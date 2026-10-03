@@ -1,0 +1,42 @@
+name: qfc-real-model-smoke
+
+on:
+  push:
+    branches: ["research/qfc-v1"]
+  workflow_dispatch:
+
+jobs:
+  real-model-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install "torch>=2.1,<2.7" "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34"
+
+      - name: Compile source
+        run: |
+          python -m compileall -q src scripts
+
+      - name: Run BERT SST-2 engineering smoke test
+        run: |
+          python scripts/step2_calibrate_sst2.py \
+            --model-id textattack/bert-base-uncased-SST-2 \
+            --calibration-size 32 \
+            --heads-to-keep 6 \
+            --batch-size 4 \
+            --max-length 32 \
+            --output-dir results/ci_sst2_smoke
+
+      - name: Publish smoke summary
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-sst2-smoke
+          path: results/ci_sst2_smoke/
