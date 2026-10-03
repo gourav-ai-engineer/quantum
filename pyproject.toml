@@ -13,6 +13,9 @@ dependencies = ["numpy>=1.26", "torch>=2.1"]
 dev = ["pytest>=8"]
 transformers = ["transformers>=4.45", "datasets>=2.20", "accelerate>=0.34"]
 
+[tool.setuptools.packages.find]
+where = ["src"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 addopts = "-q"
