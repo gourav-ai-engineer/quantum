@@ -12,15 +12,28 @@ def _sqrt_psd(matrix: torch.Tensor, eps: float = 1e-12) -> torch.Tensor:
 
 
 def fidelity(rho: torch.Tensor, sigma: torch.Tensor, eps: float = 1e-12) -> torch.Tensor:
-    """Uhlmann-Jozsa fidelity using the squared-fidelity convention."""
+    """Uhlmann-Jozsa fidelity using the squared-fidelity convention.
+
+    Computation is carried out in float64 to reduce eigendecomposition drift.
+    """
     if rho.shape != sigma.shape or rho.ndim < 2 or rho.shape[-1] != rho.shape[-2]:
         raise ValueError("rho and sigma must have identical shape [..., N, N]")
-    root_rho = _sqrt_psd(rho, eps=eps)
-    middle = root_rho @ sigma @ root_rho
+
+    original_dtype = rho.dtype
+    work_dtype = torch.float64
+    rho64 = rho.to(work_dtype)
+    sigma64 = sigma.to(work_dtype)
+
+    root_rho = _sqrt_psd(rho64, eps=eps)
+    middle = root_rho @ sigma64 @ root_rho
     middle = 0.5 * (middle + middle.transpose(-1, -2))
     eigenvalues = torch.linalg.eigvalsh(middle).clamp_min(0.0)
     root_trace = eigenvalues.sqrt().sum(-1)
-    return root_trace.square().clamp(0.0, 1.0)
+    result = root_trace.square().clamp(0.0, 1.0)
+
+    return result.to(original_dtype) if original_dtype in (
+        torch.float16, torch.bfloat16, torch.float32
+    ) else result
 
 
 def pairwise_fidelity(rhos: torch.Tensor, eps: float = 1e-12) -> torch.Tensor:
