@@ -1,0 +1,39 @@
+name: qfc-step6-conditional-smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: ["research/qfc-v2"]
+
+jobs:
+  conditional-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Run conditional QFC smoke
+        run: |
+          python scripts/step6_conditional_qfc_smoke.py \
+            --model-id textattack/bert-base-uncased-SST-2 \
+            --calibration-size 8 \
+            --evaluation-size 32 \
+            --heads-to-keep 9 \
+            --batch-size 2 \
+            --max-length 16 \
+            --output-dir results/step6_conditional
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step6-conditional
+          path: results/step6_conditional/
