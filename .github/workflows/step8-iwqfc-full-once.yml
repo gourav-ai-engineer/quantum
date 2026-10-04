@@ -1,8 +1,6 @@
 name: qfc-step8-iwqfc-full-once
 
 on:
-  push:
-    branches: ["research/qfc-v2"]
   workflow_dispatch:
 
 jobs:
