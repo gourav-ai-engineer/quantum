@@ -2,8 +2,6 @@ name: qfc-step6-conditional-smoke
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["research/qfc-v2"]
 
 jobs:
   conditional-smoke:
