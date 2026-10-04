@@ -48,7 +48,7 @@ def shannon_entropy_scores(model, loader: Iterable[dict[str, torch.Tensor]], dev
             for li, attn in enumerate(out.attentions):
                 p = attn.float().clamp_min(1e-12)
                 p = p * attention_mask[:, None, None, :]
-                entropy = -(p * p.log()).sum(-1)
+                entropy = -(p * p.clamp_min(1e-12).log()).sum(-1)
                 entropy = entropy * attention_mask[:, None, :]
                 per_example = entropy.sum(-1) / valid_queries[:, None]
                 sums[li] += per_example.sum(0).cpu().double()
@@ -188,6 +188,7 @@ def main():
         "loss": float(baseline_losses.mean()),
         "parameters": parameter_count(model),
         "examples": len(validation),
+        "evaluation_size": len(validation),
     }
     print(
         f"Full validation: accuracy={baseline['accuracy']:.6f} "

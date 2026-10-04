@@ -19,10 +19,16 @@ def test_representation_kernels_have_unit_diagonal_and_valid_range():
         assert sim.shape == (4, 4)
         assert torch.all(sim >= 0)
         assert torch.all(sim <= 1)
-        assert torch.allclose(torch.diag(sim), torch.ones(4))
+        assert torch.allclose(
+            torch.diag(sim),
+            torch.ones(4, dtype=sim.dtype),
+    )
 
 
 def test_hilbert_schmidt_matches_identity_geometry():
     states = torch.eye(3).repeat(2, 1, 1).double() / 3
     sim = hilbert_schmidt_similarity(states)
-    assert torch.allclose(sim, torch.ones(2, 2))
+    assert torch.allclose(
+        sim,
+        torch.ones(2, 2, dtype=sim.dtype),
+    )

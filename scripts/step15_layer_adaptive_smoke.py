@@ -57,7 +57,7 @@ def shannon_scores(model, loader, device):
             for li, attn in enumerate(out.attentions):
                 p = attn.float().clamp_min(1e-12)
                 p = p * mask[:, None, None, :]
-                entropy = -(p * p.log()).sum(-1)
+                entropy = -(p * p.clamp_min(1e-12).log()).sum(-1)
                 entropy = entropy * mask[:, None, :]
                 per_example = entropy.sum(-1) / valid_queries[:, None]
                 sums[li] += per_example.sum(0).cpu().double()

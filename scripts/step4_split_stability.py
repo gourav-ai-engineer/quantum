@@ -63,7 +63,7 @@ def mean_shannon(model, loader, device):
         for li, attn in enumerate(out.attentions):
             p = attn.float().clamp_min(1e-12)
             p = p * mask[:, None, None, :]
-            h = -(p * p.log()).sum(-1)
+            h = -(p * p.clamp_min(1e-12).log()).sum(-1)
             h = h * mask[:, None, :]
             per_example = h.sum(-1) / valid_queries[:, None]
             sums[li] += per_example.sum(0).cpu().double()
