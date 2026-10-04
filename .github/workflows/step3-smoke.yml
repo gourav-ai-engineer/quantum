@@ -1,0 +1,38 @@
+name: qfc-step3-selection-smoke
+
+on:
+  push:
+    branches: ["research/qfc-v1"]
+  workflow_dispatch:
+
+jobs:
+  selection-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install "torch>=2.1,<2.7" "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Run selection smoke test
+        run: |
+          python scripts/step3_compare_selection.py \
+            --model-id textattack/bert-base-uncased-SST-2 \
+            --calibration-size 16 \
+            --evaluation-size 32 \
+            --heads-to-keep 9 \
+            --batch-size 4 \
+            --max-length 32 \
+            --output-dir results/step3_ci
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step3-selection-smoke
+          path: results/step3_ci/
