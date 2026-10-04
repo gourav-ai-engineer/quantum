@@ -6,6 +6,8 @@ Every number that goes into `docs/PROJECT_STATE.md` or the paper comes from a JS
 results/<experiment>/<commit>/
     <task>_seed<N>.json  or  summary.json      # produced by the experiment script
     aggregate.json                              # v10 only (scripts/aggregate_v10_confirmatory.py)
+    records.json.gz                             # v11 only: per-subset records ({task: {layer: [...]}}),
+                                                #   kept out of summary.json so it stays small
     run_meta.json                               # commit, date (UTC), args, library versions, GPU
     log_<experiment>_<commit>_<YYYYMMDD>.txt    # console log
 ```
