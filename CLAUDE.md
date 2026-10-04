@@ -1,191 +1,115 @@
-# Quantum — Claude Code Research Instructions
+# Project: Attention-head pruning with Quantum-Fidelity Coverage (QFC)
 
-## Mission
+Owner: Gourav, M.Tech, NIT Silchar (supervisor: Dr. Aparajita Dutta).
+Target: a conference paper first (mid-tier IEEE), a journal extension later.
+The paper must report only what this repo actually produces.
+Scientific correctness matters more than a favorable number.
 
-This repository contains an experimental research project on Transformer attention-head pruning.
+Living state, results ledger and next steps live in **docs/PROJECT_STATE.md**. Read it first.
 
-The objective is to build a conference-defensible, reproducible research paper. Scientific correctness matters more than getting a favorable number.
+## Goal
+Test whether representing each attention head as a density operator
+rho = A A^T / Tr(A A^T) and selecting a subset of heads by fidelity coverage
+(C(S) = sum_i max_{j in S} F(rho_i, rho_j), F = squared Uhlmann-Jozsa fidelity)
+gives a useful way to prune BERT heads, compared with proper baselines.
+Weighted variant (IWQFC): nonnegative Michel gate-sensitivity weights, fixed before greedy
+selection, normalised per layer. No tuned mixing coefficients.
 
-Current research direction:
-- QFC = fidelity-based coverage selection over attention-head density operators.
-- IWQFC = importance-weighted QFC using nonnegative gate-sensitivity weights.
-- Current investigation: input-conditioned fidelity coverage (V9).
-- The original fixed-weight QIS formula (0.5/0.3/0.2) is NOT the research basis anymore.
+## Why we are here (history)
+- The original paper used a hand-weighted score QIS = 0.5*VNE + 0.3*QJSD - 0.2*F.
+  It was dropped: the weights are arbitrary, and the notebook's own check showed no
+  correlation with head importance (Spearman about -0.05, p=0.54). Its "multi-seed"
+  results were identical across seeds and it used ttest_ind labeled as paired.
+  Do NOT revive QIS or cite its numbers. (Owner-reported; the notebook is not in this repo.)
+- Replacement: QFC, a subset-selection objective. Proven (docs/theory.md): monotone
+  submodular, so greedy has a (1-1/e) guarantee for the OBJECTIVE only. Never claim this
+  guarantees accuracy.
+- V4-V10 showed QFC was not consistently better than VNE, Michel or Random, and fidelity
+  did not beat cosine/Hilbert-Schmidt (V8). Input-conditioned QFC did not hold up on full
+  validation (V10). (Owner's reading of CI artifacts; no result JSON is committed.)
+- V12 (PRs #16/#17, merged) fixed two baseline bugs: the V10 "Random" kept ALL heads (equal
+  to the unpruned model), and the Shannon baseline was NaN for every head under padding
+  (so it always kept heads 0..k-1). All earlier Shannon numbers and all V10 Random numbers
+  are INVALID. QFC/IWQFC/Michel/VNE(keep-high) rows are not invalidated by these bugs, but
+  must be re-read against corrected baselines.
 
-## Non-negotiable research rules
+## Prior work we must position against (novelty is thin; be honest)
+HIES (Choi et al., arXiv 2510.13832: gradient importance + attention entropy), CAHP
+(arXiv 2606.19150: graph/complementary head selection), Differentiable Subset Pruning
+(Li et al., TACL 2021: head pruning as subset selection), BHPVAS, AMAP, Michel et al.
+NeurIPS 2019. "Pruning as subset selection" and "combine information measures" are NOT
+novel. Do not claim "quantum advantage"; all computation is classical. The quantum
+formalism is a representation only. Do not call zeroed projections structural compression.
+(Citations are as supplied by the owner; verify each before it goes in the paper.)
 
-1. Never fabricate, infer, or "smooth" experimental results.
-2. Never change a method after seeing test results unless the change is explicitly an ablation or a new experiment.
-3. Keep calibration and evaluation data disjoint.
-4. Prefer full validation/test splits for final claims.
-5. Pin model revisions for final experiments.
-6. Report negative results honestly.
-7. Never claim a speedup unless actual latency measurements support it.
-8. Distinguish functional head masking, structural head pruning, parameter reduction, FLOP reduction, and measured latency.
-9. Every new method needs a clear mathematical definition, a reason it should work, unit tests, a reproducible experiment, and appropriate baselines.
-10. Do not add arbitrary scalar mixing coefficients merely to improve a benchmark.
+## Environment (critical)
+- Use `.venv-ci` (Python 3.12, torch 2.6.0, transformers 4.51.3, datasets 3.6.0,
+  pyarrow 24.0.0). transformers 5.x silently IGNORES head_mask: results from it are
+  meaningless. Never run experiments in any other environment.
+- `.venv-ci` is untracked and local. Recreate it with:
+  `py -3.12 -m venv .venv-ci`, then in it `pip install torch==2.6.0 transformers==4.51.3
+  "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3" pyarrow==24.0.0 pytest` and
+  `pip install -e . --no-deps`. (On the owner's Windows machine, newer pyarrow was blocked
+  by Smart App Control; 24.0.0 loads. Do not disable Windows security features.)
+- CPU is too slow for full runs. Run V10/V6/V11 on GPU (Colab or a GPU runner); CPU is for
+  smoke tests only. The existing GitHub workflows use CPU `ubuntu-latest` + Python 3.11.
+- Pinned models: SST-2 `textattack/bert-base-uncased-SST-2` rev 205ffbd1...;
+  MRPC `textattack/bert-base-uncased-MRPC` rev ddeddf4a... (full hashes in scripts/SPECS).
+- On Windows use Git Bash/PowerShell as available; GateGuard-style hooks may ask for facts
+  before edits; state them and retry.
 
-## Working style
+## Standing rules (never break)
+1. Every selector must keep exactly k distinct heads per layer
+   (`qfc.baselines.validate_selection`). Print/assert heads kept per layer in every experiment.
+2. Random is always a distribution (>=30 masks), never a single mask.
+3. Entropy baselines (VNE, Shannon) are reported keep-high AND keep-low.
+4. Calibration data comes from train; evaluation uses the held-out validation split (full
+   split for any paper number). Never choose heads on eval data.
+5. Every results JSON includes the unpruned baseline (accuracy, loss, F1 for MRPC) and the
+   evaluation size.
+6. Statistics: paired bootstrap / permutation on the same examples; never an independent
+   t-test; never present identical re-runs as independent seeds. Report mean and std over
+   calibration seeds; fixed evaluation data when testing calibration stability.
+7. Do not add new QFC variants to chase a win. A new variant needs a written hypothesis in
+   docs/PROJECT_STATE.md BEFORE it is implemented, plus math definition, unit tests, a
+   reproducible experiment and appropriate baselines.
+8. Do not claim speedup from masking. Report parameter count, attention FLOPs and measured
+   latency separately, from physically pruned models, on GPU. Distinguish functional
+   masking from structural pruning.
+9. Smoke-test outputs (tiny sizes) are engineering checks, never results.
+10. Workflow: one branch + PR per experiment (`research/qfc-vN-...`), tests green
+    (`pytest` in .venv-ci, plus `python -m compileall -q src scripts`), do not merge without
+    the user's go-ahead. Never work directly on main; `git status`, `git branch --show-current`,
+    `git pull --ff-only` before changing code. A green CI is not a scientific verdict.
+11. Before anything is called "paper-ready", an independent check of the code and numbers is
+    required (checklist in docs/PROJECT_STATE.md).
+12. Never fabricate, infer or smooth results; never change a method after seeing test results
+    unless it is an explicit ablation or new experiment; report negative results honestly;
+    baselines are implemented per their published definitions, not weakened approximations.
 
-Work in small stages.
-
-For every research task:
-1. Inspect the current code and git state.
-2. State the exact scientific question.
-3. Make the smallest necessary code change.
-4. Add or modify tests.
-5. Run the smallest smoke experiment.
-6. Inspect the result.
-7. Only then propose the larger experiment.
-8. Record the conclusion and limitations.
-
-Do not start multiple large experiments at once.
-
-## Git workflow
-
-Never work directly on main.
-
-Before modifying code:
-    git status
-    git branch --show-current
-    git pull --ff-only
-
-Create a research branch:
-    git checkout -b research/<short-name>
-
-Use meaningful commits.
-
-Before opening a PR:
-    git diff
-    python -m compileall -q src scripts
-    pytest
-
-Never merge a PR merely because CI is green. The scientific conclusion must also be sound.
-
-## Python environment
-
-Target Python 3.12 for local development.
-
-Recommended setup on Windows:
-    py -3.12 -m venv .venv
-
-Activate in Git Bash:
-    source .venv/Scripts/activate
-
-Install:
-    python -m pip install --upgrade pip
-    pip install -e ".[dev,transformers]"
-
-For cheap local checks, prefer CPU:
-    python -c "import torch; print(torch.__version__); print(torch.cuda.is_available())"
-
-Large Transformer experiments should use an appropriate GPU runner or Colab when local hardware is insufficient.
-
-## Repository structure
-
-- src/qfc/ — mathematical and experiment library
-- scripts/ — reproducible experiment entry points
-- tests/ — unit and mathematical tests
-- docs/ — research protocol and theory notes
-- .github/workflows/ — CI and experiment workflows
-
+## Repository map
+- `src/qfc/`: states, fidelity, coverage (greedy / weighted), conditional (per-sample),
+  baselines (shared selectors, Random distribution, validation), alignment (Spearman +
+  bootstrap CI), hf_experiments (model/data loading, masks, Michel importance), metrics.
+- `scripts/stepN_*.py`: experiment entry points (V4=step12, V5=step13, V6=step14, V7=step15,
+  V8=step16, V9=step17, V10=step18 + aggregate_v10_confirmatory.py, V11=step19).
+  Steps 2-7 and 11 are early smoke/stability scripts; do not cite them (see PROJECT_STATE).
+- `tests/`: unit and regression tests (47 passed at commit 777e51a).
+- `docs/`: theory.md (claims boundary), methodology.md, experiment_protocol.md (partly
+  outdated, see PROJECT_STATE), PROJECT_STATE.md (living state).
+- `.github/workflows/`: one workflow per experiment.
 Do not put one-off notebook logic into the core library.
 
-## Current mathematical core
+## Working style
+Skeptical research engineer and reviewer: inspect code and git state first, state the exact
+scientific question, make the smallest change, add tests, run the smallest smoke test, inspect,
+and only then propose the larger run. Look for leakage, bugs and unfair baselines. Reproduce
+before trusting. When evidence is insufficient, stop and report instead of guessing. Do not run
+several large experiments at once. Do not call a heuristic "theoretically proven" without
+checking the proof.
 
-Density operator:
-    rho_h(x) = A_h(x) A_h(x)^T / Tr(A_h(x) A_h(x)^T)
-
-Squared Uhlmann-Jozsa fidelity:
-    F(rho, sigma) = [Tr sqrt(sqrt(rho) sigma sqrt(rho))]^2
-
-Base coverage:
-    f(S) = sum_i max_{j in S} F(rho_i, rho_j)
-
-The base fixed-similarity coverage objective is monotone submodular.
-
-For weighted coverage, weights must be nonnegative and fixed before greedy selection.
-
-## Current research questions
-
-V8:
-Does Uhlmann fidelity contribute beyond generic coverage when compared with normalized Hilbert-Schmidt similarity and classical attention cosine similarity?
-
-V9:
-Does fidelity perform poorly because calibration examples are averaged before computing similarity?
-
-Compare:
-- fidelity of averaged states
-- average per-example fidelity
-- direct input-conditioned coverage
-- corresponding weighted variants
-
-Do not assume V9 will win.
-
-## Baseline expectations
-
-At minimum, consider:
-- Random
-- Shannon entropy
-- Von Neumann entropy
-- Michel-style gate sensitivity
-
-For stronger final claims, investigate recent methods such as HIES and other current head-pruning approaches.
-
-Baselines must be implemented according to their published definitions, not weakened approximations.
-
-## Evaluation requirements
-
-For classification:
-- accuracy
-- task-specific metrics such as F1 where appropriate
-- evaluation loss
-
-For robustness:
-- multiple calibration seeds
-- fixed evaluation data when testing calibration stability
-- mean and standard deviation
-- paired bootstrap confidence intervals where appropriate
-
-For compression:
-- heads retained and pruned
-- parameter count
-- FLOPs when available
-- measured latency separately
-
-## Claude's role
-
-Claude should act as a research engineer and skeptical reviewer.
-
-Claude should:
-- inspect existing code before changing it;
-- challenge unsupported claims;
-- look for leakage, bugs, and unfair baselines;
-- reproduce results before trusting them;
-- explain why an experiment answers a scientific question;
-- prefer falsifiable hypotheses;
-- stop and report when evidence is insufficient.
-
-Claude should not:
-- optimize solely for benchmark accuracy;
-- silently rewrite methodology after seeing results;
-- invent citations or experimental outcomes;
-- call a heuristic "theoretically proven" without checking the proof;
-- merge branches automatically unless explicitly instructed.
-
-## Collaboration with ChatGPT
-
-ChatGPT maintains the high-level research plan and external literature review.
-
-Claude works locally inside the repository and should:
-- inspect the current branch and files;
-- run code and tests;
-- implement and debug experiments;
-- create commits;
-- summarize exact changes and measured results.
-
-When uncertain, Claude should leave the code unchanged and report the issue instead of guessing.
-
-## First command
-
-After opening this repository in VS Code, start Claude Code from the repository root and ask it to read this file and audit the project before changing anything.
+## How to continue autonomously
+Open docs/PROJECT_STATE.md. Do the first unchecked item in "Next steps". After each run,
+record the outcome in the Results ledger (exact numbers from the JSON, file path, commit
+hash, environment) and update the status and next steps. If the decision rule applies, apply
+it exactly as written and record the verdict.
