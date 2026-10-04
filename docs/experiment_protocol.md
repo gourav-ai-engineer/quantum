@@ -1,5 +1,10 @@
 # Experiment Protocol — v0.1
 
+> Status (2026-10-04): this is the original step-2 engineering protocol. Where it conflicts with
+> CLAUDE.md, CLAUDE.md wins: calibration data comes from the train split and evaluation from the
+> held-out validation split (standing rule 4). Current experiments, results ledger and decision rules
+> live in docs/PROJECT_STATE.md; the runner is scripts/run_gpu.sh.
+
 ## Step 2 objective
 
 Validate that the new QFC implementation can:
@@ -9,7 +14,8 @@ Validate that the new QFC implementation can:
 3. aggregate states without violating trace/PSD constraints;
 4. compute pairwise quantum fidelity;
 5. select exactly K heads per layer by greedy coverage;
-6. physically prune the remaining heads; and
+6. mask the remaining heads functionally (head_mask; physical pruning is a separate step used only
+   for parameter/FLOP/latency reporting); and
 7. re-evaluate the same held-out examples.
 
 ## First run
@@ -17,9 +23,9 @@ Validate that the new QFC implementation can:
 Use BERT-base fine-tuned on SST-2 with:
 
 - model: textattack/bert-base-uncased-SST-2
-- dataset: stanfordnlp/sst2 validation
-- first debug calibration: 256 examples
-- final calibration: all 872 validation examples
+- dataset: stanfordnlp/sst2 (calibration from train, evaluation on validation)
+- first debug calibration: 256 train examples
+- final calibration: 128-256 train examples (seeded sample); evaluation on all 872 validation examples
 - max length: 128
 - 16 samples/batch for T4 initially
 - 6 heads retained per layer for the 50% structured-pruning stress test

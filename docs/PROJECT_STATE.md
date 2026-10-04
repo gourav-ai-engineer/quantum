@@ -107,7 +107,7 @@ Repo hygiene items found while writing this file (added by the assistant, not by
       workflows are still CPU-only) Add a GPU path for the V10/V6/V11 workflows (all 22 `runs-on` entries across the workflows are
       CPU `ubuntu-latest`; step18's matrix has `timeout-minutes: 60`, which full-validation runs with
       30 random masks are unlikely to meet on CPU; not measured).
-- [~] (CLAUDE_WORKFLOW.md done; experiment_protocol.md still open) Reconcile docs/experiment_protocol.md and docs/CLAUDE_WORKFLOW.md with CLAUDE.md (see
+- [x] (CLAUDE_WORKFLOW.md and experiment_protocol.md done) Reconcile docs/experiment_protocol.md and docs/CLAUDE_WORKFLOW.md with CLAUDE.md (see
       "Known inconsistencies").
 - [x] (results/README.md + scripts/make_ledger_row.py) Add a results-recording convention (per-experiment summary with environment and commit), since
       no result JSON is currently in git.
@@ -124,9 +124,10 @@ Repo hygiene items found while writing this file (added by the assistant, not by
 - Selections are stored sorted (since V12); masks are unaffected.
 
 ## Known inconsistencies in the repo (as of 2026-10-04)
-- docs/experiment_protocol.md says calibrate on the SST-2 validation set (final: all 872 examples)
-  and describes physical pruning; CLAUDE.md rule 4 requires calibration from train. The older
-  scripts step2/3/4/6 calibrate and evaluate on disjoint slices of the validation split.
+- RESOLVED in infra/gpu-runner: docs/experiment_protocol.md said to calibrate on the SST-2 validation
+  set and to physically prune; it now follows CLAUDE.md rule 4 (train calibration, validation
+  evaluation, functional masking). Still true: the older scripts step2/3/4/6 calibrate and evaluate on
+  disjoint slices of the validation split (flagged in their banners; do not cite).
 - RESOLVED in infra/gpu-runner: docs/CLAUDE_WORKFLOW.md told a new session to `pip install -e ".[dev,transformers]"` in `.venv`
   (can install transformers 5.x) and to record work in `docs/research_log.md`, which does not exist.
 - README.md "Verified so far" quotes 32-example smoke numbers (QFC 0.96875 vs unpruned 0.9375). They
