@@ -1,0 +1,69 @@
+name: qfc-step18-v10-confirmatory
+
+on:
+  push:
+    branches: ["research/qfc-v10-confirmatory"]
+  workflow_dispatch:
+
+jobs:
+  confirmatory:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - task: sst2
+            seed: 7
+          - task: sst2
+            seed: 42
+          - task: sst2
+            seed: 77
+          - task: mrpc
+            seed: 7
+          - task: mrpc
+            seed: 42
+          - task: mrpc
+            seed: 77
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Run confirmatory study
+        run: |
+          PYTHONPATH=scripts python scripts/step18_v10_confirmatory.py             --task ${{ matrix.task }}             --seed ${{ matrix.seed }}             --calibration-size 128             --heads-to-keep 6             --batch-size 16             --max-length 128             --bootstrap 1000             --output-dir results/step18_v10_confirmatory
+      - name: Upload run result
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-v10-${{ matrix.task }}-seed-${{ matrix.seed }}
+          path: results/step18_v10_confirmatory/
+
+  aggregate:
+    needs: confirmatory
+    if: needs.confirmatory.result == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: qfc-v10-*
+          path: v10_results
+          merge-multiple: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Aggregate
+        run: python scripts/aggregate_v10_confirmatory.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qfc-v10-confirmatory-aggregate
+          path: v10_results/aggregate.json
