@@ -75,7 +75,7 @@ def test_input_conditioned_coverage():
 
 def test_batched_fidelity_matches_single_sample():
     torch.manual_seed(4)
-    rhos = density_operator(torch.rand(3, 4, 4))
+    rhos = density_operator(torch.rand(3, 4, 4, 4))
     batched = pairwise_fidelity_batched(rhos)
     for sample in range(3):
         expected = pairwise_fidelity(rhos[sample])
