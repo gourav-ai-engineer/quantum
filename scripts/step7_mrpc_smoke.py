@@ -8,7 +8,7 @@ import os
 import torch
 from datasets import load_dataset
 
-from qfc.coverage import greedy_select
+from qfc.coverage import greedy_select, weighted_greedy_select
 from qfc.fidelity import pairwise_fidelity
 from qfc.hf_experiments import (
     _move_batch,
@@ -137,6 +137,7 @@ def mean_shannon(model, loader, device):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-id", default="textattack/bert-base-uncased-MRPC")
+    parser.add_argument("--model-revision", default="ddeddf4a04cd7b9415b00e40b00e78f0c61a7921")
     parser.add_argument("--calibration-size", type=int, default=32)
     parser.add_argument("--evaluation-size", type=int, default=64)
     parser.add_argument("--heads-to-keep", type=int, default=9)
@@ -158,7 +159,7 @@ def main():
     calibration = train.select(range(min(args.calibration_size, len(train))))
     evaluation = validation.select(range(args.evaluation_size))
 
-    model, tokenizer = load_sequence_classifier(args.model_id, args.device)
+    model, tokenizer = load_sequence_classifier(args.model_id, args.device, revision=args.model_revision)
 
     cal_loader = make_text_loader(
         calibration,
@@ -197,6 +198,13 @@ def main():
         selected, _ = greedy_select(pairwise_fidelity(layer_states), args.heads_to_keep)
         qfc[layer] = selected
     selections["QFC"] = qfc
+    iwqfc = {}
+    for layer, layer_states in enumerate(states):
+        sim = pairwise_fidelity(layer_states)
+        raw = michel[layer].clamp_min(0.0)
+        quality = raw / raw.sum() if float(raw.sum()) > 0 else torch.full_like(raw, 1.0 / len(raw))
+        iwqfc[layer], _ = weighted_greedy_select(sim, quality, args.heads_to_keep)
+    selections["IWQFC"] = iwqfc
     selections["VonNeumann"] = select_topk(vn, args.heads_to_keep)
     selections["Shannon"] = select_topk(shannon, args.heads_to_keep)
     selections["MichelGate"] = select_topk(
@@ -242,6 +250,7 @@ def main():
 
     payload = {
         "model_id": args.model_id,
+        "model_revision": args.model_revision,
         "dataset": "nyu-mll/glue/mrpc",
         "calibration_split": "train",
         "evaluation_split": "validation_smoke_slice",
