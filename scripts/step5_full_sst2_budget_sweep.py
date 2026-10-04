@@ -13,6 +13,7 @@ from qfc.coverage import greedy_select
 from qfc.fidelity import pairwise_fidelity
 from qfc.hf_experiments import (
     _move_batch,
+    collect_mean_attention_matrices,
     collect_mean_density_states,
     load_sequence_classifier,
     make_text_loader,
@@ -22,6 +23,7 @@ from qfc.hf_experiments import (
 )
 from qfc.metrics import evaluate_per_example, paired_bootstrap_delta
 from qfc.similarities import hilbert_schmidt_similarity
+from qfc.classical_controls import vectorized_cosine_similarity
 
 
 def shannon_entropy_scores(model, loader: Iterable[dict[str, torch.Tensor]], device: str):
@@ -198,6 +200,9 @@ def main():
     layers = len(mean_states)
     heads = int(mean_states[0].shape[0])
 
+    print("Collecting mean attention matrices for the classical full-attention control...")
+    mean_attention = collect_mean_attention_matrices(model, calibration_loader, args.device)
+
     print("Computing Shannon/Von-Neumann scores...")
     shannon = shannon_entropy_scores(model, calibration_loader, args.device)
     vn = [
@@ -214,6 +219,7 @@ def main():
     print("Building quantum and classical similarity kernels...")
     fidelity_similarities = [pairwise_fidelity(states) for states in mean_states]
     hs_similarities = [hilbert_schmidt_similarity(states) for states in mean_states]
+    cosine_similarities = [vectorized_cosine_similarity(attn) for attn in mean_attention]
 
     all_results = {
         "metadata": {
@@ -249,6 +255,9 @@ def main():
         hs_cov_selected, hs_cov = select_coverage_from_similarity(
             hs_similarities, k
         )
+        cosine_selected, cosine_cov = select_coverage_from_similarity(
+            cosine_similarities, k
+        )
 
         selections = {
             "QFC": qfc,
@@ -256,12 +265,14 @@ def main():
             "Shannon": select_topk(shannon, k),
             "VonNeumann": select_topk(vn, k),
             "MichelGate": select_topk(michel_scores, k),
+            "CosineCoverage": cosine_selected,
         }
 
         budget_result = {
             "heads_kept_per_layer": k,
             "qfc_fidelity_coverage_total": sum(qfc_cov.values()),
             "hs_coverage_total": sum(hs_cov.values()),
+            "cosine_coverage_total": sum(cosine_cov.values()),
             "methods": {},
         }
 
@@ -338,6 +349,7 @@ def main():
             f"k={k}: "
             f"QFC={budget_result['methods']['QFC']['accuracy']:.6f} "
             f"HS={budget_result['methods']['HS_Coverage']['accuracy']:.6f} "
+            f"Cosine={budget_result['methods']['CosineCoverage']['accuracy']:.6f} "
             f"VNE={budget_result['methods']['VonNeumann']['accuracy']:.6f} "
             f"Michel={budget_result['methods']['MichelGate']['accuracy']:.6f} "
             f"RandomMean={budget_result['Random']['mean_accuracy']:.6f}"
