@@ -1,8 +1,6 @@
 name: qfc-step10-full-mrpc-v3
 
 on:
-  push:
-    branches: ["research/qfc-v3"]
   workflow_dispatch:
 
 jobs:
