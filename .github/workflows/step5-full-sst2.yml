@@ -13,10 +13,11 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Install
+      - name: Install CPU research dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install "torch>=2.1,<2.7" "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34"
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
           pip install -e . --no-deps
 
       - name: Compile
@@ -27,8 +28,8 @@ jobs:
           python scripts/step5_full_sst2_budget_sweep.py \
             --model-id textattack/bert-base-uncased-SST-2 \
             --calibration-size 256 \
-            --heads-to-keep 9,6 \
-            --batch-size 8 \
+            --heads-to-keep 9,8,6 \
+            --batch-size 32 \
             --max-length 64 \
             --seed 42 \
             --bootstrap 1000 \
