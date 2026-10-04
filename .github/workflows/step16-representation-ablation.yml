@@ -1,0 +1,32 @@
+name: qfc-step16-representation-ablation
+
+on:
+  push:
+    branches: ["research/qfc-v8-representation-ablation"]
+  workflow_dispatch:
+
+jobs:
+  representation-ablation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Run representation ablation
+        run: |
+          python scripts/step16_representation_ablation.py             --calibration-size 256             --calibration-seed 42             --evaluation-size 64             --budgets 3,6,9             --batch-size 16             --max-length 64             --bootstrap 500             --output-dir results/step16_representation_ablation
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step16-representation-ablation
+          path: results/step16_representation_ablation/
