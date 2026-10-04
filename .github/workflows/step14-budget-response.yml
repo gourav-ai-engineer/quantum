@@ -1,0 +1,32 @@
+name: qfc-step14-budget-response
+
+on:
+  push:
+    branches: ["research/qfc-v6-budget-response"]
+  workflow_dispatch:
+
+jobs:
+  budget-response:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Run budget-response study
+        run: |
+          python scripts/step14_budget_response.py             --calibration-size 256             --calibration-seed 42             --budgets 3,6,9             --batch-size 16             --max-length 128             --output-dir results/step14_budget_response
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step14-budget-response
+          path: results/step14_budget_response/
