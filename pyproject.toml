@@ -7,7 +7,7 @@ name = "quantum-attention-pruning"
 version = "0.1.0"
 description = "Research implementation of quantum-fidelity coverage for Transformer attention-head pruning"
 requires-python = ">=3.10"
-dependencies = ["numpy>=1.26", "torch>=2.1"]
+dependencies = ["numpy>=1.26", "torch>=2.1,<2.7"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
