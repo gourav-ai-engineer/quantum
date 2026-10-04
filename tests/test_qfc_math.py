@@ -97,3 +97,24 @@ def test_conditional_greedy_is_monotone():
     assert conditional_coverage_value(sim, selected).item() == pytest.approx(
         history[-1].item(), abs=1e-5
     )
+
+
+def test_conditional_weighted_greedy_is_monotone():
+    from qfc.conditional import (
+        conditional_weighted_coverage_value,
+        conditional_weighted_greedy_select,
+    )
+
+    sim = torch.tensor(
+        [
+            [[1.0, 0.9, 0.1], [0.9, 1.0, 0.2], [0.1, 0.2, 1.0]],
+            [[1.0, 0.2, 0.8], [0.2, 1.0, 0.3], [0.8, 0.3, 1.0]],
+        ]
+    )
+    weights = torch.tensor([0.8, 0.15, 0.05])
+    selected, history = conditional_weighted_greedy_select(sim, weights, 2)
+    assert len(selected) == 2
+    assert history[1] >= history[0]
+    assert conditional_weighted_coverage_value(
+        sim, weights, selected
+    ).item() == pytest.approx(history[-1].item(), abs=1e-6)
