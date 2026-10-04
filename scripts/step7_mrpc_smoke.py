@@ -151,11 +151,12 @@ def main():
     train = load_dataset("nyu-mll/glue", "mrpc", split="train")
     validation = load_dataset("nyu-mll/glue", "mrpc", split="validation")
 
-    if args.calibration_size + args.evaluation_size > len(validation):
-        raise ValueError("smoke sizes exceed MRPC validation size")
+    if args.evaluation_size > len(validation):
+        raise ValueError("evaluation-size exceeds MRPC validation size")
+    if args.calibration_size > len(train):
+        raise ValueError("calibration-size exceeds MRPC training size")
 
-    # For a smoke run we use a held-out slice of validation to keep selection/evaluation
-    # disjoint. The final paper run will select calibration examples from training.
+    # Calibration comes from train; the full validation split is reserved for evaluation.
     calibration = train.select(range(min(args.calibration_size, len(train))))
     evaluation = validation.select(range(args.evaluation_size))
 
