@@ -306,3 +306,53 @@ def head_mask_from_selection(
     for layer, selected in selected_by_layer.items():
         mask[layer, selected] = 1.0
     return mask
+
+
+@torch.no_grad()
+def collect_mean_attention_matrices(
+    model,
+    loader: Iterable[dict[str, torch.Tensor]],
+    device: str = "cpu",
+) -> list[torch.Tensor]:
+    """Collect mean masked attention matrices for each layer/head.
+
+    Returns a list of L tensors shaped [H, T, T].
+    """
+    model.eval()
+    sums = None
+    total = 0
+
+    for batch in loader:
+        batch = _move_batch(batch, device)
+        labels = batch.pop("labels", None)
+        attention_mask = batch["attention_mask"].to(torch.float32)
+
+        outputs = model(
+            **batch,
+            output_attentions=True,
+            return_dict=True,
+        )
+        attentions = outputs.attentions
+        if attentions is None:
+            raise RuntimeError("Model did not return attention tensors")
+
+        if sums is None:
+            sums = [
+                torch.zeros(
+                    (attn.shape[1], attn.shape[-1], attn.shape[-1]),
+                    dtype=torch.float64,
+                )
+                for attn in attentions
+            ]
+
+        token_mask = attention_mask.to(attentions[0].dtype)
+        for layer_idx, attn in enumerate(attentions):
+            masked = attn * token_mask[:, None, :, None] * token_mask[:, None, None, :]
+            sums[layer_idx] += masked.sum(dim=0).cpu().double()
+
+        total += int(attentions[0].shape[0])
+
+    if sums is None or total == 0:
+        raise ValueError("empty calibration loader")
+
+    return [layer_sum / total for layer_sum in sums]

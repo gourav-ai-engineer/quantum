@@ -54,3 +54,72 @@ def greedy_select(similarity: torch.Tensor, k: int) -> tuple[list[int], torch.Te
         history.append(current.sum().detach())
 
     return selected, torch.stack(history)
+
+
+def weighted_coverage_value(
+    similarity: torch.Tensor,
+    weights: torch.Tensor,
+    selected: list[int] | tuple[int, ...],
+) -> torch.Tensor:
+    """Weighted facility-location coverage.
+
+    weights[i] is the fixed functional salience of head i. For nonnegative
+    weights, weighted coverage remains monotone submodular.
+    """
+    similarity = _validate_similarity(similarity)
+    if weights.ndim != 1 or weights.shape[0] != similarity.shape[-1]:
+        raise ValueError("weights must have shape [heads]")
+    if torch.any(weights < 0):
+        raise ValueError("weights must be nonnegative")
+    if len(selected) == 0:
+        return similarity.new_zeros(())
+    idx = torch.as_tensor(selected, dtype=torch.long, device=similarity.device)
+    covered = similarity[..., :, idx].max(dim=-1).values
+    return (covered * weights.to(covered.device)).sum()
+
+
+def weighted_greedy_select(
+    similarity: torch.Tensor,
+    weights: torch.Tensor,
+    k: int,
+) -> tuple[list[int], torch.Tensor]:
+    """Greedy weighted-fidelity coverage selection."""
+    similarity = _validate_similarity(similarity)
+    if weights.ndim != 1 or weights.shape[0] != similarity.shape[-1]:
+        raise ValueError("weights must have shape [heads]")
+    if torch.any(weights < 0):
+        raise ValueError("weights must be nonnegative")
+
+    heads = similarity.shape[-1]
+    if not 1 <= k <= heads:
+        raise ValueError(f"k must satisfy 1 <= k <= {heads}")
+
+    weights = weights.to(similarity.device)
+    selected: list[int] = []
+    remaining = set(range(heads))
+    history: list[torch.Tensor] = []
+    current = torch.zeros_like(similarity[..., 0])
+
+    for _ in range(k):
+        best_head = None
+        best_gain = None
+        for candidate in sorted(remaining):
+            candidate_cov = torch.maximum(
+                current,
+                similarity[..., :, candidate],
+            )
+            gain = ((candidate_cov - current) * weights).sum()
+            if best_gain is None or gain.item() > best_gain.item():
+                best_head = candidate
+                best_gain = gain
+
+        assert best_head is not None
+        selected.append(best_head)
+        remaining.remove(best_head)
+        current = torch.maximum(
+            current,
+            similarity[..., :, best_head],
+        )
+        history.append((current * weights).sum().detach())
+
+    return selected, torch.stack(history)

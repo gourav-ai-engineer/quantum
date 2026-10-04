@@ -1,9 +1,10 @@
 import math
+import pytest
 
 import torch
 
 from qfc.states import density_operator, aggregate_density_operators
-from qfc.fidelity import fidelity, pairwise_fidelity
+from qfc.fidelity import fidelity, pairwise_fidelity, pairwise_fidelity_batched
 from qfc.coverage import coverage_value, greedy_select
 
 
@@ -70,3 +71,29 @@ def test_input_conditioned_coverage():
     selected, history = greedy_select(sim, 2)
     assert len(selected) == 2
     assert history[-1] >= history[0]
+
+
+def test_batched_fidelity_matches_single_sample():
+    torch.manual_seed(4)
+    rhos = density_operator(torch.rand(3, 4, 4, 4))
+    batched = pairwise_fidelity_batched(rhos)
+    for sample in range(3):
+        expected = pairwise_fidelity(rhos[sample])
+        assert torch.allclose(batched[sample], expected, atol=2e-5)
+
+
+def test_conditional_greedy_is_monotone():
+    from qfc.conditional import conditional_greedy_select, conditional_coverage_value
+
+    sim = torch.tensor(
+        [
+            [[1.0, 0.9, 0.1], [0.9, 1.0, 0.2], [0.1, 0.2, 1.0]],
+            [[1.0, 0.2, 0.8], [0.2, 1.0, 0.3], [0.8, 0.3, 1.0]],
+        ]
+    )
+    selected, history = conditional_greedy_select(sim, 2)
+    assert len(selected) == 2
+    assert history[1] >= history[0]
+    assert conditional_coverage_value(sim, selected).item() == pytest.approx(
+        history[-1].item(), abs=1e-5
+    )
