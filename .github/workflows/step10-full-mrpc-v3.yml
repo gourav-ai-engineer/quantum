@@ -1,0 +1,41 @@
+name: qfc-step10-full-mrpc-v3
+
+on:
+  push:
+    branches: ["research/qfc-v3"]
+  workflow_dispatch:
+
+jobs:
+  full-mrpc-v3:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Full MRPC validation
+        run: |
+          python scripts/step7_mrpc_smoke.py \
+            --model-id textattack/bert-base-uncased-MRPC \
+            --model-revision ddeddf4a04cd7b9415b00e40b00e78f0c61a7921 \
+            --calibration-size 256 \
+            --evaluation-size 408 \
+            --heads-to-keep 9 \
+            --batch-size 16 \
+            --max-length 128 \
+            --bootstrap 1000 \
+            --output-dir results/step10_full_mrpc_v3
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step10-full-mrpc-v3
+          path: results/step10_full_mrpc_v3/
