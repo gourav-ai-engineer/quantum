@@ -101,7 +101,7 @@ def collect_mean_shannon_entropy(
         for layer_idx, attn in enumerate(attentions):
             probs = attn.float().clamp_min(1e-12)
             probs = probs * key_mask[:, None, None, :].to(probs.dtype)
-            entropy = -(probs * probs.log()).sum(dim=-1)
+            entropy = -(probs * probs.clamp_min(1e-12).log()).sum(dim=-1)
             entropy = entropy * query_mask[:, None, :].to(entropy.dtype)
 
             valid_queries = query_mask.sum(dim=-1).clamp_min(1)

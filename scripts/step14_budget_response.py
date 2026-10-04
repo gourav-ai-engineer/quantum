@@ -8,6 +8,11 @@ from statistics import mean, pstdev
 import torch
 from datasets import load_dataset
 
+from qfc.baselines import (
+    entropy_baseline_selections,
+    evaluate_random_distribution,
+    validate_all,
+)
 from qfc.coverage import greedy_select, weighted_greedy_select
 from qfc.fidelity import pairwise_fidelity
 from qfc.hf_experiments import (
@@ -58,7 +63,7 @@ def shannon_scores(model, loader, device):
             for li, attn in enumerate(out.attentions):
                 p = attn.float().clamp_min(1e-12)
                 p = p * mask[:, None, None, :]
-                entropy = -(p * p.log()).sum(-1)
+                entropy = -(p * p.clamp_min(1e-12).log()).sum(-1)
                 entropy = entropy * mask[:, None, :]
                 per_example = entropy.sum(-1) / valid_queries[:, None]
                 sums[li] += per_example.sum(0).cpu().double()
@@ -163,6 +168,7 @@ def main():
     parser.add_argument("--budgets", default="3,6,9")
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--max-length", type=int, default=128)
+    parser.add_argument("--random-masks", type=int, default=30)
     parser.add_argument("--output-dir", default="results/step14_budget_response")
     parser.add_argument(
         "--device",
@@ -182,8 +188,11 @@ def main():
         "research_note": (
             "Budget-response study at one fixed calibration seed. "
             "Validation sets are full and fixed; calibration is sampled from train. "
-            "This experiment is for response curves, not seed-level statistical claims."
+            "This experiment is for response curves, not seed-level statistical claims. "
+            "Random is the mean over random_masks independent masks per budget "
+            "(see Random.distribution); entropy baselines are reported keep-high and keep-low."
         ),
+        "random_masks": args.random_masks,
     }
 
     for task_name, spec in MODELS.items():
@@ -244,7 +253,16 @@ def main():
 
         layers = len(states)
         heads = int(states[0].shape[0])
-        methods = ("QFC", "IWQFC", "VonNeumann", "Shannon", "MichelGate", "Random")
+        single_mask_methods = (
+            "QFC",
+            "IWQFC",
+            "MichelGate",
+            "VonNeumann_keep_high",
+            "VonNeumann_keep_low",
+            "Shannon_keep_high",
+            "Shannon_keep_low",
+        )
+        methods = single_mask_methods + ("Random",)
 
         task_result = {
             "model_id": spec["model_id"],
@@ -288,18 +306,15 @@ def main():
             selections = {
                 "QFC": qfc,
                 "IWQFC": iwqfc,
-                "VonNeumann": select_topk(vn, k),
-                "Shannon": select_topk(shannon, k),
                 "MichelGate": select_topk(
                     [michel[i] for i in range(layers)], k
                 ),
-                "Random": random_select(
-                    layers, heads, k, seed=args.calibration_seed + 1000 + k
-                ),
+                **entropy_baseline_selections(vn, shannon, k),
             }
+            validate_all(selections, layers, heads, k)
 
             budget_result = {}
-            for name in methods:
+            for name in single_mask_methods:
                 mask = make_mask(
                     selections[name], layers, heads, args.device
                 )
@@ -322,6 +337,19 @@ def main():
                     entry["f1_delta"] = entry["f1"] - task_result["baseline"]["f1"]
 
                 budget_result[name] = entry
+
+            # Random is a distribution over independent masks (seed = base + i).
+            budget_result["Random"] = evaluate_random_distribution(
+                lambda m: evaluate(model, eval_loader, args.device, m),
+                layers,
+                heads,
+                k,
+                n_masks=args.random_masks,
+                base_seed=args.calibration_seed + 1000 * k,
+                device=args.device,
+                with_f1=task_name == "mrpc",
+                baseline=task_result["baseline"],
+            )
 
             budget_result["retention_fraction"] = k / heads
             budget_result["heads_pruned_fraction"] = 1.0 - (k / heads)
@@ -351,7 +379,11 @@ def main():
                         for key, value in budget_data[method].items()
                         if key in {"accuracy", "f1", "accuracy_delta", "f1_delta"}
                     }
-                    for method in ("QFC", "IWQFC", "VonNeumann", "Shannon", "MichelGate", "Random")
+                    for method in (
+                        "QFC", "IWQFC", "MichelGate",
+                        "VonNeumann_keep_high", "VonNeumann_keep_low",
+                        "Shannon_keep_high", "Shannon_keep_low", "Random",
+                    )
                 }
                 for k, budget_data in task_data["budgets"].items()
             }
