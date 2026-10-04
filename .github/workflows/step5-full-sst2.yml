@@ -1,0 +1,43 @@
+name: qfc-step5-full-sst2
+
+on:
+  push:
+    branches: ["research/qfc-v2"]
+  workflow_dispatch:
+
+jobs:
+  full-sst2:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install "torch>=2.1,<2.7" "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34"
+          pip install -e . --no-deps
+
+      - name: Compile
+        run: python -m compileall -q src scripts
+
+      - name: Full SST-2 held-out evaluation
+        run: |
+          python scripts/step5_full_sst2_budget_sweep.py \
+            --model-id textattack/bert-base-uncased-SST-2 \
+            --calibration-size 256 \
+            --heads-to-keep 9,6 \
+            --batch-size 8 \
+            --max-length 64 \
+            --seed 42 \
+            --bootstrap 1000 \
+            --output-dir results/step5_full_sst2
+
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step5-full-sst2
+          path: results/step5_full_sst2/
