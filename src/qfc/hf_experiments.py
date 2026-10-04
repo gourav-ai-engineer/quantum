@@ -23,17 +23,22 @@ def _require_transformers():
     return AutoModelForSequenceClassification, AutoTokenizer
 
 
-def load_sequence_classifier(model_id: str, device: str = "cpu"):
+def load_sequence_classifier(
+    model_id: str,
+    device: str = "cpu",
+    revision: str | None = None,
+):
     """Load a sequence classifier with eager attention when supported."""
     AutoModelForSequenceClassification, AutoTokenizer = _require_transformers()
 
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    load_kwargs = {} if revision is None else {"revision": revision}
+    tokenizer = AutoTokenizer.from_pretrained(model_id, **load_kwargs)
     try:
         model = AutoModelForSequenceClassification.from_pretrained(
-            model_id, attn_implementation="eager"
+            model_id, attn_implementation="eager", **load_kwargs
         )
     except TypeError:
-        model = AutoModelForSequenceClassification.from_pretrained(model_id)
+        model = AutoModelForSequenceClassification.from_pretrained(model_id, **load_kwargs)
 
     model.to(device)
     return model, tokenizer

@@ -1,0 +1,38 @@
+name: qfc-step11-conditional-iwqfc
+
+on:
+  workflow_dispatch:
+
+jobs:
+  conditional-iwqfc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Run conditional IWQFC smoke
+        run: |
+          python scripts/step11_conditional_iwqfc_smoke.py \
+            --model-id textattack/bert-base-uncased-SST-2 \
+            --model-revision 205ffbd1bc5c5b89802266f4948a601f53556b00 \
+            --calibration-size 8 \
+            --evaluation-size 64 \
+            --heads-to-keep 9 \
+            --batch-size 4 \
+            --max-length 32 \
+            --output-dir results/step11_conditional_iwqfc
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step11-conditional-iwqfc
+          path: results/step11_conditional_iwqfc/
