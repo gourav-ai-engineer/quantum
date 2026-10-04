@@ -1,0 +1,41 @@
+name: qfc-step8-iwqfc-full-once
+
+on:
+  push:
+    branches: ["research/qfc-v2"]
+  workflow_dispatch:
+
+jobs:
+  iwqfc-full:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU research dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Full SST-2 IWQFC comparison
+        run: |
+          python scripts/step5_full_sst2_budget_sweep.py \
+            --model-id textattack/bert-base-uncased-SST-2 \
+            --calibration-size 256 \
+            --heads-to-keep 9,6 \
+            --batch-size 32 \
+            --max-length 64 \
+            --seed 42 \
+            --bootstrap 1000 \
+            --random-replicates 3 \
+            --output-dir results/step8_iwqfc_full
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step8-iwqfc-full
+          path: results/step8_iwqfc_full/
