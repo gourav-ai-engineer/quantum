@@ -1,0 +1,32 @@
+name: qfc-step19-objective-alignment
+
+on:
+  push:
+    branches: ["research/qfc-v11-objective-alignment"]
+  workflow_dispatch:
+
+jobs:
+  alignment-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install CPU dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --index-url https://download.pytorch.org/whl/cpu "torch==2.6.0+cpu"
+          pip install "transformers==4.51.3" "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3"
+          pip install -e . --no-deps
+      - name: Compile
+        run: python -m compileall -q src scripts
+      - name: Run objective-alignment audit
+        run: |
+          python scripts/step19_objective_alignment.py             --calibration-size 128             --calibration-seed 42             --evaluation-size 64             --heads-to-keep 6             --random-subsets 24             --batch-size 16             --max-length 64             --output-dir results/step19_objective_alignment
+      - name: Upload results
+        uses: actions/upload-artifact@v4
+        with:
+          name: qfc-step19-objective-alignment
+          path: results/step19_objective_alignment/
