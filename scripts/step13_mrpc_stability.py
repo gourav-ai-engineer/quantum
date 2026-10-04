@@ -9,6 +9,11 @@ from statistics import mean, pstdev
 import torch
 from datasets import load_dataset
 
+from qfc.baselines import (
+    entropy_baseline_selections,
+    evaluate_random_distribution,
+    validate_all,
+)
 from qfc.coverage import greedy_select, weighted_greedy_select
 from qfc.fidelity import pairwise_fidelity
 from qfc.hf_experiments import (
@@ -40,7 +45,7 @@ def shannon_scores(model, loader, device):
             for li, attn in enumerate(out.attentions):
                 p = attn.float().clamp_min(1e-12)
                 p = p * mask[:, None, None, :]
-                entropy = -(p * p.log()).sum(-1)
+                entropy = -(p * p.clamp_min(1e-12).log()).sum(-1)
                 entropy = entropy * mask[:, None, :]
                 per_example = entropy.sum(-1) / valid_queries[:, None]
                 sums[li] += per_example.sum(0).cpu().double()
@@ -218,6 +223,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=16)
     parser.add_argument("--max-length", type=int, default=128)
     parser.add_argument("--bootstrap", type=int, default=1000)
+    parser.add_argument("--random-masks", type=int, default=30)
     parser.add_argument(
         "--output-dir", default="results/step13_mrpc_stability"
     )
@@ -310,24 +316,14 @@ def main():
         selections = {
             "QFC": qfc,
             "IWQFC": iwqfc,
-            "VonNeumann": select_topk(
-                vn, args.heads_to_keep
-            ),
-            "Shannon": select_topk(
-                shannon, args.heads_to_keep
-            ),
             "MichelGate": select_topk(
                 [michel[i] for i in range(layers)],
                 args.heads_to_keep,
             ),
-            # Fixed across calibration seeds: Random is a non-calibrated control.
-            "Random": random_select(
-                layers,
-                heads,
-                args.heads_to_keep,
-                seed=2027,
-            ),
+            # Entropy baselines in both directions, labelled explicitly.
+            **entropy_baseline_selections(vn, shannon, args.heads_to_keep),
         }
+        validate_all(selections, layers, heads, args.heads_to_keep)
 
         seed_result = {
             "seed": seed,
@@ -375,21 +371,27 @@ def main():
                 "selected_heads_zero_based": selection,
             }
 
+        # Random is a distribution over independent masks, fixed across
+        # calibration seeds because it does not use calibration data.
+        seed_result["methods"]["Random"] = evaluate_random_distribution(
+            lambda m: evaluate(model, eval_loader, args.device, m),
+            layers,
+            heads,
+            args.heads_to_keep,
+            n_masks=args.random_masks,
+            base_seed=2027,
+            device=args.device,
+            with_f1=True,
+            baseline=seed_result["baseline"],
+        )
+
         results.append(seed_result)
         print(
             f"seed={seed} "
-            f"QFC acc={seed_result['methods']['QFC']['accuracy']:.4f} "
-            f"F1={seed_result['methods']['QFC']['f1']:.4f} | "
-            f"IWQFC acc={seed_result['methods']['IWQFC']['accuracy']:.4f} "
-            f"F1={seed_result['methods']['IWQFC']['f1']:.4f} | "
-            f"VNE acc={seed_result['methods']['VonNeumann']['accuracy']:.4f} "
-            f"F1={seed_result['methods']['VonNeumann']['f1']:.4f} | "
-            f"Shannon acc={seed_result['methods']['Shannon']['accuracy']:.4f} "
-            f"F1={seed_result['methods']['Shannon']['f1']:.4f} | "
-            f"Michel acc={seed_result['methods']['MichelGate']['accuracy']:.4f} "
-            f"F1={seed_result['methods']['MichelGate']['f1']:.4f} | "
-            f"Random acc={seed_result['methods']['Random']['accuracy']:.4f} "
-            f"F1={seed_result['methods']['Random']['f1']:.4f}"
+            + " | ".join(
+                f"{name} acc={entry['accuracy']:.4f} F1={entry['f1']:.4f}"
+                for name, entry in seed_result["methods"].items()
+            )
         )
 
     summary = {
@@ -408,9 +410,12 @@ def main():
         "aggregate": {},
         "research_note": (
             "Cross-task stability study. The evaluation set is fixed across "
-            "calibration seeds. Random selection is fixed across seeds because "
-            "it does not use calibration data."
+            "calibration seeds. Random is the mean over random_masks independent "
+            "masks (seed = 2027 + i), fixed across calibration seeds because it "
+            "does not use calibration data; see methods.Random.distribution. "
+            "Entropy baselines are reported keep-high and keep-low."
         ),
+        "random_masks": args.random_masks,
     }
 
     method_names = list(results[0]["methods"])
