@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+from itertools import combinations
 from statistics import mean, pstdev
 
 import torch
@@ -81,6 +82,42 @@ def make_mask(selection, layers, heads, device):
     for layer, hs in selection.items():
         mask[layer, hs] = 1.0
     return mask
+
+
+def selection_jaccard(selection_a, selection_b):
+    """Jaccard overlap over all (layer, head) selections."""
+    set_a = {
+        (layer, head)
+        for layer, heads in selection_a.items()
+        for head in heads
+    }
+    set_b = {
+        (layer, head)
+        for layer, heads in selection_b.items()
+        for head in heads
+    }
+    union = set_a | set_b
+    if not union:
+        raise ValueError("cannot compute Jaccard overlap for empty selections")
+    return float(len(set_a & set_b) / len(union))
+
+
+def selection_stability(results, method_name):
+    """Pairwise selection Jaccard across calibration seeds."""
+    selections = [
+        run["methods"][method_name]["selected_heads_zero_based"]
+        for run in results
+    ]
+    values = [
+        selection_jaccard(a, b)
+        for a, b in combinations(selections, 2)
+    ]
+    return {
+        "mean": mean(values) if values else 1.0,
+        "std": pstdev(values) if len(values) > 1 else 0.0,
+        "pairwise": values,
+    }
+
 
 
 def f1_score(labels, predictions):
@@ -381,6 +418,7 @@ def main():
         accs = [r["methods"][name]["accuracy"] for r in results]
         f1s = [r["methods"][name]["f1"] for r in results]
         losses = [r["methods"][name]["loss"] for r in results]
+        stability = selection_stability(results, name)
         summary["aggregate"][name] = {
             "accuracy_mean": mean(accs),
             "accuracy_std": pstdev(accs) if len(accs) > 1 else 0.0,
@@ -388,6 +426,9 @@ def main():
             "f1_std": pstdev(f1s) if len(f1s) > 1 else 0.0,
             "loss_mean": mean(losses),
             "loss_std": pstdev(losses) if len(losses) > 1 else 0.0,
+            "selection_jaccard_mean": stability["mean"],
+            "selection_jaccard_std": stability["std"],
+            "selection_jaccard_pairwise": stability["pairwise"],
         }
 
     os.makedirs(args.output_dir, exist_ok=True)
