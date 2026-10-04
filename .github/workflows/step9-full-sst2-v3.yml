@@ -1,8 +1,6 @@
 name: qfc-step9-full-sst2-v3
 
 on:
-  push:
-    branches: ["research/qfc-v3"]
   workflow_dispatch:
 
 jobs:
