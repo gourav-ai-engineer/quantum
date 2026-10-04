@@ -7,11 +7,19 @@ name = "quantum-attention-pruning"
 version = "0.1.0"
 description = "Research implementation of quantum-fidelity coverage for Transformer attention-head pruning"
 requires-python = ">=3.10"
-dependencies = ["numpy>=1.26", "torch>=2.1,<2.7"]
+dependencies = ["numpy>=1.26,<3", "torch>=2.1,<2.7"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8"]
-transformers = ["transformers>=4.45", "datasets>=2.20", "accelerate>=0.34"]
+# Keep in sync with requirements-ci.txt (tests/test_env_pins.py enforces it).
+# transformers 5.x ignores head_mask, so it must never be installable from here.
+transformers = [
+    "transformers==4.51.3",
+    "datasets==3.6.0",
+    "pyarrow==24.0.0",
+    "accelerate>=0.34",
+    "huggingface_hub>=0.30,<1.0",
+]
 
 [tool.setuptools.packages.find]
 where = ["src"]
