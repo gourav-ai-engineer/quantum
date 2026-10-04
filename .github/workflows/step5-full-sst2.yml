@@ -1,10 +1,6 @@
 name: qfc-step5-full-sst2
 
 on:
-  push:
-    branches: ["research/qfc-v2"]
-  pull_request:
-    branches: ["main"]
   workflow_dispatch:
 
 jobs:
