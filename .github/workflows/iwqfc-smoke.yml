@@ -1,8 +1,6 @@
 name: qfc-iwqfc-smoke
 
 on:
-  push:
-    branches: ["research/qfc-v2"]
   workflow_dispatch:
 
 jobs:
