@@ -1,3 +1,15 @@
+"""step4: multi-split stability on SST-2 validation slices (smoke).
+
+STATUS: SMOKE/EXPLORATORY, DO NOT CITE.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT satisfied (not printed/asserted).
+  Rule 2 (Random as a distribution, >= 30 masks): VIOLATED. One Random mask per split.
+  Rule 3 (entropy baselines keep-high AND keep-low): VIOLATED. Keep-high only.
+  Rule 4 (calibration from train, evaluation on validation): VIOLATED. Splits are slices of
+         the validation split.
+The Shannon baseline was NaN under padding before V12 (fixed). Superseded by step12/step13.
+"""
+
 from __future__ import annotations
 
 import argparse

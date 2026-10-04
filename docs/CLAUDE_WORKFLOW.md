@@ -23,19 +23,23 @@ Then:
 
 ## 3. Create the Python environment
 
-Use Python 3.12:
-    py -3.12 -m venv .venv
+Use Python 3.12 and the pinned environment (transformers 4.51.3; transformers 5.x silently
+ignores head_mask and invalidates every result):
+    py -3.12 -m venv .venv-ci
 
 Activate in Git Bash:
-    source .venv/Scripts/activate
+    source .venv-ci/Scripts/activate
 
-Verify:
-    python --version
-    python -c "import sys; print(sys.executable)"
-
-Install:
+Install (versions are pinned in requirements-ci.txt; `.[dev,transformers]` pins the same ones):
     python -m pip install --upgrade pip
-    pip install -e ".[dev,transformers]"
+    pip install -r requirements-ci.txt
+    pip install -e . --no-deps
+
+Verify (versions, head_mask actually changes the model; --allow-cpu is for local smoke tests only):
+    python --version
+    python scripts/preflight.py check --allow-cpu
+
+Full experiments run on a GPU: `bash scripts/run_gpu.sh --commit <hash>` or colab/run_experiments.ipynb.
 
 ## 4. Start Claude Code
 
@@ -97,7 +101,8 @@ Before creating or merging a PR:
 ## 9. Keep research state in files
 
 Important conclusions should go into version-controlled files such as:
-    docs/research_log.md
+    docs/PROJECT_STATE.md      (results ledger, decision rule, next steps)
+    results/<experiment>/<commit>/   (the JSONs the ledger rows are generated from)
     docs/experiment_protocol.md
     docs/theory.md
 

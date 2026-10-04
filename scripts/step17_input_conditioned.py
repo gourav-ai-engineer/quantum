@@ -1,3 +1,14 @@
+"""step17 (V9): input-conditioned fidelity coverage ablation (mean-state vs conditional QFC/IWQFC).
+
+STATUS: ABLATION ONLY, superseded by step18 (V10). Do not cite; no result JSON is committed.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT satisfied (not printed/asserted).
+  Rule 2 (Random as a distribution, >= 30 masks): not applicable (no Random baseline).
+  Rule 3 (entropy baselines keep-high AND keep-low): not applicable (no entropy baselines).
+  Rule 4 (calibration from train, evaluation on validation): satisfied.
+Unaffected by the V12 Random/Shannon bugs (the script has neither baseline).
+"""
+
 from __future__ import annotations
 
 import argparse

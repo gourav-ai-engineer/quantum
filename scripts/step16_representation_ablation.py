@@ -1,3 +1,15 @@
+"""step16 (V8): representation ablation (fidelity vs Hilbert-Schmidt vs cosine coverage).
+
+STATUS: ABLATION ONLY. Do not cite until re-run in the pinned environment (requirements-ci.txt);
+no result JSON is committed. It is not a method-vs-baseline comparison.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT satisfied (not printed/asserted).
+  Rule 2 (Random as a distribution, >= 30 masks): not applicable (no Random baseline).
+  Rule 3 (entropy baselines keep-high AND keep-low): not applicable (no entropy baselines).
+  Rule 4 (calibration from train, evaluation on validation): satisfied.
+Unaffected by the V12 Random/Shannon bugs (the script has neither baseline).
+"""
+
 from __future__ import annotations
 
 import argparse
