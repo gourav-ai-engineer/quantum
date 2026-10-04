@@ -130,6 +130,7 @@ def main():
         description="Leakage-safe full SST-2 validation for QFC and matched baselines."
     )
     parser.add_argument("--model-id", default="textattack/bert-base-uncased-SST-2")
+    parser.add_argument("--model-revision", default=None)
     parser.add_argument(
         "--calibration-size",
         type=int,
@@ -163,7 +164,7 @@ def main():
     validation = load_dataset("stanfordnlp/sst2", split="validation")
     calibration = train.shuffle(seed=args.seed).select(range(args.calibration_size))
 
-    model, tokenizer = load_sequence_classifier(args.model_id, args.device)
+    model, tokenizer = load_sequence_classifier(args.model_id, args.device, revision=args.model_revision)
     calibration_loader = make_text_loader(
         calibration,
         tokenizer,
@@ -224,6 +225,7 @@ def main():
     all_results = {
         "metadata": {
             "model_id": args.model_id,
+            "model_revision": args.model_revision,
             "dataset": "stanfordnlp/sst2",
             "calibration_split": "train",
             "calibration_examples": args.calibration_size,
