@@ -9,7 +9,7 @@ from typing import Iterable
 import torch
 from datasets import load_dataset
 
-from qfc.coverage import greedy_select
+from qfc.coverage import greedy_select, weighted_greedy_select
 from qfc.fidelity import pairwise_fidelity
 from qfc.hf_experiments import (
     _move_batch,
@@ -252,6 +252,18 @@ def main():
         qfc, qfc_cov = select_coverage_from_similarity(
             fidelity_similarities, k
         )
+        iwqfc = {}
+        iwqfc_cov = {}
+        for layer, states in enumerate(mean_states):
+            sim = fidelity_similarities[layer]
+            raw = michel_scores[layer].clamp_min(0.0)
+            if float(raw.sum()) <= 0.0:
+                quality = torch.full_like(raw, 1.0 / len(raw))
+            else:
+                quality = raw / raw.sum()
+            selected, history = weighted_greedy_select(sim, quality, k)
+            iwqfc[layer] = selected
+            iwqfc_cov[layer] = float(history[-1])
         hs_cov_selected, hs_cov = select_coverage_from_similarity(
             hs_similarities, k
         )
@@ -261,6 +273,7 @@ def main():
 
         selections = {
             "QFC": qfc,
+            "IWQFC": iwqfc,
             "HS_Coverage": hs_cov_selected,
             "Shannon": select_topk(shannon, k),
             "VonNeumann": select_topk(vn, k),
@@ -271,6 +284,7 @@ def main():
         budget_result = {
             "heads_kept_per_layer": k,
             "qfc_fidelity_coverage_total": sum(qfc_cov.values()),
+            "iwqfc_weighted_coverage_total": sum(iwqfc_cov.values()),
             "hs_coverage_total": sum(hs_cov.values()),
             "cosine_coverage_total": sum(cosine_cov.values()),
             "methods": {},
@@ -321,11 +335,11 @@ def main():
 
         # Physical pruning validates the actual architecture surgery for QFC.
         physical = copy.deepcopy(model).to(args.device)
-        physical, pruned = structured_prune(physical, qfc)
+        physical, pruned = structured_prune(physical, iwqfc)
         physical_losses, physical_correct = evaluate_per_example(
             physical, validation_loader, args.device
         )
-        budget_result["QFC_structured"] = {
+        budget_result["IWQFC_structured"] = {
             "accuracy": float(physical_correct.mean()),
             "loss": float(physical_losses.mean()),
             "accuracy_delta_vs_full": paired_bootstrap_delta(
@@ -348,6 +362,7 @@ def main():
         print(
             f"k={k}: "
             f"QFC={budget_result['methods']['QFC']['accuracy']:.6f} "
+            f"IWQFC={budget_result['methods']['IWQFC']['accuracy']:.6f} "
             f"HS={budget_result['methods']['HS_Coverage']['accuracy']:.6f} "
             f"Cosine={budget_result['methods']['CosineCoverage']['accuracy']:.6f} "
             f"VNE={budget_result['methods']['VonNeumann']['accuracy']:.6f} "
