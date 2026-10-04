@@ -139,11 +139,11 @@ def main():
     )
     parser.add_argument(
         "--heads-to-keep",
-        default="9,8,6",
+        default="10,9,8,6",
         help="Comma-separated heads retained per layer.",
     )
     parser.add_argument("--batch-size", type=int, default=8)
-    parser.add_argument("--max-length", type=int, default=64)
+    parser.add_argument("--max-length", type=int, default=128)
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--bootstrap", type=int, default=1000)
     parser.add_argument("--random-replicates", type=int, default=3)
