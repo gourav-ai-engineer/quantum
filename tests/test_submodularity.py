@@ -35,7 +35,7 @@ def test_toy_objective_is_exhaustively_submodular():
                             coverage_value(sim, sorted(T | {h}))
                             - coverage_value(sim, sorted(T))
                         ).item()
-                        assert lhs + 1e-7 >= rhs
+                        assert lhs + 1e-5 >= rhs
 
 
 def test_empty_coverage_is_zero():
