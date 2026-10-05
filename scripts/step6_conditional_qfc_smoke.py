@@ -1,3 +1,15 @@
+"""step6: conditional (per-example) QFC smoke test on SST-2.
+
+STATUS: SMOKE/EXPLORATORY, DO NOT CITE.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT satisfied (not printed/asserted).
+  Rule 2 (Random as a distribution, >= 30 masks): not applicable (no Random baseline).
+  Rule 3 (entropy baselines keep-high AND keep-low): not applicable (no entropy baselines).
+  Rule 4 (calibration from train, evaluation on validation): VIOLATED. Calibration and
+         evaluation are slices of the validation split.
+Superseded by step17 (V9) and step18 (V10).
+"""
+
 from __future__ import annotations
 
 import argparse

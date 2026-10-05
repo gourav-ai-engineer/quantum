@@ -78,8 +78,14 @@ B. Alignment not supported, or classical similarity matches fidelity: write the 
 C. Never: resurrect QIS claims, hide negative results, or tune until QFC wins.
 
 ## Next steps (ordered checklist)
-- [ ] Run step18 (V10) on GPU: tasks sst2+mrpc, seeds 7,42,77, full validation, 30 random masks,
-      heads-to-keep 6. Aggregate with scripts/aggregate_v10_confirmatory.py (it reads `v10_results/`).
+- [ ] Run the pending experiments on a GPU with `bash scripts/run_gpu.sh --commit <hash> --results-root <dir>`
+      (or colab/run_experiments.ipynb). It pins the environment, runs the pre-flight (versions, CUDA,
+      head_mask effective) and executes the four items below in order. Results land in
+      `results/<experiment>/<commit>/`; generate ledger rows with
+      `python scripts/make_ledger_row.py <dir>`. Do not run step19 before the V11 decision rule is merged.
+      (The runner and notebook have only been smoke-tested on CPU, never on a GPU.)
+- [ ] V10: step18 on GPU: tasks sst2+mrpc, seeds 7,42,77, full validation, 30 random masks,
+      heads-to-keep 6. Aggregation (scripts/aggregate_v10_confirmatory.py <dir>) is run by the runner.
 - [ ] Run step14 (V6) on GPU: budgets 3,6,9, full validation, both tasks.
 - [ ] Re-run step13 (V5) for MRPC stability with the fixed Shannon.
 - [ ] Commit the V11 decision rule (this file; done once the docs PR is merged), then run step19 on
@@ -93,15 +99,17 @@ C. Never: resurrect QIS claims, hide negative results, or tune until QFC wins.
       hand-typed numbers.
 
 Repo hygiene items found while writing this file (added by the assistant, not by the owner):
-- [ ] Make the environment reproducible from the repo: a pinned requirements file or tightened
+- [x] (done in infra/gpu-runner: requirements-ci.txt, pinned pyproject extras, tests/test_env_pins.py)
+      Make the environment reproducible from the repo: a pinned requirements file or tightened
       `pyproject.toml` extras (currently `transformers>=4.45` and `datasets>=2.20` are unpinned, so
       `pip install -e ".[dev,transformers]"` can install transformers 5.x, which ignores head_mask).
-- [ ] Add a GPU path for the V10/V6/V11 workflows (all 22 `runs-on` entries across the workflows are
+- [~] (runner done: scripts/run_gpu.sh + colab/run_experiments.ipynb, untested on a GPU; the GitHub
+      workflows are still CPU-only) Add a GPU path for the V10/V6/V11 workflows (all 22 `runs-on` entries across the workflows are
       CPU `ubuntu-latest`; step18's matrix has `timeout-minutes: 60`, which full-validation runs with
       30 random masks are unlikely to meet on CPU; not measured).
-- [ ] Reconcile docs/experiment_protocol.md and docs/CLAUDE_WORKFLOW.md with CLAUDE.md (see
+- [x] (CLAUDE_WORKFLOW.md and experiment_protocol.md done) Reconcile docs/experiment_protocol.md and docs/CLAUDE_WORKFLOW.md with CLAUDE.md (see
       "Known inconsistencies").
-- [ ] Add a results-recording convention (per-experiment summary with environment and commit), since
+- [x] (results/README.md + scripts/make_ledger_row.py) Add a results-recording convention (per-experiment summary with environment and commit), since
       no result JSON is currently in git.
 
 ## Known limitations / open questions
@@ -116,10 +124,11 @@ Repo hygiene items found while writing this file (added by the assistant, not by
 - Selections are stored sorted (since V12); masks are unaffected.
 
 ## Known inconsistencies in the repo (as of 2026-10-04)
-- docs/experiment_protocol.md says calibrate on the SST-2 validation set (final: all 872 examples)
-  and describes physical pruning; CLAUDE.md rule 4 requires calibration from train. The older
-  scripts step2/3/4/6 calibrate and evaluate on disjoint slices of the validation split.
-- docs/CLAUDE_WORKFLOW.md tells a new session to `pip install -e ".[dev,transformers]"` in `.venv`
+- RESOLVED in infra/gpu-runner: docs/experiment_protocol.md said to calibrate on the SST-2 validation
+  set and to physically prune; it now follows CLAUDE.md rule 4 (train calibration, validation
+  evaluation, functional masking). Still true: the older scripts step2/3/4/6 calibrate and evaluate on
+  disjoint slices of the validation split (flagged in their banners; do not cite).
+- RESOLVED in infra/gpu-runner: docs/CLAUDE_WORKFLOW.md told a new session to `pip install -e ".[dev,transformers]"` in `.venv`
   (can install transformers 5.x) and to record work in `docs/research_log.md`, which does not exist.
 - README.md "Verified so far" quotes 32-example smoke numbers (QFC 0.96875 vs unpruned 0.9375). They
   are engineering evidence only and came from pre-V12 code; do not cite them.
@@ -129,6 +138,9 @@ Repo hygiene items found while writing this file (added by the assistant, not by
   12, 13, 14, 18.
 - The history in CLAUDE.md (QIS Spearman/p-value, "V4-V10 showed...") is owner-reported; neither the
   old notebook nor any result JSON is in this repo.
+
+- Legacy scripts (steps 2-7, 11, 15-17) now carry status banners saying which standing rules they
+  satisfy and that they must not be cited (tests/test_script_banners.py keeps them in place).
 
 ## Paper outline (fill only with produced evidence)
 Method, theory (objective-level only), corrected baselines, objective-alignment audit, budget

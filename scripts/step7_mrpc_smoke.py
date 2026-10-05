@@ -1,3 +1,15 @@
+"""step7: MRPC engineering smoke test (QFC vs baselines on a small validation slice).
+
+STATUS: SMOKE/EXPLORATORY, DO NOT CITE.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT satisfied (not printed/asserted).
+  Rule 2 (Random as a distribution, >= 30 masks): VIOLATED. Random is a single mask.
+  Rule 3 (entropy baselines keep-high AND keep-low): VIOLATED. Keep-high only.
+  Rule 4 (calibration from train, evaluation on validation): satisfied, but the evaluation
+         set is a small smoke slice, not the full validation split.
+The Shannon baseline was NaN under padding before V12 (fixed). Superseded by step13 (V5).
+"""
+
 from __future__ import annotations
 
 import argparse

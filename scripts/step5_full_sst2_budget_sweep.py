@@ -1,3 +1,15 @@
+"""step5: leakage-safe full SST-2 validation budget sweep with structured pruning (early).
+
+STATUS: EXPLORATORY, DO NOT CITE until re-run under rules 2-3.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT satisfied (not printed/asserted).
+  Rule 2 (Random as a distribution, >= 30 masks): VIOLATED. 3 random replicates.
+  Rule 3 (entropy baselines keep-high AND keep-low): VIOLATED. Keep-high only.
+  Rule 4 (calibration from train, evaluation on validation): satisfied (train calibration,
+         full validation evaluation).
+Its Shannon baseline was NaN under padding before V12 (fixed). Superseded by step14 (V6).
+"""
+
 from __future__ import annotations
 
 import argparse

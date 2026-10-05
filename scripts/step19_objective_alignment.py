@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import gzip
 import json
 import os
 
@@ -362,6 +363,18 @@ def main():
         )
 
     os.makedirs(args.output_dir, exist_ok=True)
+    # Per-subset records are large (about 1 KB each). summary.json keeps everything the
+    # ledger and the decision rule need; the full records go to records.json.gz so that
+    # committed results stay small. Nothing is dropped.
+    records_by_task = {
+        task: {layer: data.pop("records") for layer, data in task_data["layers"].items()}
+        for task, task_data in output["tasks"].items()
+    }
+    output["records_file"] = "records.json.gz"
+    with gzip.open(
+        os.path.join(args.output_dir, "records.json.gz"), "wt", encoding="utf-8"
+    ) as f:
+        json.dump(records_by_task, f)
     with open(
         os.path.join(args.output_dir, "summary.json"),
         "w",

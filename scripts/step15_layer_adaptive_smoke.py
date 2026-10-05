@@ -1,3 +1,17 @@
+"""step15 (V7): layer-adaptive head-budget allocation smoke test.
+
+STATUS: SMOKE/EXPLORATORY, DO NOT CITE.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT applicable as stated. The budget
+         is a total across layers (layer-adaptive allocation); per-layer counts and the
+         total are not asserted.
+  Rule 2 (Random as a distribution, >= 30 masks): VIOLATED. Random is a single mask.
+  Rule 3 (entropy baselines keep-high AND keep-low): VIOLATED. Keep-high only.
+  Rule 4 (calibration from train, evaluation on validation): satisfied.
+Its Shannon scores were NaN under padding before V12 (fixed). Not upgraded to the shared
+baselines helper (different evaluators and budget model).
+"""
+
 from __future__ import annotations
 
 import argparse

@@ -1,0 +1,21 @@
+# Pinned environment for every experiment in this repo (see CLAUDE.md "Environment").
+#
+# transformers 5.x silently IGNORES head_mask, which makes every pruning result
+# meaningless. Do not loosen the four exact pins below without re-running
+# scripts/preflight.py and updating pyproject.toml (tests/test_env_pins.py checks
+# that the two files agree).
+#
+# Install:  pip install -r requirements-ci.txt && pip install -e . --no-deps
+# Python 3.12 locally; GitHub workflows use 3.11.
+# torch 2.6.0 from PyPI on Linux/Windows-CUDA ships a CUDA build; on CPU-only CI use
+#   pip install --index-url https://download.pytorch.org/whl/cpu torch==2.6.0
+torch==2.6.0
+transformers==4.51.3
+datasets==3.6.0
+# pyarrow 24.0.0: newer builds were blocked by Windows Smart App Control on the
+# owner's machine (pyarrow.dataset DLL). Do not disable Windows security features.
+pyarrow==24.0.0
+accelerate>=0.34
+numpy>=1.26,<3
+huggingface_hub>=0.30,<1.0
+pytest>=8

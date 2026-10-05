@@ -46,13 +46,17 @@ formalism is a representation only. Do not call zeroed projections structural co
 - Use `.venv-ci` (Python 3.12, torch 2.6.0, transformers 4.51.3, datasets 3.6.0,
   pyarrow 24.0.0). transformers 5.x silently IGNORES head_mask: results from it are
   meaningless. Never run experiments in any other environment.
-- `.venv-ci` is untracked and local. Recreate it with:
-  `py -3.12 -m venv .venv-ci`, then in it `pip install torch==2.6.0 transformers==4.51.3
-  "datasets>=2.20,<4" "accelerate>=0.34" "numpy>=1.26,<3" pyarrow==24.0.0 pytest` and
-  `pip install -e . --no-deps`. (On the owner's Windows machine, newer pyarrow was blocked
-  by Smart App Control; 24.0.0 loads. Do not disable Windows security features.)
-- CPU is too slow for full runs. Run V10/V6/V11 on GPU (Colab or a GPU runner); CPU is for
-  smoke tests only. The existing GitHub workflows use CPU `ubuntu-latest` + Python 3.11.
+- `.venv-ci` is untracked and local. Recreate it with `py -3.12 -m venv .venv-ci`, then in it
+  `pip install -r requirements-ci.txt` and `pip install -e . --no-deps`. The pins live in
+  `requirements-ci.txt` (and `pyproject.toml` extras, kept equal by tests/test_env_pins.py).
+  Check with `python scripts/preflight.py check` (versions, CUDA, head_mask effective).
+  (On the owner's Windows machine, newer pyarrow was blocked by Smart App Control; 24.0.0
+  loads. Do not disable Windows security features.)
+- CPU is too slow for full runs. Run V10/V6/V5/V11 on GPU with `scripts/run_gpu.sh` or
+  `colab/run_experiments.ipynb`; CPU is for smoke tests only (`--smoke --allow-cpu`). The
+  existing GitHub workflows still use CPU `ubuntu-latest` + Python 3.11.
+- Results convention: `results/<experiment>/<commit>/` (small JSONs + run_meta.json), see
+  results/README.md. Ledger rows are generated with `scripts/make_ledger_row.py`, never typed.
 - Pinned models: SST-2 `textattack/bert-base-uncased-SST-2` rev 205ffbd1...;
   MRPC `textattack/bert-base-uncased-MRPC` rev ddeddf4a... (full hashes in scripts/SPECS).
 - On Windows use Git Bash/PowerShell as available; GateGuard-style hooks may ask for facts

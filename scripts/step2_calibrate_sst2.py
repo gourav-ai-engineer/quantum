@@ -1,3 +1,16 @@
+"""step2: first calibration/selection run on SST-2 (engineering check of the QFC pipeline).
+
+STATUS: SMOKE/EXPLORATORY, DO NOT CITE.
+Standing rules (CLAUDE.md), checked 2026-10-04:
+  Rule 1 (exactly k heads per layer, printed/asserted): NOT satisfied. Selection is k per
+         layer by construction but heads kept per layer are neither printed nor asserted.
+  Rule 2 (Random as a distribution, >= 30 masks): not applicable (no Random baseline).
+  Rule 3 (entropy baselines keep-high AND keep-low): not applicable (no entropy baselines).
+  Rule 4 (calibration from train, evaluation on validation): VIOLATED. Calibration data is
+         drawn from the SST-2 validation split.
+Superseded by step18 (V10) and step14 (V6); do not use its output as evidence.
+"""
+
 from __future__ import annotations
 
 import argparse
