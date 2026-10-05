@@ -157,6 +157,7 @@ run_step() {
           done
         done
         "$PY" scripts/aggregate_v10_confirmatory.py "$d"
+        "$PY" scripts/v13_paired_test.py "$d"
         write_meta "$step" "tasks=sst2,mrpc seeds=${S18_SEEDS// /,} $S18_FLAGS";;
       step14)
         "$PY" scripts/step14_budget_response.py $S14_FLAGS --output-dir "$d"

@@ -1,5 +1,5 @@
 from __future__ import annotations
-import argparse,json,os,torch
+import argparse,json,os,numpy as np,torch
 from datasets import load_dataset
 from qfc.baselines import calibrated_selections,evaluate_random_distribution,heads_kept_per_layer,validate_all
 from qfc.conditional import collect_per_sample_density_states,conditional_fidelity_kernels
@@ -43,15 +43,16 @@ def main():
     validate_all(sel,L,H,k)
     r={"task":a.task,"seed":a.seed,"model_id":s["model_id"],"model_revision":s["revision"],"calibration_size":a.calibration_size,"evaluation_size":len(valid),"heads_to_keep_per_layer":k,"random_masks":a.random_masks,"baseline":{"accuracy":float(bc.mean()),"loss":float(bl.mean())},"methods":{},"research_note":"Entropy baselines are reported keep-high and keep-low. Random is the mean over random_masks independent masks (seed = 2027 + 1000*k + i); see methods.Random.distribution for mean/std/min/max."}
     if a.task=="mrpc":r["baseline"]["f1"]=f1(by,bp)
+    correct_by_method={"Unpruned":bc.numpy().astype(bool)}
     for n,ss in sel.items():
-        lo,co,y,pred=evaluate(model,vl,a.device,head_mask_from_selection(L,H,ss,a.device));e={"accuracy":float(co.mean()),"loss":float(lo.mean()),"accuracy_delta":float(co.mean()-bc.mean()),"loss_delta":float(lo.mean()-bl.mean()),"accuracy_bootstrap_delta":paired_bootstrap_delta(co,bc,n_boot=a.bootstrap,seed=a.seed+30000),"selected_heads_zero_based":ss}
+        lo,co,y,pred=evaluate(model,vl,a.device,head_mask_from_selection(L,H,ss,a.device));correct_by_method[n]=co.numpy().astype(bool);e={"accuracy":float(co.mean()),"loss":float(lo.mean()),"accuracy_delta":float(co.mean()-bc.mean()),"loss_delta":float(lo.mean()-bl.mean()),"accuracy_bootstrap_delta":paired_bootstrap_delta(co,bc,n_boot=a.bootstrap,seed=a.seed+30000),"selected_heads_zero_based":ss}
         if a.task=="mrpc":e["f1"]=f1(y,pred);e["f1_delta"]=e["f1"]-r["baseline"]["f1"]
         r["methods"][n]=e
     r["methods"]["Random"]=evaluate_random_distribution(lambda m:evaluate(model,vl,a.device,m),L,H,k,a.random_masks,2027+1000*k,a.device,with_f1=a.task=="mrpc",baseline=r["baseline"])
     r["heads_kept_per_layer"]={n:heads_kept_per_layer(m["selected_heads_zero_based"]) for n,m in r["methods"].items()}
     for n,kept in r["heads_kept_per_layer"].items():
         if kept!=[k]*L:raise RuntimeError(f"{n} keeps {kept}, expected {k} per layer")
-    os.makedirs(a.output_dir,exist_ok=True);path=os.path.join(a.output_dir,f"{a.task}_seed{a.seed}.json");json.dump(r,open(path,"w",encoding="utf-8"),indent=2)
+    os.makedirs(a.output_dir,exist_ok=True);path=os.path.join(a.output_dir,f"{a.task}_seed{a.seed}.json");json.dump(r,open(path,"w",encoding="utf-8"),indent=2);np.savez_compressed(path[:-5]+"_correct.npz",**correct_by_method)
     print(f"{a.task} seed={a.seed} eval_n={len(valid)} baseline_acc={r['baseline']['accuracy']:.4f} baseline_loss={r['baseline']['loss']:.4f}"+(f" baseline_f1={r['baseline']['f1']:.4f}" if a.task=="mrpc" else ""))
     for n,m in r["methods"].items():print(f"  {n:20s} acc={m['accuracy']:.4f} loss={m['loss']:.4f} heads_kept_per_layer={r['heads_kept_per_layer'][n]}"+(f" f1={m['f1']:.4f}" if a.task=="mrpc" else ""))
     rd=r["methods"]["Random"]["distribution"];print("  Random distribution (n=%d): "%a.random_masks+" ".join(f"{key}[mean={v['mean']:.4f} std={v['std']:.4f} min={v['min']:.4f} max={v['max']:.4f}]" for key,v in rd.items()))
