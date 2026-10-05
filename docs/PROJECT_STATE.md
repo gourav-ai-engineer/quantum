@@ -82,21 +82,25 @@ here, and the paper's contribution is a controlled answer (positive or negative)
 No new variant is introduced: IWQFC (Michel weights + fidelity coverage) and MichelGate (same importance
 scores, no coverage) already exist in `src/qfc/` and step13/14/18. IWQFC vs MichelGate differ only in the
 coverage term, so their paired difference is the marginal value of diversity.
+In step18 the names are `MeanStateIWQFC` (PRIMARY comparison: MeanStateIWQFC minus MichelGate) and
+`ConditionalIWQFC` (SECONDARY, reported, never used to rescue a failed primary).
 
 - **H0:** IWQFC accuracy minus MichelGate accuracy on the same validation examples is <= 0.
 - **H1:** it is > 0.
 - **Data:** V10 (step18) full validation, SST-2 and MRPC, calibration seeds 7, 42, 77, k = 6 heads/layer;
   V6 (step14) for k = 3 and 9 as secondary. Same examples, same calibration split per seed.
-- **Test:** paired bootstrap (>= 1000 resamples; use `qfc.metrics.paired_bootstrap_delta`) of the per-example
-  correctness difference, per task and per seed. Loss difference is secondary. Report the delta and its 95% CI.
-  This needs per-example correctness for both methods; if step18 does not persist it, add an
-  analysis-only change (no change to any selector) before running.
-- **Supported:** the 95% CI lower bound is > 0 in at least 2 of 3 seeds on BOTH tasks.
-- **Not supported:** the CI includes 0 or lies below 0 in at least 2 of 3 seeds on either task.
-- **Otherwise:** inconclusive; do not interpret as support.
-- **Controls to read alongside:** Random distribution (>= 30 masks, report mean and the 2.5-97.5 percentile
-  of the mask distribution, not a std over calibration seeds), VNE and Shannon keep-high AND keep-low,
-  unpruned model. Selection stability (mean pairwise Jaccard across seeds) is reported as a separate axis,
+- **Test:** paired bootstrap (10000 resamples, `qfc.metrics.paired_bootstrap_delta`, bootstrap seed =
+  calibration seed + 40000) of the per-example correctness difference, per task and per calibration seed;
+  95% CI. Implemented in `scripts/v13_paired_test.py` (writes `v13_paired.json`; run by `run_gpu.sh` after
+  step18). step18 now saves `<task>_seed<seed>_correct.npz` (per-example correctness of every selector
+  and the unpruned model) for this; analysis-only change, no selector touched (2026-10-05, before V10 ran).
+- **A task "passes"** if the CI lower bound is > 0 in at least 2 of its 3 seeds.
+- **Supported:** both tasks pass. **Not supported:** neither task passes. **Inconclusive:** exactly one
+  task passes (task-dependent; do not interpret as support). **insufficient_data:** fewer than 3 seeds or
+  fewer than 2 tasks (e.g. smoke runs); no verdict.
+- **Controls to read alongside:** Random distribution (>= 30 masks; report the mask distribution's mean,
+  std, min and max as step18 records them, not a std over calibration seeds), VNE and Shannon keep-high
+  AND keep-low, unpruned model. Selection stability (mean pairwise Jaccard across seeds) is reported as a separate axis,
   not folded into accuracy.
 - **Out of scope here (needs its own written hypothesis first, rule 7):** classical-similarity versions of
   IWQFC, post-pruning fine-tuning, other models or tasks, a HIES baseline implementation.
@@ -129,7 +133,8 @@ C. Never: resurrect QIS claims, hide negative results, or tune until QFC wins.
 - [x] Re-run step13 (V5) for MRPC stability with the fixed Shannon (2026-10-05, Colab T4; ledger row above).
       Still open: confirm why VNE keep-high selection is identical across calibration seeds.
 - [ ] V13 (hypothesis above): after V10/V6, compute paired IWQFC-vs-MichelGate deltas and apply the
-      written rule. Check whether step18 persists per-example correctness first.
+      written rule. (step18 now persists per-example correctness; `run_gpu.sh` runs
+      `scripts/v13_paired_test.py` after step18, so the verdict lands in `v13_paired.json`.)
 - [ ] Commit the V5 result JSONs (small) under `results/v5_mrpc_stability/f665db1e30a1/` from the Drive copy,
       so the ledger path is in the repo.
 - [ ] Commit the V11 decision rule (this file; done once the docs PR is merged), then run step19 on
