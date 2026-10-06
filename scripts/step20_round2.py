@@ -134,6 +134,8 @@ def main():
     p.add_argument("--max-length", type=int, default=128)
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     p.add_argument("--output-dir", default="results/round2")
+    p.add_argument("--resume", action="store_true",
+                   help="skip (task, seed) outputs already on disk and continue a partial Random distribution")
     a = p.parse_args()
     k = a.heads_to_keep
     os.makedirs(a.output_dir, exist_ok=True)
@@ -153,7 +155,12 @@ def main():
         base_summary = summarize(*base)
         print(f"{task} eval_n={len(valid)} unpruned: {base_summary}")
 
+        layers, heads = model.config.num_hidden_layers, model.config.num_attention_heads
         for seed in [int(s) for s in a.seeds.split(",")]:
+            stem = os.path.join(a.output_dir, f"round2_{task}_seed{seed}")
+            if a.resume and os.path.exists(stem + ".json") and os.path.exists(stem + ".npz"):
+                print(f"  {task} seed={seed}: already on disk, skipped (--resume)")
+                continue
             cal = train.shuffle(seed=seed).select(range(a.calibration_size))
             cl = make_text_loader(cal, tok, text_fields=spec["text_fields"], batch_size=a.batch_size, max_length=a.max_length)
             layers, heads, uniform, glob = build_selections(model, tok, cl, a.device, k)
@@ -173,15 +180,24 @@ def main():
             json.dump(record, open(os.path.join(a.output_dir, f"round2_{task}_seed{seed}.json"), "w", encoding="utf-8"), indent=2)
 
         # Random: one distribution per task, independent of the calibration seed.
-        masks = []
-        for i in range(a.random_masks):
+        done_file = os.path.join(a.output_dir, f"round2_{task}_random.json")
+        partial_file = os.path.join(a.output_dir, f"round2_{task}_random_partial.json")
+        if a.resume and os.path.exists(done_file):
+            print(f"  {task} Random: already on disk, skipped (--resume)")
+            continue
+        masks = json.load(open(partial_file)) if a.resume and os.path.exists(partial_file) else []
+        for i in range(len(masks), a.random_masks):  # mask i always uses seed 2027 + 1000k + i, so resuming is exact
             sel = random_selection(layers, heads, k, 2027 + 1000 * k + i)
             validate_selection(sel, layers, heads, k, name=f"Random[{i}]")
             masks.append(summarize(*evaluate(model, vl, a.device, head_mask_from_selection(layers, heads, sel, a.device))))
+            if (i + 1) % 10 == 0:
+                json.dump(masks, open(partial_file, "w"))
         quant = {m: {f"q{q}": float(np.nanquantile([r[m] for r in masks], q / 100)) for q in (2.5, 25, 50, 75, 97.5)}
                  for m in ("accuracy", "mcc", "loss", "auroc")}
         json.dump({"task": task, "metric": spec["metric"], "random_masks": a.random_masks, "heads_kept_per_layer": [k] * layers,
                    "per_mask": masks, "quantiles": quant}, open(os.path.join(a.output_dir, f"round2_{task}_random.json"), "w"), indent=2)
+        if os.path.exists(partial_file):
+            os.remove(partial_file)
         print(f"  {task} Random (n={a.random_masks}) {spec['metric']} quantiles: {quant[spec['metric']]}")
 
 

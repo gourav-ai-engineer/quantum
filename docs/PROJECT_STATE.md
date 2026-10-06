@@ -229,6 +229,15 @@ per layer). Report MichelGlobal minus MichelGate per task. **[proposed]** "Globa
 "delta <= 0" on >= 3 of 5 tasks and no task shows a Holm-significant negative; "not better" otherwise. If
 global is better, every later comparison (H1, H2, H7, ...) must be re-run against the stronger Michel.
 
+**Run log (provenance).** 2026-10-06, run 1, commit 6ed05e7b90f4, Colab T4: SST-2, MRPC and RTE finished (5
+seeds + 100-mask Random each) and are on Drive under `qfc_results/round2_h1_h2_h6/6ed05e7b90f4/`; the free GPU
+quota ended while QNLI was loading, so QNLI and CoLA did not run and no `run_meta.json` / `round2_verdicts.json`
+was written. The per-method lines of the first three tasks were visible in the log before the rules were
+applied; the rules, margins, seeds and directions above were all fixed before that run, so nothing was tuned to
+them. The rules are applied only by `scripts/round2_analysis.py` on the complete set (all 5 tasks x 5 seeds).
+Remaining tasks are run with `run_gpu.sh --only step20 --step20-tasks cola --resume` and then `qnli`; `--resume`
+skips finished (task, seed) outputs and the protocol is unchanged.
+
 **Future hypotheses (NOT implemented this round; each needs its own written hypothesis, math definition, unit
 tests and baselines first, rule 7):** H4 output-space coverage (density operators built from head outputs,
 judged with the V11 rule); QUBO head selection with pairwise interaction terms solved by simulated annealing;

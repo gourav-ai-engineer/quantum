@@ -19,6 +19,12 @@
 #                             <repo>/.venv-gpu from requirements-ci.txt.
 #   --step19-eval-size N      evaluation examples for step19 (default 256; -1 = full
 #                             validation). Values below 256 are refused outside --smoke.
+#   --step20-tasks LIST       restrict step20 to these tasks (e.g. cola, then qnli) so a run that was
+#                             cut off can be finished; see --resume.
+#   --resume                  allow re-entering a non-empty step20 results directory: finished
+#                             (task, seed) outputs are skipped and a partial Random distribution is
+#                             continued. The first run's run_meta.json is never overwritten
+#                             (a run_meta_resume_<date>.json is written instead).
 #   --smoke                   tiny sizes for an engineering check; writes under
 #                             <results-root>/_smoke and is never a result. --allow-cpu is only
 #                             accepted together with --smoke.
@@ -32,10 +38,10 @@
 #           masks, k=6 (not in the default --only list: run it with --only step20)
 set -euo pipefail
 
-usage() { sed -n '2,32p' "$0"; exit "${1:-0}"; }
+usage() { sed -n '2,/^set -euo/p' "$0" | sed '$d'; exit "${1:-0}"; }
 
 REPO_URL=""; COMMIT=""; WORKDIR=""; RESULTS_ROOT=""; VENV=""; TAG=""
-ONLY="step18,step14,step13,step19"; STEP19_EVAL=256
+ONLY="step18,step14,step13,step19"; STEP19_EVAL=256; STEP20_TASKS=""; RESUME=0
 SMOKE=0; ALLOW_CPU=0; FORCE=0
 
 while [[ $# -gt 0 ]]; do
@@ -47,6 +53,8 @@ while [[ $# -gt 0 ]]; do
     --venv) VENV="$2"; shift 2;;
     --only) ONLY="$2"; shift 2;;
     --step19-eval-size) STEP19_EVAL="$2"; shift 2;;
+    --step20-tasks) STEP20_TASKS="$2"; shift 2;;
+    --resume) RESUME=1; shift;;
     --tag) TAG="$2"; shift 2;;
     --smoke) SMOKE=1; shift;;
     --allow-cpu) ALLOW_CPU=1; shift;;
@@ -123,7 +131,7 @@ run_dir() { echo "$ROOT/$(exp_name "$1")/${COMMIT_SHORT}${TAG:+-$TAG}"; }
 IFS=',' read -r -a STEPS <<< "$ONLY"
 for s in "${STEPS[@]}"; do
   d="$(run_dir "$s")"
-  if [[ -d "$d" && -n "$(ls -A "$d" 2>/dev/null)" && $FORCE -eq 0 ]]; then
+  if [[ -d "$d" && -n "$(ls -A "$d" 2>/dev/null)" && $FORCE -eq 0 ]] && ! [[ $RESUME -eq 1 && "$s" == step20 ]]; then
     echo "refusing to overwrite non-empty $d (use --tag or --force)" >&2; exit 2
   fi
 done
@@ -143,8 +151,12 @@ else
   S20_FLAGS="--tasks sst2,mrpc,rte,qnli,cola --seeds 7,42,77,123,2024 --calibration-size 128 --evaluation-size -1 --heads-to-keep 6 --random-masks 100 --batch-size 16 --max-length 128"
 fi
 
-write_meta() {  # step, flags
-  "$PY" scripts/preflight.py meta --out "$(run_dir "$1")/run_meta.json" --experiment "$(exp_name "$1")" \
+[[ -n "$STEP20_TASKS" ]] && S20_FLAGS="${S20_FLAGS/--tasks sst2,mrpc,rte,qnli,cola/--tasks $STEP20_TASKS}"
+
+write_meta() {  # step, flags. A resumed run never overwrites the first run's run_meta.json.
+  local meta_out; meta_out="$(run_dir "$1")/run_meta.json"
+  if [[ $RESUME -eq 1 && -f "$meta_out" ]]; then meta_out="$(run_dir "$1")/run_meta_resume_${DATE_UTC}.json"; fi
+  "$PY" scripts/preflight.py meta --out "$meta_out" --experiment "$(exp_name "$1")" \
     $SMOKE_FLAG --args-json "{\"script\": \"$1\", \"flags\": \"$2\"}"
 }
 
@@ -174,7 +186,7 @@ run_step() {
         "$PY" scripts/step19_objective_alignment.py $S19_FLAGS --output-dir "$d"
         write_meta "$step" "$S19_FLAGS";;
       step20)
-        PYTHONPATH=scripts "$PY" scripts/step20_round2.py $S20_FLAGS --output-dir "$d"
+        PYTHONPATH=scripts "$PY" scripts/step20_round2.py $S20_FLAGS $([[ $RESUME -eq 1 ]] && echo --resume) --output-dir "$d"
         "$PY" scripts/round2_analysis.py "$d"
         write_meta "$step" "$S20_FLAGS";;
     esac
