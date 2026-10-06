@@ -164,7 +164,26 @@ def key_numbers_v11(run_dir: Path) -> tuple[str, str]:
     return "<br>".join(lines), verdict
 
 
+def key_numbers_round2(run_dir: Path) -> tuple[str, str]:
+    """Per-task method table and the verdicts that scripts/round2_analysis.py wrote (rules applied there)."""
+    v = _load(run_dir / "round2_verdicts.json")
+    lines = []
+    for task, t in v["tables"].items():
+        m, un = t["metric"], t["unpruned"]
+        parts = [f"{n} {_f(e[m])} (loss {_f(e['loss'])}, AUROC {_f(e['auroc'])})" for n, e in t["methods"].items()]
+        rq = t.get("random_quantiles", {}).get(m)
+        rand = f"; Random median {_f(rq['q50'])} [2.5% {_f(rq['q2.5'])}, 97.5% {_f(rq['q97.5'])}]" if rq else ""
+        lines.append(
+            f"{task} (eval n={t['evaluation_size']}, seeds {','.join(str(s) for s in t['seeds'])}): unpruned {m} "
+            f"{_f(un[m])}, loss {_f(un['loss'])}, AUROC {_f(un['auroc'])}. Mean over seeds, {m}: " + "; ".join(parts) + rand
+        )
+    verdict = "ROUND 2 RULES APPLIED by scripts/round2_analysis.py (complete_protocol=%s): %s" % (
+        v["complete_protocol"], json.dumps(v["verdicts"], sort_keys=True))
+    return "<br>".join(lines), verdict
+
+
 EXPERIMENTS = {
+    "round2_h1_h2_h6": ("step20_round2.py", "Round 2 (H1/H2/H6)"),
     "v10_confirmatory": ("step18_v10_confirmatory.py", "V10 confirmatory"),
     "v6_budget_response": ("step14_budget_response.py", "V6 budget response"),
     "v5_mrpc_stability": ("step13_mrpc_stability.py", "V5 MRPC stability"),
@@ -190,6 +209,8 @@ def row_for(run_dir: str | Path, allow_smoke: bool = False) -> tuple[str, list[s
         numbers = key_numbers_v6(run_dir)
     elif experiment == "v5_mrpc_stability":
         numbers = key_numbers_v5(run_dir)
+    elif experiment == "round2_h1_h2_h6":
+        numbers, verdict = key_numbers_round2(run_dir)
     else:
         numbers, verdict = key_numbers_v11(run_dir)
     env = meta["versions"]

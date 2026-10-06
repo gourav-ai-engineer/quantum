@@ -193,7 +193,11 @@ accuracy 0.7256, MCC 0.4581; QNLI n=5463 accuracy 0.9154, MCC 0.8310; CoLA n=104
 aligned with GLUE for all three. CoLA metric: MCC (margins below are 0.015 MCC for CoLA, 1.5 pp for the rest).
 No checkpoint was missing, nothing was substituted.
 
-**Protocol.** 5 calibration seeds; k = 6 per layer for uniform-k methods and the matched total of 72 heads for
+**Protocol.** 5 calibration seeds, fixed here before any Round 2 run: 7, 42, 77, 123, 2024 **[proposed: the
+owner's text said 5 seeds without listing them; the first three are the earlier seeds]**, calibration size 128
+drawn from TRAIN (`train.shuffle(seed).select(128)`), max length 128; Random masks use seeds 2027 + 6000 + i for
+i = 0..99. Implemented by `scripts/step20_round2.py` and `scripts/round2_analysis.py` (`run_gpu.sh --only
+step20`); k = 6 per layer for uniform-k methods and the matched total of 72 heads for
 global methods; full validation split; Random: >= 100 masks reported as quantiles (2.5, 25, 50, 75, 97.5%),
 masks independent of the calibration seed, so one Random distribution per task; report accuracy (MCC for
 CoLA), loss and AUROC. Per-example predictions, labels, losses and scores are saved so every test can be

@@ -88,6 +88,84 @@ def heads_kept_per_layer(selection: Mapping[int, Sequence[int]]) -> list[int]:
     return [len(selection[layer]) for layer in sorted(selection)]
 
 
+def delimiter_mass_from_attention(
+    attention: torch.Tensor,
+    attention_mask: torch.Tensor,
+    delimiter_mask: torch.Tensor,
+) -> torch.Tensor:
+    """Per-example, per-head attention mass on delimiter keys ([CLS]/[SEP]).
+
+    ``attention`` is [B, H, T, T] (query, key); ``attention_mask`` and
+    ``delimiter_mask`` are [B, T] with 1 for real / delimiter tokens. For each
+    example and head: the mean over REAL query positions of the attention that
+    query puts on delimiter keys. Padding queries are excluded from the mean and
+    padding keys never count as delimiters. Returns [B, H].
+    """
+    delimiter = (delimiter_mask * attention_mask).to(attention.dtype)
+    queries = attention_mask.to(attention.dtype)
+    mass = (attention * delimiter[:, None, None, :]).sum(-1)  # [B, H, T]
+    per_head = (mass * queries[:, None, :]).sum(-1) / queries.sum(-1).clamp_min(1.0)[:, None]
+    return per_head
+
+
+def michel_global_selection(
+    michel: torch.Tensor,
+    total: int,
+    min_per_layer: int = 0,
+) -> Selection:
+    """Global Michel-style pruning: L2-normalise scores per layer, rank all heads, keep ``total``.
+
+    ``michel`` is [L, H] gate-sensitivity scores. Layers may end with fewer than
+    k heads, or none, unless ``min_per_layer`` forces a floor (the floor heads are the
+    layer's best by normalised score; the rest of the budget is filled globally).
+    Ties break by (layer, head) index, so the result is deterministic.
+    """
+    layers, heads = michel.shape
+    if not 0 <= min_per_layer * layers <= total <= layers * heads:
+        raise ValueError(f"cannot keep {total} heads with floor {min_per_layer} in {layers}x{heads}")
+    score = michel.detach().double().cpu()
+    norm = score.norm(dim=1, keepdim=True)
+    score = torch.where(norm > 0, score / norm.clamp_min(1e-30), score)
+    flat = [(float(score[l, h]), l, h) for l in range(layers) for h in range(heads)]
+    flat.sort(key=lambda t: (-t[0], t[1], t[2]))
+    chosen: set[tuple[int, int]] = set()
+    if min_per_layer:
+        for layer in range(layers):
+            for _, l, h in [t for t in flat if t[1] == layer][:min_per_layer]:
+                chosen.add((l, h))
+    for _, l, h in flat:
+        if len(chosen) >= total:
+            break
+        chosen.add((l, h))
+    selection: Selection = {layer: [] for layer in range(layers)}
+    for l, h in sorted(chosen):
+        selection[l].append(h)
+    return selection
+
+
+def validate_global_selection(
+    selection: Mapping[int, Sequence[int]],
+    layers: int,
+    heads: int,
+    total: int,
+    min_per_layer: int = 0,
+    name: str = "selection",
+) -> None:
+    """Raise unless the selection keeps exactly ``total`` distinct heads (per-layer counts may vary)."""
+    if sorted(selection) != list(range(layers)):
+        raise ValueError(f"{name}: expected layers 0..{layers - 1}, got {sorted(selection)}")
+    count = 0
+    for layer, kept in selection.items():
+        kept = list(kept)
+        if len(set(kept)) != len(kept) or any(h < 0 or h >= heads for h in kept):
+            raise ValueError(f"{name}: layer {layer} has duplicate or out-of-range heads")
+        if len(kept) < min_per_layer:
+            raise ValueError(f"{name}: layer {layer} keeps {len(kept)} < floor {min_per_layer}")
+        count += len(kept)
+    if count != total:
+        raise ValueError(f"{name}: keeps {count} heads in total, expected {total}")
+
+
 def summarize(values: Sequence[float]) -> dict[str, float]:
     """mean / population std (as elsewhere in this repo) / min / max."""
     values = [float(v) for v in values]
