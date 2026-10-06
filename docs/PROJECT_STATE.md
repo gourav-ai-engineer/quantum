@@ -137,7 +137,16 @@ C. Never: resurrect QIS claims, hide negative results, or tune until QFC wins.
       (The runner and notebook have only been smoke-tested on CPU, never on a GPU.)
 - [x] V10 DONE 2026-10-05 (Colab T4, commit 972bf8baba28; ledger row + V13 verdict INCONCLUSIVE above). Follow-ups:
       (a) VNE keep-high selection is identical across seeds on MRPC (Jaccard 1.0) but varies on SST-2 (0.92):
-      check why before citing VNE; (b) Random's per-seed numbers are identical by construction (masks
+      DIAGNOSED 2026-10-06 (scripts/diag_vne_seed_stability.py, CPU, results/diag_vne/vne_seed_stability.json,
+      3 seeds, 128 calibration examples, k=6; engineering diagnostic, no selector changed). Reproduced both
+      numbers. Cause: boundary gaps. Median score gap between the 6th and 7th ranked head is 0.235 on MRPC
+      (min 0.042) vs 0.047 on SST-2 (min 0.004), and SST-2 has near-ties (gap/spread 0.003-0.004 in layers 2
+      and 5) that flip with the calibration draw. Not a bug. But VNE is only partly content-driven: real vs
+      word-shuffled text keeps Jaccard 0.80-0.82 on MRPC (0.66-0.76 on SST-2), real vs other-task text
+      0.62-0.67 (MRPC) and 0.76-0.80 (SST-2); per-layer rank correlation between real and other-task text is
+      >= 0.93 in MRPC layers 0-2 but 0.58..-0.32 in layers 3, 4, 8, 9, 10. So early layers are ranked mostly
+      by length/layout and later layers by content: H2/H3 (delimiter heuristic, generic-text calibration) are
+      the right tests, and VNE must not be described as a content measure until they are run; (b) Random's per-seed numbers are identical by construction (masks
       independent of calibration seed): report its mask distribution, not a seed std; (c) V13 is
       inconclusive, so run V6 (budgets 3,6,9) next to see whether the MRPC gain depends on k;
       (d) commit the V5/V10 result JSONs from Drive.
