@@ -175,7 +175,7 @@ Any claim about recovery or reconstruction must include Kwon et al. as a baselin
 Do-not-claim list: a method win; quantum advantage; that diversity helps (V13 inconclusive); that the
 submodularity theorem is novel. Venue and call-for-papers details are unverified: check with the supervisor.
 
-## Pre-registration "Round 2" (written 2026-10-06, BEFORE any Round 2 data; THRESHOLDS AWAIT OWNER CONFIRMATION)
+## Pre-registration "Round 2" (written 2026-10-06, BEFORE any Round 2 data; thresholds CONFIRMED by the owner 2026-10-06 with one edit: H2 uses DelimiterMass keep-low only)
 Round 2 is the first, concrete stage of H1, H2 and H6 above. Where its numbers differ from the H1-H8 table
 (5 calibration seeds here vs 10 there; 3 confirmatory tasks vs 4), Round 2 governs Round 2; the H1-H8 table
 remains the longer-run plan. The critiques behind it are in docs/REVIEW_2026-10.md. Items marked
