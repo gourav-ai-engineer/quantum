@@ -175,7 +175,7 @@ Any claim about recovery or reconstruction must include Kwon et al. as a baselin
 Do-not-claim list: a method win; quantum advantage; that diversity helps (V13 inconclusive); that the
 submodularity theorem is novel. Venue and call-for-papers details are unverified: check with the supervisor.
 
-## Pre-registration "Round 2" (written 2026-10-06, BEFORE any Round 2 data; THRESHOLDS AWAIT OWNER CONFIRMATION)
+## Pre-registration "Round 2" (written 2026-10-06, BEFORE any Round 2 data; thresholds CONFIRMED by the owner 2026-10-06 with one edit: H2 uses DelimiterMass keep-low only)
 Round 2 is the first, concrete stage of H1, H2 and H6 above. Where its numbers differ from the H1-H8 table
 (5 calibration seeds here vs 10 there; 3 confirmatory tasks vs 4), Round 2 governs Round 2; the H1-H8 table
 remains the longer-run plan. The critiques behind it are in docs/REVIEW_2026-10.md. Items marked
@@ -193,7 +193,11 @@ accuracy 0.7256, MCC 0.4581; QNLI n=5463 accuracy 0.9154, MCC 0.8310; CoLA n=104
 aligned with GLUE for all three. CoLA metric: MCC (margins below are 0.015 MCC for CoLA, 1.5 pp for the rest).
 No checkpoint was missing, nothing was substituted.
 
-**Protocol.** 5 calibration seeds; k = 6 per layer for uniform-k methods and the matched total of 72 heads for
+**Protocol.** 5 calibration seeds, fixed here before any Round 2 run: 7, 42, 77, 123, 2024 **[proposed: the
+owner's text said 5 seeds without listing them; the first three are the earlier seeds]**, calibration size 128
+drawn from TRAIN (`train.shuffle(seed).select(128)`), max length 128; Random masks use seeds 2027 + 6000 + i for
+i = 0..99. Implemented by `scripts/step20_round2.py` and `scripts/round2_analysis.py` (`run_gpu.sh --only
+step20`); k = 6 per layer for uniform-k methods and the matched total of 72 heads for
 global methods; full validation split; Random: >= 100 masks reported as quantiles (2.5, 25, 50, 75, 97.5%),
 masks independent of the calibration seed, so one Random distribution per task; report accuracy (MCC for
 CoLA), loss and AUROC. Per-example predictions, labels, losses and scores are saved so every test can be
@@ -211,12 +215,13 @@ Holm-adjusted p-value agree **[proposed]**.
 and at most one failure occurs across all 5 tasks; otherwise **not supported**.
 
 **H2 (VNE vs delimiter heuristic).** New baseline `DelimiterMass`: per head, the mean attention mass placed on
-[CLS] and [SEP] tokens (padding excluded), evaluated keep-low and keep-high. VNE is **informative** if, on >= 2
-confirmatory tasks, the lower 95% CI bound of VNE_keep_high minus DelimiterMass is > 0 for BOTH directions
-**[proposed: beating both directions is equivalent to beating the better one and needs no choice on eval
-data]**. If the better DelimiterMass direction is within 1.5 pp of VNE_keep_high (or better) on all 5 tasks
-**[proposed operationalisation of "within 1.5 pp"]**, record "VNE adds nothing beyond the heuristic".
-Otherwise: inconclusive.
+[CLS] and [SEP] tokens (padding excluded). Direction pre-registered as **keep-low ONLY** (owner edit
+2026-10-06: high delimiter mass = positional head = prune first); keep-high is NOT tested as a competitor.
+Statistic: VNE_keep_high minus DelimiterMass_keep_low. VNE is **informative** if, on >= 2 confirmatory tasks,
+the 95% CI lower bound of that difference is > 0 (and Holm agrees). If DelimiterMass_keep_low is within 1.5 pp
+of VNE_keep_high or better on all 5 tasks (mean difference VNE - DelimiterMass <= 1.5 pp), record "VNE adds
+nothing beyond the heuristic". If DelimiterMass_keep_low beats VNE (95% CI of the difference entirely below 0)
+on a task, record that explicitly. Otherwise: inconclusive.
 
 **H6 (global vs uniform Michel).** `MichelGlobal`: Michel scores L2-normalised per layer, ranked over all 144
 heads, top 72 kept; record per-layer counts, empty layers allowed. Also report `MichelGlobal_min1` (>= 1 head

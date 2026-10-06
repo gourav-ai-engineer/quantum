@@ -145,3 +145,25 @@ def test_missing_meta_is_an_error_and_dirty_warns(tmp_path):
     row, warnings = ledger.row_for(tmp_path)
     assert warnings and "dirty" in warnings[0]
     assert "(dirty)" in row
+
+
+def test_round2_row_reads_numbers_and_verdicts_from_json(tmp_path):
+    _write(tmp_path, "run_meta.json", _meta("round2_h1_h2_h6"))
+    _write(tmp_path, "round2_verdicts.json", {
+        "complete_protocol": True,
+        "verdicts": {"H1": {"verdict": "supported"}},
+        "tables": {"cola": {
+            "metric": "mcc", "seeds": [7, 42], "evaluation_size": 10,
+            "unpruned": {"mcc": 0.5, "loss": 0.4, "auroc": 0.9},
+            "methods": {"MichelGate": {"mcc": 0.3, "loss": 0.6, "auroc": 0.8}},
+            "random_quantiles": {"mcc": {"q2.5": 0.0, "q50": 0.1, "q97.5": 0.2}},
+        }},
+    })
+    row, warnings = ledger.row_for(tmp_path)
+    assert warnings == []
+    assert row.startswith("| Round 2 (H1/H2/H6) | step20_round2.py |")
+    assert "unpruned mcc 0.5000, loss 0.4000, AUROC 0.9000" in row
+    assert "MichelGate 0.3000 (loss 0.6000, AUROC 0.8000)" in row
+    assert "Random median 0.1000 [2.5% 0.0000, 97.5% 0.2000]" in row
+    assert '"verdict": "supported"' in row and "complete_protocol=True" in row
+    assert "\n" not in row
