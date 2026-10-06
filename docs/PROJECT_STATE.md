@@ -118,6 +118,63 @@ and the V6 budget response. Branch A (method paper) is closed unless a new pre-r
 Remaining before submission: HIES baseline, RoBERTa-base + one more GLUE task, physical-pruning cost table,
 commit result JSONs, independent review (rule 11). Each new experiment needs its hypothesis written here first.
 
+## Pre-registered hypotheses H1-H8 (written 2026-10-06, BEFORE any run of them)
+Source: an external review (QFC_Project_Review.pdf, supplied by the owner 2026-10-06) read against our own
+ledger. Everything below is a plan; no number here is a result.
+
+Checks of the review against our data (so the plan does not rest on its word alone):
+- VNE keep-high vs MichelGate, MRPC: V5 mean 0.8064 vs 0.8015 (k=6); V6 single seed k=9 0.8652 vs 0.8529.
+  Consistent with the review. The review omits SST-2, where VNE is LOWER: V10 mean 0.8964 vs 0.9090 (about
+  -1.3 pp). H1 therefore must be tested on all tasks, not only MRPC.
+- V13's rule ("CI > 0 in 2 of 3 seeds") treats seeds as evidence although they share the same evaluation
+  examples. The verdict stays "inconclusive" (it was never a support claim); that rule is NOT reused. H7 uses a
+  cluster bootstrap (resample seeds AND examples).
+- Uniform k per layer is not the published Michel procedure (global ranking with per-layer normalisation);
+  H6 tests whether this matters. Until then, uniform-k Michel results must be labelled "uniform-k Michel".
+- Accuracy alone cannot separate ranking quality from class collapse (MRPC 0.3162 is the minority-class
+  rate): report AUROC alongside accuracy in every new experiment.
+- Verified 2026-10-06: Kwon et al., "A Fast Post-Training Pruning Framework for Transformers", NeurIPS 2022
+  (arXiv 2204.09656) exists (Fisher mask search + mask rearrangement + layer-wise reconstruction). In
+  transformers 5.x, head_mask is ignored for every attention implementation other than "eager" (release
+  notes via search; our pin + scripts/preflight.py already guard this). Cite primary sources only after reading them.
+- Corrections to our own claims: fixing our baseline bugs is a reproducibility note, NOT a contribution;
+  "Claude reviews Claude" is NOT the independent review of rule 11 (a human, ideally the supervisor, must read the
+  key code); the submodularity result is textbook facility location and is stated as a remark, not a contribution.
+
+Design rules for H1-H8: SST-2 and MRPC are now DEVELOPMENT tasks (already seen). Confirmation uses new tasks
+(RTE, CoLA, QNLI) and RoBERTa-base; each new checkpoint needs a pinned revision and, where no suitable
+fine-tuned checkpoint exists, our own fine-tuning recipe with 3 fine-tuning seeds. 10 calibration seeds;
+Random >= 100 masks reported as quantiles; k = 3, 6, 9; cluster bootstrap over seed x example; Holm correction
+across the confirmatory tests; AUROC next to accuracy. Non-inferiority margin: 1.5 pp.
+
+| # | Hypothesis | Falsified if |
+|---|---|---|
+| H1 | VNE keep-high is non-inferior to uniform-k Michel: lower bound of the paired 95% CI of (VNE - Michel) > -1.5 pp | it fails on more than 1 of 4 confirmation tasks |
+| H2 | VNE adds information beyond a "delimiter attention mass" heuristic (rank heads by attention mass on [CLS]/[SEP]) | the heuristic matches VNE within 1.5 pp |
+| H3 | VNE calibrated on unlabelled generic text matches task-text calibration | accuracy differs by > 1 pp or selection Jaccard < 0.8 |
+| H4 | Coverage on head OUTPUT vectors (after the value/output projections) aligns with local loss under the V11 rule | < 8/12 layers on either task, or no better than attention-space coverage |
+| H5 | Method rankings survive 1-epoch recovery fine-tuning (rank Spearman >= 0.7) | rankings flip: differences are collapse artefacts |
+| H6 | Global layer-normalised Michel >= uniform-k Michel at the same total number of heads | uniform is better or equal: uniform is a fair comparison |
+| H7 | IWQFC beats Michel: cluster-bootstrap CI above 0, pooled over 10 seeds, on >= 3 of 4 tasks | otherwise diversity adds nothing |
+| H8 | EXPLORATORY: head uniqueness (1 - mean fidelity to other heads) predicts single-head ablation loss | cheap to test on existing machinery; exploratory because the MRPC sign was seen |
+
+Order: H1, H2, H6 first (cheapest, most informative), then H3, then H4/H5/H7 on the confirmation tasks, H8
+last. H2 and H6 need two new baselines (delimiter-mass; global-normalised Michel). They are baselines
+implemented per their definitions (rule 12), not QFC variants; each still needs unit tests and its own PR.
+H4 needs an output-space state definition; its math definition and tests must be written and committed before
+H4 is run (rule 7).
+
+Exploratory backlog (NOT registered; nothing here may be implemented until its own hypothesis, math
+definition, unit tests and baselines are written here, rule 7). Source: an LLM-written ideas list pasted by the
+owner 2026-10-06, treat as unverified: (1) output-space conditional entropy selection (overlaps H4);
+(2) head selection as a QUBO with interaction terms (on a classical GPU, quantum annealing would add a label,
+not accuracy; 144 heads is easy classically); (3) head merging via entanglement-spectrum truncation;
+(4) fidelity-based post-pruning reconstruction objective; (5) VNE as a label-free importance prior (= H1-H3).
+Any claim about recovery or reconstruction must include Kwon et al. as a baseline.
+
+Do-not-claim list: a method win; quantum advantage; that diversity helps (V13 inconclusive); that the
+submodularity theorem is novel. Venue and call-for-papers details are unverified: check with the supervisor.
+
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
    bootstrap on the full validation set, Random as a distribution): write a method paper; add
@@ -151,6 +208,9 @@ C. Never: resurrect QIS claims, hide negative results, or tune until QFC wins.
 - [ ] V13 (hypothesis above): after V10/V6, compute paired IWQFC-vs-MichelGate deltas and apply the
       written rule. (step18 now persists per-example correctness; `run_gpu.sh` runs
       `scripts/v13_paired_test.py` after step18, so the verdict lands in `v13_paired.json`.)
+- [ ] H1/H2/H6 (see "Pre-registered hypotheses H1-H8"): implement the delimiter-mass and global-normalised
+      Michel baselines with tests (one PR each), pin checkpoints for RTE/CoLA/QNLI (+ RoBERTa), add AUROC
+      and a cluster-bootstrap script, then run H1/H2/H6 on GPU. Human (supervisor) code review before any paper claim.
 - [ ] Commit the V5 result JSONs (small) under `results/v5_mrpc_stability/f665db1e30a1/` from the Drive copy,
       so the ledger path is in the repo.
 - [ ] Commit the V11 decision rule (this file; done once the docs PR is merged), then run step19 on
