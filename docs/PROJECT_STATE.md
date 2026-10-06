@@ -211,12 +211,13 @@ Holm-adjusted p-value agree **[proposed]**.
 and at most one failure occurs across all 5 tasks; otherwise **not supported**.
 
 **H2 (VNE vs delimiter heuristic).** New baseline `DelimiterMass`: per head, the mean attention mass placed on
-[CLS] and [SEP] tokens (padding excluded), evaluated keep-low and keep-high. VNE is **informative** if, on >= 2
-confirmatory tasks, the lower 95% CI bound of VNE_keep_high minus DelimiterMass is > 0 for BOTH directions
-**[proposed: beating both directions is equivalent to beating the better one and needs no choice on eval
-data]**. If the better DelimiterMass direction is within 1.5 pp of VNE_keep_high (or better) on all 5 tasks
-**[proposed operationalisation of "within 1.5 pp"]**, record "VNE adds nothing beyond the heuristic".
-Otherwise: inconclusive.
+[CLS] and [SEP] tokens (padding excluded). Direction pre-registered as **keep-low ONLY** (owner edit
+2026-10-06: high delimiter mass = positional head = prune first); keep-high is NOT tested as a competitor.
+Statistic: VNE_keep_high minus DelimiterMass_keep_low. VNE is **informative** if, on >= 2 confirmatory tasks,
+the 95% CI lower bound of that difference is > 0 (and Holm agrees). If DelimiterMass_keep_low is within 1.5 pp
+of VNE_keep_high or better on all 5 tasks (mean difference VNE - DelimiterMass <= 1.5 pp), record "VNE adds
+nothing beyond the heuristic". If DelimiterMass_keep_low beats VNE (95% CI of the difference entirely below 0)
+on a task, record that explicitly. Otherwise: inconclusive.
 
 **H6 (global vs uniform Michel).** `MichelGlobal`: Michel scores L2-normalised per layer, ranked over all 144
 heads, top 72 kept; record per-layer counts, empty layers allowed. Also report `MichelGlobal_min1` (>= 1 head
