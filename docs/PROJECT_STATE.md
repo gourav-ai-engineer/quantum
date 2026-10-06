@@ -175,6 +175,60 @@ Any claim about recovery or reconstruction must include Kwon et al. as a baselin
 Do-not-claim list: a method win; quantum advantage; that diversity helps (V13 inconclusive); that the
 submodularity theorem is novel. Venue and call-for-papers details are unverified: check with the supervisor.
 
+## Pre-registration "Round 2" (written 2026-10-06, BEFORE any Round 2 data; THRESHOLDS AWAIT OWNER CONFIRMATION)
+Round 2 is the first, concrete stage of H1, H2 and H6 above. Where its numbers differ from the H1-H8 table
+(5 calibration seeds here vs 10 there; 3 confirmatory tasks vs 4), Round 2 governs Round 2; the H1-H8 table
+remains the longer-run plan. The critiques behind it are in docs/REVIEW_2026-10.md. Items marked
+**[proposed]** were filled in by the assistant where the owner's text was silent; the owner must confirm or
+edit them (dated) before Phase 2 code is written. Nothing below is a result.
+
+**Data.** Confirmatory (not seen before): RTE, QNLI, CoLA. Replication (seen): SST-2, MRPC. Checkpoints,
+all `textattack/bert-base-uncased-<TASK>` (existence and revision checked via the Hugging Face API 2026-10-06):
+RTE `44f1d994cbd4a349cb7867681940bdb1f0472f53`; QNLI `a63ef5bad18761ededbc04fb8e0f0a2729b1508d`; CoLA
+`5fed03dd6bc5f0b40e86cb04cd1a16eb404ba391`; SST-2 and MRPC keep their existing pins (scripts/SPECS /
+step18). Label alignment was checked with `scripts/check_checkpoints.py` on the full unpruned validation
+splits (CPU, `results/diag_checkpoints/check.json`; engineering check, not a hypothesis test): RTE n=277
+accuracy 0.7256, MCC 0.4581; QNLI n=5463 accuracy 0.9154, MCC 0.8310; CoLA n=1043 accuracy 0.8121, MCC
+0.5339. Swapping the two labels would give accuracy 1-acc and MCC of opposite sign, so the label order is
+aligned with GLUE for all three. CoLA metric: MCC (margins below are 0.015 MCC for CoLA, 1.5 pp for the rest).
+No checkpoint was missing, nothing was substituted.
+
+**Protocol.** 5 calibration seeds; k = 6 per layer for uniform-k methods and the matched total of 72 heads for
+global methods; full validation split; Random: >= 100 masks reported as quantiles (2.5, 25, 50, 75, 97.5%),
+masks independent of the calibration seed, so one Random distribution per task; report accuracy (MCC for
+CoLA), loss and AUROC. Per-example predictions, labels, losses and scores are saved so every test can be
+recomputed from files.
+
+**Statistics.** Paired cluster bootstrap over (calibration seed x example), 10000 resamples, 95% CI
+**[proposed detail]**: each resample draws 5 seeds with replacement and, independently, n examples with
+replacement, and recomputes the metric difference on the resampled seed x example grid (CoLA: delta MCC on
+the resampled predictions). One-sided bootstrap p-value for each hypothesis's null; Holm correction across the 5
+tasks within each hypothesis (alpha = 0.05). A task "passes" a test only if BOTH the 95% CI bound and the
+Holm-adjusted p-value agree **[proposed]**.
+
+**H1 (VNE non-inferiority).** Statistic: VNE_keep_high minus MichelGate (uniform-k Michel). A task passes if the
+95% CI lower bound > -1.5 pp and Holm rejects "delta <= -1.5 pp". **Supported** if all 3 confirmatory tasks pass
+and at most one failure occurs across all 5 tasks; otherwise **not supported**.
+
+**H2 (VNE vs delimiter heuristic).** New baseline `DelimiterMass`: per head, the mean attention mass placed on
+[CLS] and [SEP] tokens (padding excluded), evaluated keep-low and keep-high. VNE is **informative** if, on >= 2
+confirmatory tasks, the lower 95% CI bound of VNE_keep_high minus DelimiterMass is > 0 for BOTH directions
+**[proposed: beating both directions is equivalent to beating the better one and needs no choice on eval
+data]**. If the better DelimiterMass direction is within 1.5 pp of VNE_keep_high (or better) on all 5 tasks
+**[proposed operationalisation of "within 1.5 pp"]**, record "VNE adds nothing beyond the heuristic".
+Otherwise: inconclusive.
+
+**H6 (global vs uniform Michel).** `MichelGlobal`: Michel scores L2-normalised per layer, ranked over all 144
+heads, top 72 kept; record per-layer counts, empty layers allowed. Also report `MichelGlobal_min1` (>= 1 head
+per layer). Report MichelGlobal minus MichelGate per task. **[proposed]** "Global is better" if Holm rejects
+"delta <= 0" on >= 3 of 5 tasks and no task shows a Holm-significant negative; "not better" otherwise. If
+global is better, every later comparison (H1, H2, H7, ...) must be re-run against the stronger Michel.
+
+**Future hypotheses (NOT implemented this round; each needs its own written hypothesis, math definition, unit
+tests and baselines first, rule 7):** H4 output-space coverage (density operators built from head outputs,
+judged with the V11 rule); QUBO head selection with pairwise interaction terms solved by simulated annealing;
+fidelity-based reconstruction vs MSE reconstruction; MPO / entanglement-spectrum head merging.
+
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
    bootstrap on the full validation set, Random as a distribution): write a method paper; add
