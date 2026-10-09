@@ -243,6 +243,93 @@ tests and baselines first, rule 7):** H4 output-space coverage (density operator
 judged with the V11 rule); QUBO head selection with pairwise interaction terms solved by simulated annealing;
 fidelity-based reconstruction vs MSE reconstruction; MPO / entanglement-spectrum head merging.
 
+## Pre-registration V14 / H9: output-space coverage with compensation (BCM) (written 2026-10-09, BEFORE any V14 code or data)
+Source: two external research reports supplied by the owner on 2026-10-09 ("QFC journal novelty and gaps",
+"QFC new performance techniques"; not in the repo). Owner goal: a top-tier journal paper with measured accuracy
+and speed gains. This section turns their recommendations into falsifiable tests. Everything below is a plan.
+
+**Claims of the reports checked numerically before writing this (2026-10-09, scratch script, synthetic matrices,
+float64; engineering check, not a result):** (1) for rho_X = XX^T/||X||_F^2, sqrt F(rho_X, rho_Y) =
+||X^T Y||_* / (||X||_F ||Y||_F) (matched the eigen-sqrt formula to 1e-8); (2) min over scale s and orthogonal U of
+||X - s Y U||_F = ||X||_F sqrt(1 - F) (exact); (3) on a 6-head toy layer the merge bound held (merge error 223 <=
+bound 531), merge beat deletion (344), and a least-squares refit of the kept output projections beat the merge by
+far (42); (4) attention-Gram fidelity gives F = 1 for previous- vs next-token, self vs previous-token, [SEP]- vs
+[CLS]-sink and [SEP]-sink vs uniform heads, while pure-state fidelity gives 0 for the first and third; (5) sqrt F
+of input-averaged states (0.679) exceeds the mean per-input sqrt F (0.539), so averaging inflates similarity.
+**Corrections to the reports:** the greedy guarantee is additive on the bound (below), not "(1-1/e) on the
+bound"; the facility-location similarity implied by the bound is 1 - sqrt(1 - F), not sqrt F; and because the LS
+refit dominates the merge, an exact greedy layer-wise least-squares selector (cheap at 12 heads per layer) is a
+mandatory baseline that may beat coverage.
+
+**Definitions.** Per layer, head h in {1..12}: Z_h in R^{N x 64} = context vectors (A_h V_h) of all non-pad
+calibration tokens stacked (direct sum over inputs); W_O^h in R^{64 x 768} = rows of the attention output
+projection for head h (torch: dense.weight[:, 64h:64h+64]^T). Unpruned attention output (bias excluded)
+Y = sum_h Z_h W_O^h. All quantities below are functions of the per-layer Gram G = Z^T Z (768 x 768), accumulated
+in one forward pass. F_ij = (||Z_i^T Z_j||_* / (||Z_i||_F ||Z_j||_F))^2; d_ij = sqrt(1 - F_ij) in [0, 1];
+w_j = ||W_O^j||_2 ||Z_j||_F. For a kept set S and pruned set P: assignment pi(j) = argmax_{i in S} F_ji;
+**merge** = scaled-orthogonal Procrustes R_j = s_j U_j of Z_j onto Z_{pi(j)}, W_O^{pi(j)} += R_j W_O^j, head j masked;
+**LS refit** = W_S = argmin ||Y - Z_S W||_F^2 + lambda ||W||_F^2 over all kept heads' rows jointly.
+
+**Theorem (to be checked line by line by the supervisor, rule 11).** ||Y - Y_merge(S)||_F <= B(S) :=
+sum_j w_j min_{i in S} d_ji (triangle inequality, ||AB||_F <= ||A||_F ||B||_2, and claim (2)); and
+||Y - Y_LS(S)||_F <= ||Y - Y_merge(S)||_F at lambda = 0 (the merge is a feasible point). B(S) = sum_j w_j - f(S) with
+f(S) = sum_j w_j max_{i in S} (1 - d_ji), a monotone submodular facility-location function, so greedy gives
+f(S_g) >= (1 - 1/e) f(S*) and hence B(S_g) <= B(S*) + f(S*)/e. The bound is single-layer with fixed layer input;
+errors compound across layers, so it says nothing about task accuracy by itself.
+
+**Arms (all keep exactly k heads per layer, rule 1).** Selectors: BCM (greedy on f), Fisher/Michel top-k (existing
+`michel_head_importance`), magnitude w_j top-k, Greedy-LS (forward selection on the exact layer residual
+||Y - Y_LS(S)||, from G), attention-Gram QFC (current method), Random (>= 100 masks). Compensation: none, merge,
+LS refit (one-shot, unpruned inputs), sequential LS refit (layer by layer, teacher = unpruned layer output, inputs
+from the already-pruned model; Kwon-style). Budgets k in {3, 6, 9} per layer; k = 6 primary. Fixed before data:
+calibration 512 training sentences per seed, max length 128; ridge lambda = 1e-4 x mean(diag(G_SS)).
+
+**Diagnostics (calibration only, deterministic; may run on CPU as engineering diagnostics like the V10 follow-up
+(a), never as accuracy results).** D1: fraction of within-layer head pairs with attention-Gram F > 0.99 but output
+F < 0.5 (how often the blindness bites on the real checkpoints; if rare, record that it weakens the motivation).
+D2: per layer, Spearman between B(S) and the exact merge error and LS error over 200 random k-subsets
+(bound informativeness) and the slack ratio. D3: layer error of BCM vs Greedy-LS vs the exhaustive optimum over
+all C(12, k) subsets.
+
+**Hypotheses and decision rules (accuracy arms on GPU, full validation, 5 calibration seeds 7, 42, 77, 123, 2024,
+paired cluster bootstrap over seed x example, Holm across tasks, as in Round 2; metric accuracy, MCC for CoLA;
+tasks: SST-2, MRPC development; RTE, QNLI, CoLA confirmatory).**
+- **H9a (compensation helps; expected, a sanity gate).** For every selector at k = 6, sequential LS refit minus no
+  compensation > 0 (95% CI lower bound > 0) on >= 4 of 5 tasks. If this fails the implementation is suspect: stop
+  and debug before reading any other arm.
+- **H9b (primary: does coverage beat importance once both are compensated?).** BCM minus Fisher top-k, both with
+  sequential LS refit, k = 6. **Supported** if Holm-adjusted p < 0.05 and CI lower bound > 0 on >= 2 of 3
+  confirmatory tasks and no Holm-significant negative on any task. **Not supported** otherwise.
+- **H9c (does coverage beat exact greedy reconstruction?).** BCM minus Greedy-LS, both with sequential LS refit,
+  same test. Reported either way; if Greedy-LS wins, the method recommended in the paper is Greedy-LS and BCM is
+  reported as its tractable bound.
+- **H9d (does the coverage assignment matter for merging?).** With merge only (no LS refit): merge target pi(j)
+  vs a random kept head (10 draws), BCM selection, k = 6. Supported if CI lower bound > 0 on >= 3 of 5 tasks.
+
+**Gates.** Gate 1 = D1-D3 plus H9a-H9d at k = 6 on BERT-base. **If H9b is not supported, the method claim fails**
+and the paper is the analysis paper (when attention-pattern similarity fails as a redundancy proxy, and how much
+compensation, not selection, explains retraining-free pruning), target TMLR. If H9b is supported, Gate 2 adds FFN
+neuron coverage + refit under a FLOPs budget, physical pruning with measured FP16 latency (rule 8), RoBERTa-base,
+SQuAD, comparison with re-run Kwon et al. (2022) and published KCM / K-Prune numbers; TNNLS only if competitive
+there. Each Gate 2 component gets its own dated addition here before it is implemented.
+
+**Do not claim** (in addition to the list above): that the (1-1/e) guarantee applies multiplicatively to the bound;
+that the merge is the source of any gain without the H9d ablation; quantum advantage; speedup from masking.
+
+**Diagnostics run 1 (2026-10-09, CPU, engineering diagnostic, not an accuracy result).** Code 4bd649f;
+`results/v14_bcm_diag/4bd649f/` (`run_meta_diag.json` gives provenance); SST-2 and MRPC, seed 7, 512 calibration
+sentences, k = 6. Numbers aggregated over the 12 layers from the JSONs (MRPC / SST-2):
+D1: within-layer pairs with attention-Gram F > 0.99: 36 / 54 of 792; of those, output F < 0.5: 35 / 39; median
+per-layer Spearman(attention F, output F) 0.263 / 0.437. D2: median per-layer Spearman(B, merge error) 0.959 /
+0.929, Spearman(B, LS error) 0.932 / 0.903, median slack B / merge error 3.12 / 3.26. D3 (LS error / unpruned
+output norm, mean over layers): BCM 0.304 / 0.334, Fisher 0.402 / 0.359, magnitude 0.307 / 0.334, Greedy-LS
+0.297 / 0.321, attention-QFC 0.391 / 0.417, exhaustive optimum 0.296 / 0.320; deletion error for BCM 0.453 / 0.524,
+merge 0.377 / 0.431. **Reading (one seed, layer-level only):** the attention-Gram blindness occurs on about 5-7% of
+pairs and attention fidelity tracks output fidelity weakly; the bound ranks subsets well but is loose; BCM is close
+to the per-layer optimum and better than Fisher and attention-QFC at layer level, **but magnitude top-k ties BCM**,
+so at layer level the coverage term adds little beyond the importance weights. Layer error is not task accuracy;
+H9b-H9d are decided only by the GPU accuracy arms.
+
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
    bootstrap on the full validation set, Random as a distribution): write a method paper; add
