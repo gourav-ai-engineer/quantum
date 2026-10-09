@@ -316,6 +316,20 @@ there. Each Gate 2 component gets its own dated addition here before it is imple
 **Do not claim** (in addition to the list above): that the (1-1/e) guarantee applies multiplicatively to the bound;
 that the merge is the source of any gain without the H9d ablation; quantum advantage; speedup from masking.
 
+**Diagnostics run 1 (2026-10-09, CPU, engineering diagnostic, not an accuracy result).** Code 4bd649f;
+`results/v14_bcm_diag/4bd649f/` (`run_meta_diag.json` gives provenance); SST-2 and MRPC, seed 7, 512 calibration
+sentences, k = 6. Numbers aggregated over the 12 layers from the JSONs (MRPC / SST-2):
+D1: within-layer pairs with attention-Gram F > 0.99: 36 / 54 of 792; of those, output F < 0.5: 35 / 39; median
+per-layer Spearman(attention F, output F) 0.263 / 0.437. D2: median per-layer Spearman(B, merge error) 0.959 /
+0.929, Spearman(B, LS error) 0.932 / 0.903, median slack B / merge error 3.12 / 3.26. D3 (LS error / unpruned
+output norm, mean over layers): BCM 0.304 / 0.334, Fisher 0.402 / 0.359, magnitude 0.307 / 0.334, Greedy-LS
+0.297 / 0.321, attention-QFC 0.391 / 0.417, exhaustive optimum 0.296 / 0.320; deletion error for BCM 0.453 / 0.524,
+merge 0.377 / 0.431. **Reading (one seed, layer-level only):** the attention-Gram blindness occurs on about 5-7% of
+pairs and attention fidelity tracks output fidelity weakly; the bound ranks subsets well but is loose; BCM is close
+to the per-layer optimum and better than Fisher and attention-QFC at layer level, **but magnitude top-k ties BCM**,
+so at layer level the coverage term adds little beyond the importance weights. Layer error is not task accuracy;
+H9b-H9d are decided only by the GPU accuracy arms.
+
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
    bootstrap on the full validation set, Random as a distribution): write a method paper; add

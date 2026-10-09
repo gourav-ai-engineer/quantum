@@ -1,0 +1,15 @@
+{
+  "experiment": "v14_bcm_diag",
+  "kind": "engineering diagnostic (calibration only), not an accuracy result",
+  "code_commit": "4bd649f",
+  "provenance": "run started 2026-10-09 at HEAD 30eae31 with step21_bcm.py and src/qfc/output_coverage.py uncommitted; those files were committed unchanged as 4bd649f",
+  "command": "PYTHONPATH=scripts python scripts/step21_bcm.py --tasks sst2,mrpc --seeds 7 --calibration-size 512 --diagnostics-only",
+  "device": "cpu",
+  "versions": {
+    "torch": "2.6.0+cpu",
+    "transformers": "4.51.3",
+    "datasets": "3.6.0",
+    "pyarrow": "24.0.0"
+  },
+  "python": "3.12.10"
+}
