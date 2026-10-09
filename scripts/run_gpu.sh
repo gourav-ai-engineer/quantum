@@ -36,6 +36,8 @@
 #   step19  V11 objective alignment: 300 subsets per layer, >=256 evaluation examples
 #   step20  Round 2 (H1/H2/H6): sst2,mrpc,rte,qnli,cola, 5 calibration seeds, full validation, 100 random
 #           masks, k=6 (not in the default --only list: run it with --only step20)
+#   step21  V14 (H9) output-space coverage x compensation factorial, 5 tasks, 5 seeds, 512 calibration
+#           sentences, full validation, k=6 (run it with --only step21)
 set -euo pipefail
 
 usage() { sed -n '2,/^set -euo/p' "$0" | sed '$d'; exit "${1:-0}"; }
@@ -123,6 +125,7 @@ exp_name() {
     step13) echo v5_mrpc_stability;;
     step19) echo v11_objective_alignment;;
     step20) echo round2_h1_h2_h6;;
+    step21) echo v14_bcm;;
     *) echo "unknown step: $1" >&2; exit 2;;
   esac
 }
@@ -143,13 +146,16 @@ if [[ $SMOKE -eq 1 ]]; then
   S13_FLAGS="--calibration-size 16 --evaluation-size 32 --heads-to-keep 6 --seeds 7 --batch-size 8 --max-length 32 --bootstrap 20 --random-masks 2"
   S19_FLAGS="--calibration-size 16 --calibration-seed 42 --evaluation-size 32 --heads-to-keep 6 --random-subsets 4 --bootstrap 20 --batch-size 8 --max-length 32"
   S20_FLAGS="--tasks rte,cola --seeds 7 --calibration-size 16 --evaluation-size 32 --heads-to-keep 6 --random-masks 3 --batch-size 8 --max-length 32"
+  S21_FLAGS="--tasks mrpc --seeds 7 --calibration-size 16 --evaluation-size 32 --random-masks 2 --merge-random-targets 1 --batch-size 8 --max-length 64 --smoke"
 else
   S18_SEEDS="7 42 77"; S18_FLAGS="--calibration-size 128 --heads-to-keep 6 --batch-size 16 --max-length 128 --bootstrap 1000 --random-masks 30"
   S14_FLAGS="--calibration-size 256 --calibration-seed 42 --budgets 3,6,9 --batch-size 16 --max-length 128 --random-masks 30"
   S13_FLAGS="--calibration-size 128 --evaluation-size -1 --heads-to-keep 6 --seeds 7,42,77 --batch-size 16 --max-length 128 --bootstrap 1000 --random-masks 30"
   S19_FLAGS="--calibration-size 128 --calibration-seed 42 --evaluation-size $STEP19_EVAL --heads-to-keep 6 --random-subsets 300 --bootstrap 1000 --batch-size 16 --max-length 64"
   S20_FLAGS="--tasks sst2,mrpc,rte,qnli,cola --seeds 7,42,77,123,2024 --calibration-size 128 --evaluation-size -1 --heads-to-keep 6 --random-masks 100 --batch-size 16 --max-length 128"
+  S21_FLAGS="--tasks sst2,mrpc,rte,qnli,cola --seeds 7,42,77,123,2024 --calibration-size 512 --evaluation-size -1 --heads-to-keep 6 --random-masks 100 --merge-random-targets 10 --batch-size 16 --max-length 128"
 fi
+[[ $ALLOW_CPU -eq 1 ]] && S21_FLAGS="$S21_FLAGS --allow-cpu"
 
 [[ -n "$STEP20_TASKS" ]] && S20_FLAGS="${S20_FLAGS/--tasks sst2,mrpc,rte,qnli,cola/--tasks $STEP20_TASKS}"
 
@@ -189,6 +195,10 @@ run_step() {
         PYTHONPATH=scripts "$PY" scripts/step20_round2.py $S20_FLAGS $([[ $RESUME -eq 1 ]] && echo --resume) --output-dir "$d"
         "$PY" scripts/round2_analysis.py "$d"
         write_meta "$step" "$S20_FLAGS";;
+      step21)
+        PYTHONPATH=scripts "$PY" scripts/step21_bcm.py $S21_FLAGS --output-dir "$d"
+        "$PY" scripts/v14_analysis.py "$d"
+        write_meta "$step" "$S21_FLAGS";;
     esac
   } 2>&1 | tee "$d/log_${name}_${COMMIT_SHORT}_${DATE_UTC}.txt"
   # Results are committed to git: keep them small.
