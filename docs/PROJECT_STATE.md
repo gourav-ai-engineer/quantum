@@ -352,7 +352,9 @@ none / Random mean: SST-2 0.9243 / 0.9193 / 0.9151 / 0.9170 / 0.8784 / 0.8785; M
 **Gate 1 outcome (rule as written): H9b not supported, so the method claim fails.** Next is the analysis paper
 (attention-pattern similarity fails as a redundancy proxy, and compensation, not selection, explains most
 retraining-free recovery), target TMLR. Gate 2 (FFN, latency, RoBERTa) is not triggered. Observed, not tested:
-attention-QFC selections without compensation sit at the Random mean on every task.
+attention-QFC selections without compensation are at the Random mean on SST-2, MRPC, RTE and below it on QNLI
+(0.5669 vs 0.7003, Random sd 0.0916) and CoLA (MCC 0.0093 vs 0.2284, sd 0.1430). (Corrected 2026-10-10: an
+earlier version of this line said "at the Random mean on every task".)
 
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
