@@ -141,7 +141,11 @@ def main():
         vl = None if a.diagnostics_only else make_text_loader(
             valid, tok, text_fields=spec["text_fields"], batch_size=a.batch_size, max_length=a.max_length)
         base = None if a.diagnostics_only else evaluate(teacher, vl, a.device)
-        for seed in [int(s) for s in a.seeds.split(",")]:
+        for seed in [int(s) for s in a.seeds.split(",") if s]:
+            stem = os.path.join(a.output_dir, f"v14_{task}_seed{seed}")
+            if not a.diagnostics_only and os.path.exists(stem + ".npz"):  # resume after a timeout
+                print(f"  {task} seed={seed} done, skipping")
+                continue
             cal = train.shuffle(seed=seed).select(range(a.calibration_size))
             cl = make_text_loader(cal, tok, text_fields=spec["text_fields"], batch_size=a.batch_size,
                                   max_length=a.max_length)
@@ -155,7 +159,6 @@ def main():
             for n, sel in sels.items():
                 validate_selection(sel, L, H, k, name=n)
                 print(f"  {task} seed={seed} {n:10s} heads_kept_per_layer={heads_kept_per_layer(sel)}")
-            stem = os.path.join(a.output_dir, f"v14_{task}_seed{seed}")
             if a.diagnostics_only:
                 d = diagnostics(Gs, Ws, Fs, wts, mean_states, sels, k, H, ridge, a.diag_random_subsets,
                                 random.Random(seed + 70000))
@@ -200,14 +203,16 @@ def main():
             np.savez_compressed(stem + ".npz", **arrays)
             json.dump(rec, open(stem + ".json", "w"), indent=2)
 
-        if not a.diagnostics_only:  # Random distribution: one per task, masks independent of the calibration seed
+        rand_path = os.path.join(a.output_dir, f"v14_{task}_random.json")
+        if not a.diagnostics_only and a.random_masks > 0 and not os.path.exists(rand_path):
+            # Random distribution: one per task, masks independent of the calibration seed
             rand = []
             for i in range(a.random_masks):
                 sel = random_selection(L, H, k, 2027 + 7000 + i)
                 validate_selection(sel, L, H, k, name=f"Random[{i}]")
                 rand.append(summarize(*evaluate(teacher, vl, a.device, head_mask_from_selection(L, H, sel, a.device))))
             json.dump({"task": task, "k": k, "random_masks": a.random_masks, "per_mask": rand},
-                      open(os.path.join(a.output_dir, f"v14_{task}_random.json"), "w"), indent=2)
+                      open(rand_path, "w"), indent=2)
 
 
 if __name__ == "__main__":

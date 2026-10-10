@@ -1,0 +1,10 @@
+{
+  "experiment": "v14_bcm (step21_bcm.py accuracy factorial)",
+  "commit": "9c4b999",
+  "environment": "Kaggle notebook, Save & Run All (commit), GPU T4 x2 (one process per GPU), Python 3.13 (Kaggle image, not 3.12)",
+  "packages": "pip install -r requirements-ci.txt (pins torch 2.6.0, transformers 4.51.3, datasets 3.6.0, pyarrow 24.0.0); torchvision/torchaudio uninstalled; scripts/preflight.py check passed before the run (versions, CUDA, head_mask effective). Exact version strings were not captured in the output.",
+  "command": "PYTHONPATH=scripts python scripts/step21_bcm.py --tasks <split across runs> --seeds 7,42,77,123,2024 --calibration-size 512 --heads-to-keep 6 --random-masks 100 --merge-random-targets 10",
+  "runs": "Produced over more than one Kaggle commit run (12 h cap); per-seed outputs are deterministic and resumed with the skip-existing logic in 9c4b999. Merged by the owner into one directory (results.zip).",
+  "analysis": "scripts/v14_analysis.py (n_boot 10000, seed 1234), run locally in .venv-ci on 2026-10-10",
+  "provenance_gap": "No run_gpu.sh run_meta was produced on Kaggle; make_ledger_row.py will refuse this directory for missing version strings. Do not treat as paper-ready until rerun or versions are verified (rule 11)."
+}

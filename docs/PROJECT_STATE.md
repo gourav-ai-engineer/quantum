@@ -330,6 +330,30 @@ to the per-layer optimum and better than Fisher and attention-QFC at layer level
 so at layer level the coverage term adds little beyond the importance weights. Layer error is not task accuracy;
 H9b-H9d are decided only by the GPU accuracy arms.
 
+**Accuracy run 1 (2026-10-10, GPU, full protocol).** Code 9c4b999; `results/v14_bcm/9c4b999/` (`run_meta.json`
+gives provenance and its gap: Kaggle T4, Python 3.13, preflight passed, exact version strings not captured).
+5 tasks x 5 seeds, full validation, k = 6, Random 100 masks per task. `v14_verdicts.json` from
+`scripts/v14_analysis.py` (10,000 resamples), applied as written:
+- **H9a: fail for BCM and Fisher** (CI lower bound > 0 on 3/5 and 2/5 tasks; SST-2 and MRPC lower bounds -0.50 and
+  -0.15 points for BCM), pass for magnitude, Greedy-LS, attention-QFC. Per the rule this flags the implementation
+  for a check before other arms are read. LS refit raises every arm's mean on every task (QNLI BCM +4.03 [+3.27,
+  +4.82]); the failures are SST-2 (unpruned 0.9243, BCM without refit already 0.9142) and MRPC (n = 408).
+  **Check still to do:** confirm on calibration data that sequential refit lowers the per-layer output error for
+  BCM and Fisher on SST-2 and MRPC (expected from D3); record the result here before any paper text.
+- **H9b (BCM vs Fisher, both ls_seq): not supported.** Deltas (points) SST-2 +0.41, MRPC -0.20, RTE +1.30,
+  QNLI -0.30, CoLA +0.27 (MCC x100); no CI excludes zero, no Holm-significant win or loss.
+- **H9c (BCM vs Greedy-LS): not supported.** All CIs include zero (QNLI +0.25 [-0.26, +0.78]).
+- **H9d (pi(j) merge vs random target): not supported** (1/5 needed 3): QNLI +1.11 [+0.78, +1.45]; CoLA +1.09
+  [-1.08, +3.28]; others near zero.
+Means over seeds (accuracy; CoLA MCC): unpruned / BCM ls_seq / Fisher ls_seq / Greedy-LS ls_seq / attention-QFC
+none / Random mean: SST-2 0.9243 / 0.9193 / 0.9151 / 0.9170 / 0.8784 / 0.8785; MRPC 0.8775 / 0.8564 / 0.8583 /
+0.8623 / 0.7328 / 0.7296; RTE 0.7256 / 0.7083 / 0.6953 / 0.6960 / 0.5884 / 0.5893; QNLI 0.9154 / 0.8962 / 0.8992
+/ 0.8936 / 0.5669 / 0.7003; CoLA 0.5339 / 0.5429 / 0.5402 / 0.5374 / 0.0093 / 0.2284.
+**Gate 1 outcome (rule as written): H9b not supported, so the method claim fails.** Next is the analysis paper
+(attention-pattern similarity fails as a redundancy proxy, and compensation, not selection, explains most
+retraining-free recovery), target TMLR. Gate 2 (FFN, latency, RoBERTa) is not triggered. Observed, not tested:
+attention-QFC selections without compensation sit at the Random mean on every task.
+
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
    bootstrap on the full validation set, Random as a distribution): write a method paper; add
