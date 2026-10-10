@@ -356,6 +356,96 @@ attention-QFC selections without compensation are at the Random mean on SST-2, M
 (0.5669 vs 0.7003, Random sd 0.0916) and CoLA (MCC 0.0093 vs 0.2284, sd 0.1430). (Corrected 2026-10-10: an
 earlier version of this line said "at the Random mean on every task".)
 
+## Pre-registration V15: global reconstruction pruning (GRP) of heads and FFN neurons (written 2026-10-10, BEFORE any V15 code or data)
+
+**Status: DRAFT. The owner must confirm the thresholds below before any V15 code is written** (same procedure as
+Round 2). Branch `research/qfc-v15-grp`. This is a new method, not a QFC variant; V14 stays recorded as a
+pre-registered negative result and is the motivation (at k = 6 heads per layer, attention only, the choice of heads
+barely matters once the output projection is refit).
+
+**Question.** At high compression (heads and FFN neurons, global FLOPs budget), does a selector that uses the exact
+closed-form reconstruction cost of each unit, weighted by the downstream sensitivity of its module, plus a joint
+closed-form refit, beat the strongest retraining-free baselines (Kwon et al. 2022; K-prune, Park et al., ICLR 2024)
+when all methods use the same checkpoints and the same calibration samples?
+
+**Prior work this must be positioned against (all to be read in full in Phase 0 before code).** Kwon et al. 2022
+(Fisher mask search + LS mask tuning, FLOPs constraint); K-prune 2024 (knowledge-preserving weight tuning, high
+compression); KCM, Nova et al. ICML 2023 (gradient-free, unlabeled data); G-Pruner (CoNLL 2024); LIAR (2024);
+OSSCAR (Meng et al. 2024, combinatorial search over heads/neurons on a quadratic objective); CORP (arXiv 2602.05243,
+2026, closed-form ridge compensation for heads and MLP); Neuron Merging (NeurIPS 2020); OBS-style structured removal
+costs. **The removal-cost formula and closed-form refit are individually known.** The claim, if any, is the
+combination (exact per-unit cost + sensitivity-weighted global allocation across heads and neurons + joint
+sequential refit) **and only if it wins empirically**. Do not claim novelty of any single component.
+
+**Method definition (fixed before code).** BERT-base, L = 12 layers. Two module types per layer l:
+- attention output: features z = head contexts (12 blocks of 64 dims), weights W_O (768 x 768, rows per head);
+- FFN output: features z = GELU activations (3072 scalars), weights W_2 (3072 x 768, one row per neuron).
+For a module with feature Gram G = sum_tokens z z^T (calibration data, non-pad tokens), target Y = Z W, kept set S:
+refit V_S = (G_SS + lambda I)^{-1} G_S: W, with lambda = 1e-4 * tr(G_SS)/|S| (V14's ridge_rel), bias handled by an
+appended constant feature that is not penalised and never pruned. Removal cost of unit j from S (rank-one downdate,
+for a block of rows R_j and P = (G_SS + lambda I)^{-1}): Delta E_j = tr(V_{R_j}^T (P_{R_j R_j})^{-1} V_{R_j}).
+- Sensitivity weight of module m: s_m = E_x E_{y ~ p_teacher(.|x)} ||d log p(y|x) / d Y_m||_F^2 / n_tokens
+  (expected Fisher of the module output, unlabeled data, teacher-sampled labels; 1 label sample per input).
+- FLOPs per unit: the per-head and per-neuron FLOPs of Kwon et al. 2022 at sequence length 128 (formula copied
+  verbatim into the code in Phase 0 with a citation; one FLOPs function shared by all methods).
+- **Global greedy elimination**: start from all units; repeatedly remove the unit with the smallest
+  s_m * Delta E_j / FLOPs(j) over all modules of all layers, recomputing Delta E only in the module just changed;
+  at most 1% of a module's remaining units per round; stop when total FLOPs <= the constraint. A layer may lose all
+  heads (its attention block is then skipped) but keeps at least 1 FFN neuron.
+- **Joint sequential refit**: layer by layer from first to last, refit W_O and then W_2 (each with its bias) by the
+  closed form above, inputs from the already-pruned student, targets from the unpruned teacher (as V14 ls_seq).
+- One-shot selection from teacher statistics; no labels, no gradient steps on weights, no fine-tuning.
+
+**Fixed protocol.** Checkpoints: the pinned textattack BERT-base checkpoints already in SPECS (SST-2, MRPC, QNLI)
+plus MNLI and a BERT-base SQuAD v1.1 checkpoint, whose revisions are recorded in SPECS in Phase 0 before any run.
+Calibration: 2048 train examples per seed (Kwon's default; to be confirmed against their paper in Phase 0 and then
+used for **every** method), seeds 7, 42, 77, 123, 2024. Evaluation: full validation split (MNLI matched). FLOPs
+constraints (fraction of the unpruned model's FLOPs kept): 0.7, 0.6, **0.5 (primary)**, 0.4. Metrics: accuracy;
+SQuAD v1.1 F1 (per-example F1 for the bootstrap). Tasks: development MRPC, SST-2; confirmatory QNLI, MNLI-m,
+SQuAD v1.1. Baselines run with the **official code** of Kwon et al. and K-prune on the same checkpoints and
+calibration samples; KCM and others are cited at their published numbers only, labelled as not re-run (unless
+official code runs unmodified). Random: >= 30 random unit sets per (task, constraint) meeting the same FLOPs,
+uniform over units, with GRP's joint refit (isolates the value of selection). Statistics as in V14: paired
+cluster bootstrap over (calibration seed x example), 10,000 resamples, Holm across confirmatory tasks.
+
+**Phases and stop points (each stop is final for this pre-registration).**
+- **Phase 0 (CPU):** read Kwon, K-prune, KCM, OSSCAR, CORP in full; record their FLOPs formula, calibration size,
+  tasks and constraint grids here; pin the MNLI and SQuAD checkpoints; smoke-run both official codes.
+- **Phase 1 (GPU) reproduction gate:** run the official Kwon and K-prune code with the **authors'** checkpoints on
+  MRPC and SST-2 at the constraints they report. **Stop** (no fair comparison possible) if either method is more
+  than 1.0 point below its published number on both tasks; record the numbers either way.
+- **Phase 2 (CPU) calibration gate, H10:** on MRPC and SST-2, 5 seeds, held-out slice of train (never validation):
+  mean logit KL(teacher || pruned) of GRP vs Kwon and vs K-prune. **Supported** if GRP's mean KL is at least 10%
+  lower than each baseline at >= 2 of the 4 constraints on both tasks. **If not supported, stop V15 before any GPU
+  accuracy run** and write the TMLR analysis paper (V14 + V15 gate result).
+- **Phase 3 (GPU) primary, H11:** GRP minus the better of {Kwon, K-prune} (chosen per task on the development tasks
+  only, then fixed) at FLOPs 0.5 on the confirmatory tasks. **Supported** if Holm-adjusted p < 0.05 and CI lower
+  bound > 0 on >= 2 of 3 confirmatory tasks and no Holm-significant loss on any task (including vs the other
+  baseline). Other constraints are reported in full, without a decision rule.
+- **H12 (descriptive, rule 8):** physically pruned models (heads and neurons removed from the weight matrices) for
+  GRP, Kwon and K-prune at each constraint: parameter count, FLOPs, measured FP16 latency on one GPU type
+  (batch 1 and batch 32, seq 128, median of 100 runs after warm-up), with the masked accuracy checked equal to the
+  physical one. No speedup claim from masking.
+- **H13 (ablations, reported with CIs, no decision rule):** s_m = 1 (no sensitivity); uniform per-layer budget;
+  attention-only and FFN-only; no refit; one-shot vs sequential refit; Random with refit.
+- **Phase 4 (only if H11 supported):** the same H11 test on RoBERTa-base (GLUE confirmatory tasks), then one small
+  decoder model under its own dated pre-registration addition.
+
+**Gate to a tier-one venue (TNNLS / TPAMI):** H11 supported on BERT-base **and** on RoBERTa-base, latency table
+complete, independent check done (rule 11). Otherwise the paper is the TMLR analysis paper with V14 and V15
+reported as they came out.
+
+**Do not claim:** novelty of the removal cost, the closed-form refit, or merging taken alone; speedup from masking;
+any result at a constraint or task chosen after seeing confirmatory data; that the greedy has an approximation
+guarantee unless a proof (e.g. via a submodularity-ratio bound) is written and checked.
+
+**GPU budget estimate (to revise in Phase 0):** Kaggle T4, about 30 GPU-hours/week; Phase 1 about 10 h, Phase 3
+about 60-80 h (3 methods x 5 tasks x 4 constraints x 5 seeds, plus Random at 0.5 only), so Phase 3 alone takes
+2-3 weeks of quota.
+
+**Owner confirmation:** _pending_ (thresholds: 1.0-point reproduction margin; 10% KL margin at >= 2 of 4
+constraints; primary constraint 0.5; H11 rule >= 2 of 3 confirmatory tasks).
+
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
    bootstrap on the full validation set, Random as a distribution): write a method paper; add
