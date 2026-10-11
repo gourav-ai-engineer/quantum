@@ -443,8 +443,53 @@ guarantee unless a proof (e.g. via a submodularity-ratio bound) is written and c
 about 60-80 h (3 methods x 5 tasks x 4 constraints x 5 seeds, plus Random at 0.5 only), so Phase 3 alone takes
 2-3 weeks of quota.
 
-**Owner confirmation:** _pending_ (thresholds: 1.0-point reproduction margin; 10% KL margin at >= 2 of 4
-constraints; primary constraint 0.5; H11 rule >= 2 of 3 confirmatory tasks).
+**Owner confirmation:** CONFIRMED by the owner 2026-10-11 without edits (thresholds: 1.0-point reproduction
+margin; 10% KL margin at >= 2 of 4 constraints; primary constraint 0.5; H11 rule >= 2 of 3 confirmatory tasks).
+Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
+
+**Phase 0 record (2026-10-11, from the papers and the official code; no V15 code or data yet).**
+- **Official code, pinned commits.** Kwon et al.: github.com/WoosukKwon/retraining-free-pruning @ 806ac5a6 (2023-02-28;
+  needs CuPy, i.e. CUDA; paper used torch 1.9.1, transformers 4.12.0). K-prune: github.com/snudm-starlab/K-prune
+  @ 9ca629a1 (2025-05-31; requirements pin transformers 4.25.1, numpy 1.23.4, scipy 1.10.0). Each runs in its own
+  environment (not .venv-ci; neither uses HF head_mask, so the 4.51.3 pin does not apply to them).
+- **FLOPs.** Kwon `efficiency/mac.py`: MACs per head = 3 n d d_h + 2 n^2 d_h + n d_h d; per neuron = 2 n d
+  (d = 768, d_h = 64). K-prune `src/utils/capacity.py`: exactly 2x those MACs (FLOPs), so relative constraints are
+  identical. **Both use n = the task's average dev sequence length** (MRPC 53.24, SST-2 25.16, QNLI 50.97, MNLI
+  39.05, QQP 30.55, STS-B 31.47, RTE 64.59, CoLA 11.67) **and n = 170 for SQuAD**. **Amendment (before any code or
+  data):** GRP uses the same per-task n, not n = 128 as written above, so all methods share one FLOPs function.
+- **Calibration.** Kwon: `--num_samples 2048`, drawn with `np.random.choice(len(train), 2048)` (with replacement),
+  seeds 0-9 in the paper. K-prune: `--num_tokens 100000`, i.e. int(100000 / n) examples (MRPC 1878, SST-2 3974,
+  QNLI 1961, MNLI 2560, SQuAD 588), same `np.random.choice`, seeds 0-4; lam_pred 1, lam_rep 2.5e-4 (run.sh; the
+  argparse default is 1e-5; record which value each run uses), T 2, mu 64, `--sublayerwise_tuning`. **Decision
+  (before any code or data):** every method gets the same 2048 training examples per seed, i.e.
+  `train.shuffle(seed).select(range(2048))` (our convention, without replacement). In both official codes only the
+  `Subset(... np.random.choice(...))` line is patched to load that index list; every other line is unchanged, and
+  the patch is committed as a diff. Phase 1 reproduction uses the **unpatched** codes with their own defaults.
+- **Reported numbers to reproduce (Phase 1, authors' checkpoints).** Kwon et al., BERT-base, Table 4: QQP/QNLI/
+  SST-2/MRPC unpruned 91.0/91.4/93.6/86.3; at FLOPs 0.7: 90.7/90.9/93.0/86.1; at 0.6: 90.4/90.0/92.5/85.3; at 0.5:
+  89.5/88.7/91.6/83.2. K-prune: per-setting BERT numbers exist only in its Figure 1 (an image); its Table 5
+  unpruned BERT: MRPC 87.01, SST-2 93.12, QNLI 91.87, MNLI 84.90, SQuAD1.1 F1 88.51. **Phase 1 reproduction target
+  for K-prune**: read the Figure 1 values off the PDF (or ask the authors), record them here before running.
+- **Authors' checkpoints (Phase 1 only):** Kwon BERT-base Google Drive folder 1OWHL7Cjhaf2n67PZX4Pt0Be3Gv2VCLo0;
+  K-prune folder 1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt (both public links in the READMEs; the owner downloads them).
+- **Checkpoints pinned for Phases 2-3 (added to SPECS when the code is written):** MNLI
+  `textattack/bert-base-uncased-MNLI` rev 3a97f689528cbd91bcc71ab29ea6c20c089d8f28; SQuAD v1.1
+  `csarron/bert-base-uncased-squad-v1` rev c0773ca28abf86a669cd1cccc9104c7f829f2be0. **Open check:** textattack
+  MNLI checkpoints are known to use a label order that may differ from GLUE's; verify the unpruned matched accuracy
+  (expected about 84) and the label mapping before any pruning run; if it cannot be verified, replace with Kwon's
+  MNLI checkpoint and record that here.
+- **Overlap found (honest reading).** K-prune already does: per-unit score (predictive knowledge from a
+  Fisher/Taylor term + representational knowledge = squared output norm) divided by unit FLOPs, a threshold that
+  meets the FLOPs budget, sublayers processed bottom to top, and a least-squares weight tuning of each pruned
+  sublayer. GRP differs only in (a) the refit-aware removal cost (error **after** optimal refit, rank-one downdate)
+  instead of the output norm (error **without** refit); (b) a module-output expected Fisher from teacher-sampled
+  labels as the sensitivity; (c) one global greedy instead of a per-sublayer threshold. These are incremental, so
+  the H10 gate is decisive: without a clear calibration-side win there is no method paper.
+- **Other baselines.** KCM (Nova et al., ICML 2023): no official code found; cited at published numbers only.
+  OSSCAR (ICML 2024, github.com/mazumder-lab/OSSCAR): evaluated on ResNet/OPT, not BERT; cited, not re-run unless its
+  code runs on BERT-base unmodified. CORP (arXiv 2602.05243): DeiT vision transformers; cited only.
+- **Still open in Phase 0:** smoke-run both official codes (on Kaggle, GPU, separate environments; first cell of
+  Phase 1); read K-prune Figure 1 values; MNLI label check.
 
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
