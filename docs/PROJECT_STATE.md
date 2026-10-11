@@ -468,8 +468,17 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
 - **Reported numbers to reproduce (Phase 1, authors' checkpoints).** Kwon et al., BERT-base, Table 4: QQP/QNLI/
   SST-2/MRPC unpruned 91.0/91.4/93.6/86.3; at FLOPs 0.7: 90.7/90.9/93.0/86.1; at 0.6: 90.4/90.0/92.5/85.3; at 0.5:
   89.5/88.7/91.6/83.2. K-prune: per-setting BERT numbers exist only in its Figure 1 (an image); its Table 5
-  unpruned BERT: MRPC 87.01, SST-2 93.12, QNLI 91.87, MNLI 84.90, SQuAD1.1 F1 88.51. **Phase 1 reproduction target
-  for K-prune**: read the Figure 1 values off the PDF (or ask the authors), record them here before running.
+  unpruned BERT: MRPC 87.01, SST-2 93.12, QNLI 91.87, MNLI 84.90, SQuAD1.1 F1 88.51. The paper has **no numeric
+  per-setting BERT table**: Figure 1 is a plot (reading error about +-1 point, too coarse for a 1.0-point gate), and
+  the only numeric pruned values are Table 2 (ablation, compression 80% = constraint 0.2): K-prune MRPC 84.80,
+  SQuAD1.1 F1 74.16 (the caption does not name the model; Section 4.5 text to be checked that it is BERT).
+  **Amendment to the Phase 1 gate (before any run):** the K-prune reproduction target is Table 2 (MRPC 84.80 and
+  SQuAD1.1 74.16 at constraint 0.2, authors' checkpoints, their defaults); stop if both are missed by more than 1.0
+  point. Kwon's gate stays on its Table 4 (MRPC, SST-2 at 0.7/0.6/0.5); stop if Kwon misses by more than 1.0 point
+  on both tasks at the majority of those constraints. Figure 1 readings are recorded only as descriptive context.
+  Note: K-prune's Figure 1 plots Kwon et al. at about 80 on MRPC at 50% reduced FLOPs, below Kwon's own Table 4
+  (83.2), so the two papers' Kwon numbers already differ (different checkpoints and seeds); this is why our
+  comparison runs all methods on one set of checkpoints.
 - **Authors' checkpoints (Phase 1 only):** Kwon BERT-base Google Drive folder 1OWHL7Cjhaf2n67PZX4Pt0Be3Gv2VCLo0;
   K-prune folder 1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt (both public links in the READMEs; the owner downloads them).
 - **Checkpoints pinned for Phases 2-3 (added to SPECS when the code is written):** MNLI
