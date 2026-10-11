@@ -509,9 +509,11 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   predicts in a permuted order. On 1000 **train** examples (`train.shuffle(0)[:1000]`) identity accuracy is 0.027 and
   the mapping pred -> GLUE label (0 -> 2, 1 -> 0, 2 -> 1) gives 0.946; the mapping is fixed from train only. (A first
   look on 1000 validation-matched examples gave the same permutation, 0.071 -> 0.84; it was used for nothing.)
-  **Decision:** keep the textattack checkpoint and apply this fixed label remap in the evaluation and in every
-  baseline's evaluation (both official codes compare argmax with GLUE labels, so the same remap must be patched
-  into their evaluate step and committed as a diff). The remap changes no logits used for pruning statistics.
+  **Decision:** keep the textattack checkpoint, but permute the rows of its classifier weight and bias once
+  (GLUE label g takes the row of model class m with map(m) = g), save that as the MNLI checkpoint used by **every**
+  method (ours and both official codes via `--ckpt_dir`), and record its hash. Remapping only at evaluation would
+  be wrong: Kwon's Fisher and K-prune's predictive knowledge use gold labels, so the labels must agree with the
+  model's outputs during pruning too. The permutation changes no function of the model except output order.
 - **Still open in Phase 0:** smoke-run both official codes (on Kaggle, GPU, separate environments; first cell of
   Phase 1). K-prune Figure 1 is not used as a gate (see the amendment above).
 
