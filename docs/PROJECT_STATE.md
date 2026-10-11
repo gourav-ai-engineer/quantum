@@ -338,8 +338,16 @@ gives provenance and its gap: Kaggle T4, Python 3.13, preflight passed, exact ve
   -0.15 points for BCM), pass for magnitude, Greedy-LS, attention-QFC. Per the rule this flags the implementation
   for a check before other arms are read. LS refit raises every arm's mean on every task (QNLI BCM +4.03 [+3.27,
   +4.82]); the failures are SST-2 (unpruned 0.9243, BCM without refit already 0.9142) and MRPC (n = 408).
-  **Check still to do:** confirm on calibration data that sequential refit lowers the per-layer output error for
-  BCM and Fisher on SST-2 and MRPC (expected from D3); record the result here before any paper text.
+  **Check done (2026-10-11, `scripts/check_h9a.py` @ fdd808d, CPU, train data only; `results/v14_h9a_check/fdd808d/`;
+  selections from the GPU run; calibration = the run's 512 examples, held-out = the next 512 of the same shuffle):**
+  sequential refit lowers the attention-output error in **every layer, every seed (5/5), both selectors, both tasks,
+  on calibration and held-out data**, and lowers the logit KL to the teacher in 10/10 cases per split. Held-out means
+  (none -> ls_seq): mean layer error SST-2 BCM 0.656 -> 0.450, Fisher 0.676 -> 0.487; MRPC BCM 0.663 -> 0.394, Fisher
+  0.744 -> 0.512; logit KL SST-2 BCM 0.0302 -> 0.0123, Fisher 0.0352 -> 0.0136; MRPC BCM 0.1230 -> 0.0643, Fisher
+  0.1272 -> 0.0476. **Reading:** the implementation does what it is meant to; the H9a fail for BCM/Fisher is a power
+  and ceiling effect on the validation accuracy (SST-2 near ceiling, MRPC n = 408), not a bug. Observed, not tested:
+  on SST-2 held-out, ls_seq's KL (BCM 0.0123) is above ls_oneshot's (0.0107) although its calibration KL is far lower
+  (0.0022 vs 0.0077): with 512 calibration sentences the sequential refit partly overfits the calibration set.
 - **H9b (BCM vs Fisher, both ls_seq): not supported.** Deltas (points) SST-2 +0.41, MRPC -0.20, RTE +1.30,
   QNLI -0.30, CoLA +0.27 (MCC x100); no CI excludes zero, no Holm-significant win or loss.
 - **H9c (BCM vs Greedy-LS): not supported.** All CIs include zero (QNLI +0.25 [-0.26, +0.78]).
