@@ -505,8 +505,15 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
 - **Other baselines.** KCM (Nova et al., ICML 2023): no official code found; cited at published numbers only.
   OSSCAR (ICML 2024, github.com/mazumder-lab/OSSCAR): evaluated on ResNet/OPT, not BERT; cited, not re-run unless its
   code runs on BERT-base unmodified. CORP (arXiv 2602.05243): DeiT vision transformers; cited only.
+- **MNLI label check done (2026-10-11, CPU, engineering check).** `textattack/bert-base-uncased-MNLI` @ 3a97f689
+  predicts in a permuted order. On 1000 **train** examples (`train.shuffle(0)[:1000]`) identity accuracy is 0.027 and
+  the mapping pred -> GLUE label (0 -> 2, 1 -> 0, 2 -> 1) gives 0.946; the mapping is fixed from train only. (A first
+  look on 1000 validation-matched examples gave the same permutation, 0.071 -> 0.84; it was used for nothing.)
+  **Decision:** keep the textattack checkpoint and apply this fixed label remap in the evaluation and in every
+  baseline's evaluation (both official codes compare argmax with GLUE labels, so the same remap must be patched
+  into their evaluate step and committed as a diff). The remap changes no logits used for pruning statistics.
 - **Still open in Phase 0:** smoke-run both official codes (on Kaggle, GPU, separate environments; first cell of
-  Phase 1); read K-prune Figure 1 values; MNLI label check.
+  Phase 1). K-prune Figure 1 is not used as a gate (see the amendment above).
 
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
