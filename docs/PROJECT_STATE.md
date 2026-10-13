@@ -514,6 +514,16 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   method (ours and both official codes via `--ckpt_dir`), and record its hash. Remapping only at evaluation would
   be wrong: Kwon's Fisher and K-prune's predictive knowledge use gold labels, so the labels must agree with the
   model's outputs during pruning too. The permutation changes no function of the model except output order.
+- **2026-10-13: Kwon's checkpoint folder is gone** (Google Drive returns 404 for folder
+  1OWHL7Cjhaf2n67PZX4Pt0Be3Gv2VCLo0, checked by the owner in a browser), so the Kwon reproduction with the authors'
+  checkpoints cannot be run. **Proposed amendment A1 (before any Kwon run; owner confirmation pending):** run Kwon's
+  official code on K-prune's BERT-base checkpoints (folder 1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt, downloaded fine) and
+  compare the accuracy **drop** (pruned minus unpruned on those checkpoints) with Kwon's Table 4 drop (MRPC -0.2,
+  -1.0, -3.1; SST-2 -0.6, -1.1, -2.0 at 0.7, 0.6, 0.5); stop if the drop is missed by more than 1.0 point at the
+  majority of the three constraints on both tasks. K-prune's gate (Table 2, its own checkpoints) is unchanged.
+- First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
+  same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
+  no code patch.
 - **Still open in Phase 0:** smoke-run both official codes (on Kaggle, GPU, separate environments; first cell of
   Phase 1). K-prune Figure 1 is not used as a gate (see the amendment above).
 
