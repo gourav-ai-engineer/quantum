@@ -521,6 +521,16 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   compare the accuracy **drop** (pruned minus unpruned on those checkpoints) with Kwon's Table 4 drop (MRPC -0.2,
   -1.0, -3.1; SST-2 -0.6, -1.1, -2.0 at 0.7, 0.6, 0.5); stop if the drop is missed by more than 1.0 point at the
   majority of the three constraints on both tasks. K-prune's gate (Table 2, its own checkpoints) is unchanged.
+  **A1 CONFIRMED by the owner 2026-10-14.**
+- **GRP implementation (2026-10-14, commit 364766f, `src/qfc/grp.py`, tests `tests/test_grp.py`; before any V15
+  data).** Choices not spelled out in the pre-registration, fixed now: (i) during selection each module's ridge lam
+  is fixed at its initial value (ridge_rel x mean diagonal of the full non-bias Gram) so block downdates stay exact;
+  the final sequential refit recomputes lam on the kept set as V14 did; (ii) "at most 1% per round" = each round
+  removes from the module holding the globally cheapest unit its max(1, floor(0.01 |kept|)) cheapest units, capped so
+  the round does not overshoot the budget by more than one unit; (iii) P is recomputed from scratch every 25 removals
+  per module; (iv) pruning is physical (HF `prune_heads` + sliced FFN matrices), tested equal to masking; a layer may
+  keep 0 heads. Tests check the removal cost and downdate against brute-force refits, the Kwon MAC formula,
+  physical = masked logits, the budget, determinism, and that the joint refit lowers module error and logit KL.
 - First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
   same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
   no code patch.
