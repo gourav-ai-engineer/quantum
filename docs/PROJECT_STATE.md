@@ -531,6 +531,15 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   per module; (iv) pruning is physical (HF `prune_heads` + sliced FFN matrices), tested equal to masking; a layer may
   keep 0 heads. Tests check the removal cost and downdate against brute-force refits, the Kwon MAC formula,
   physical = masked logits, the budget, determinism, and that the joint refit lowers module error and logit KL.
+- **Baseline runner (2026-10-14, before any baseline run).** K-prune's `--constraint` is the fraction of FLOPs to
+  **remove** (`max_flops = model_flops * (1 - constraint)`, src/prune.py), Kwon's the fraction to **keep**; so our
+  constraint c is passed to Kwon as c and to K-prune as 1 - c, and K-prune's Table 2 "80% compression" is
+  `--constraint 0.8`. Both repos keep HF's GLUE train order, so `scripts/v15_prepare_baselines.py` writes our
+  calibration/held-out row indices once and `scripts/v15_official_addon.py` patches 4 lines per official main.py
+  (indices + logit dumps; without V15_INDEX_FILE the code path equals the original). Driver:
+  `scripts/v15_kaggle.sh setup|phase1|h10`; gate: `scripts/v15_h10_analysis.py`. **Fixed now:** Phase 1 uses seeds
+  0-4 for both codes and compares the 5-seed mean; Kwon's checkpoint for A1 is K-prune's; in H10 both official
+  codes run with `--seed 0` (their own RNG only affects code paths our fixed indices replace).
 - First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
   same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
   no code patch.

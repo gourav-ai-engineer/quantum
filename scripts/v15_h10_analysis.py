@@ -20,8 +20,8 @@ MARGIN, MIN_CONS = 0.10, 2
 
 
 def kl_from_dumps(d):
-    t = torch.load(os.path.join(d, "v15_teacher_heldout.pt"))
-    s = torch.load(os.path.join(d, "v15_student_heldout.pt"))
+    t = torch.load(os.path.join(d, "v15_teacher_heldout.pt"), weights_only=True)
+    s = torch.load(os.path.join(d, "v15_student_heldout.pt"), weights_only=True)
     assert t["idx"] == s["idx"]
     pt = t["logits"].double().log_softmax(-1)
     return float((pt.exp() * (pt - s["logits"].double().log_softmax(-1))).sum(-1).mean())
