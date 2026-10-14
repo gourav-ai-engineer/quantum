@@ -294,13 +294,21 @@ def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 
             ht[i] = lt(ht[i], attention_mask=ext[i])[0]
 
 
+def teacher_stats(teacher, batches, device: str, seed: int = 0) -> dict:
+    """Budget-independent statistics (computed once per calibration set): Grams, teacher weights, sensitivities."""
+    L = len(_layers(teacher))
+    return {"G": collect_grams(teacher, batches, device),
+            "W": {(l, k): teacher_weight(teacher, l, k) for l in range(L) for k in ("att", "ffn")},
+            "sens": module_sensitivity(teacher, batches, device, seed)}
+
+
 def grp_prune(teacher, batches, device: str, seq_len: float, constraint: float, ridge_rel: float = 1e-4,
-              use_sensitivity: bool = True, refit: bool = True, seed: int = 0):
+              use_sensitivity: bool = True, refit: bool = True, seed: int = 0, stats: dict | None = None):
     """Full GRP: statistics -> global greedy selection -> physical pruning -> joint sequential refit."""
     L, H = len(_layers(teacher)), teacher.config.num_attention_heads
-    G = collect_grams(teacher, batches, device)
-    weights = {(l, k): teacher_weight(teacher, l, k) for l in range(L) for k in ("att", "ffn")}
-    sens = module_sensitivity(teacher, batches, device, seed) if use_sensitivity else None
+    stats = stats or teacher_stats(teacher, batches, device, seed)
+    G, weights = stats["G"], stats["W"]
+    sens = stats["sens"] if use_sensitivity else None
     heads, neurons, info = grp_select(G, weights, sens, L, H, seq_len, teacher.config.hidden_size, constraint,
                                       ridge_rel)
     student = prune_model(copy.deepcopy(teacher), heads, neurons)
