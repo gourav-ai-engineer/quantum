@@ -79,5 +79,29 @@ h10)
   mkdir -p "$W/h10/kprune_out" && cp -r "$KP_OUT/h10/." "$W/h10/kprune_out/" 2>/dev/null || true
   find "$W/h10/kprune_out" -name model.ckpt -delete || true
   ;;
+h11)
+  # Primary test (run only if Phase 1 and H10 pass). Constraint 0.5; dev tasks pick the better baseline once.
+  TASKS=${H11_TASKS:-"mrpc sst2 qnli mnli squad"}
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks "$(echo $TASKS | tr ' ' ,)" --out "$W/inputs")
+  mkdir -p h11
+  for t in $TASKS; do for s in $SEEDS; do
+    export V15_INDEX_FILE=$W/inputs/indices/${t}_seed${s}.json
+    o=$W/h11/kwon_${t}_seed${s}_c0.5
+    [ -f $o/v15_student_validation.pt ] || { mkdir -p $o; kwon --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
+      --constraint 0.5 --seed 0 --output_dir $o > $o.log 2>&1 || echo "FAIL $o"; }
+    e=h11/kprune_${t}_seed${s}_c0.5
+    [ -f "$KP_OUT/$e/v15_student_validation.pt" ] || { kprune --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
+      --exp_name $e --seed 0 --constraint 0.5 > "$W/h11/kprune_${t}_seed${s}.log" 2>&1 || echo "FAIL $e"; }
+    unset V15_INDEX_FILE
+  done; done
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/step22_grp.py --tasks "$(echo $TASKS | tr ' ' ,)" \
+    --constraints 0.5 --variants grp --mode accuracy --output-dir "$W/h11/grp" 2>&1 | grep -v -i warn | tail -40)
+  mkdir -p "$W/h11/kprune_out" && cp -r "$KP_OUT/h11/." "$W/h11/kprune_out/" 2>/dev/null || true
+  find "$W/h11/kprune_out" -name model.ckpt -delete || true
+  (cd "$REPO" && python scripts/v15_h11_analysis.py "$W/h11") || true
+  (cd "$REPO" && python scripts/v15_latency.py --grp "$W/h11/grp/v15_grp_*_c0.5.json" \
+    --kwon $(ls -d $W/h11/kwon_*_seed7_c0.5) --kprune $(ls -d $W/h11/kprune_out/kprune_*_seed7_c0.5) \
+    --out "$W/h11/latency.json") || true
+  ;;
 *) echo "unknown stage $STAGE"; exit 1 ;;
 esac
