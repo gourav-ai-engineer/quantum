@@ -540,6 +540,18 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   `scripts/v15_kaggle.sh setup|phase1|h10`; gate: `scripts/v15_h10_analysis.py`. **Fixed now:** Phase 1 uses seeds
   0-4 for both codes and compares the 5-seed mean; Kwon's checkpoint for A1 is K-prune's; in H10 both official
   codes run with `--seed 0` (their own RNG only affects code paths our fixed indices replace).
+- **2026-10-15, still before any V15 data.** (a) K-prune's main.py has CRLF line endings, so the first patcher
+  would have aborted on Kaggle; it now adapts its anchors to the file's newline style (regression test added).
+  (b) Phase 3 plumbing written and tested on CPU: Random-units baseline with refit (`--variants random`, 6 sets per
+  calibration seed = 30 per (task, constraint)), MNLI classifier-row permutation (`label_order [1, 2, 0]`), SQuAD v1.1
+  (QA sensitivity from start/end positions, 384/128 features, official F1/EM per example; the add-on scores the
+  official codes with the same preprocessing and metric), shape-based FP16 latency (`scripts/v15_latency.py`, H12),
+  H11 analysis (`scripts/v15_h11_analysis.py`: better baseline chosen once on MRPC/SST-2 at 0.5, Holm over QNLI,
+  MNLI-m, SQuAD) with synthetic end-to-end tests. (c) Kaggle quota on 2026-10-15: 9 GPU-hours left this week; H10
+  runs only the gate variant (`grp`), the `no_sens` ablation waits for Phase 3. (d) `kaggle/v15_run.ipynb` = setup +
+  Phase 1 + H10 in one committed run, importable via File -> Import Notebook -> link to the raw GitHub file.
+  (e) Paper draft started: `paper/main.tex` (theory, methods, protocol, V14 results; V15 slots marked TODO) and
+  `paper/refs.bib` (22 entries verified against Semantic Scholar by arXiv id).
 - First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
   same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
   no code patch.
