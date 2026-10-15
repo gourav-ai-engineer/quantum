@@ -74,7 +74,7 @@ h10)
     unset V15_INDEX_FILE
   done; done
   (cd "$REPO" && PYTHONPATH=scripts python scripts/step22_grp.py --tasks mrpc,sst2 --constraints 0.7,0.6,0.5,0.4 \
-    --variants grp,no_sens --mode kl --output-dir "$W/h10/grp" 2>&1 | grep -v -i warn | tail -45)
+    --variants "${GRP_VARIANTS:-grp}" --mode kl --output-dir "$W/h10/grp" 2>&1 | grep -v -i warn | tail -45)
   mkdir -p "$W/h10/kprune_out" && cp -r "$KP_OUT/h10/." "$W/h10/kprune_out/" 2>/dev/null || true
   find "$W/h10/kprune_out" -name model.ckpt -delete || true
   ;;
