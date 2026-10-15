@@ -175,6 +175,25 @@ One model family so far (BERT-base); V14 uses a single, uniform sparsity level; 
 (V15 measures latency on physically pruned models); the V14 Kaggle run did not record exact package version strings;
 \todo{complete after V15}.
 
+\appendix
+\section{Reproducibility details for the baselines (V15)}
+\paragraph{Official code.} Kwon et al.: \texttt{github.com/WoosukKwon/retraining-free-pruning} at commit 806ac5a6;
+K-prune: \texttt{github.com/snudm-starlab/K-prune} at commit 9ca629a1. Each runs in its own environment (Python 3.9,
+PyTorch 1.13.1, Transformers 4.12.0, CuPy; and Python 3.10, PyTorch 1.12.1, Transformers 4.25.1). Exactly four lines
+of each \texttt{main.py} are changed: the calibration sampling line reads a fixed list of training-row indices
+(identical for all methods), and two calls save teacher and pruned-model outputs on held-out training rows and on the
+validation split; without the index file the code path equals the original. The diffs are released with the code.
+\paragraph{Budgets.} Both codes count MACs with the same per-head and per-neuron formulas (K-prune reports FLOPs =
+2 MACs) at the task's average development-set sequence length (170 for SQuAD); GRP uses the same function. Kwon's
+\texttt{--constraint} is the fraction of MACs kept and K-prune's the fraction removed, so a budget $c$ is passed as
+$c$ and $1-c$ respectively.
+\paragraph{Checkpoints.} Kwon et al.'s released checkpoints are no longer downloadable; following a dated amendment
+made before any baseline run, Kwon's code is reproduced on K-prune's released BERT-base checkpoints by comparing the
+accuracy drop relative to the unpruned model with the drop reported by Kwon et al. All comparative runs use the
+pinned public checkpoints listed in Section~6; the MNLI checkpoint's classifier rows are permuted once to the GLUE
+label order (mapping fixed from training data).
+\todo{fill with Phase~1 reproduction numbers.}
+
 \bibliographystyle{plainnat}
 \bibliography{refs}
 \end{document}
