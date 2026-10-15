@@ -29,18 +29,20 @@ def main():
     os.makedirs(os.path.join(a.out, "indices"), exist_ok=True)
     for task in a.tasks.split(","):
         spec = SPECS[task]
-        if spec.get("qa"):
-            # Both official codes index SQuAD training FEATURES (after windowing), not examples, so our example
-            # indices cannot be passed through unchanged; the mapping must be written before H11 (PROJECT_STATE).
-            raise SystemExit("SQuAD calibration-index mapping for the official codes is not implemented yet")
         dn, cfg = spec["dataset"]
         train = (load_dataset(dn, cfg) if cfg else load_dataset(dn))["train"]
-        assert train["idx"] == list(range(len(train))), "GLUE idx must equal row index"
+        if spec.get("qa"):
+            # SQuAD has no 'idx'; the indices are EXAMPLE rows, and the add-on maps them to the official codes'
+            # feature indices (every window of each example), so all methods use the same calibration examples.
+            train = train.add_column("idx", list(range(len(train))))
+        assert train["idx"] == list(range(len(train))), "idx must equal row index"
         n, h = a.calibration_size, a.heldout_size
         for seed in [int(s) for s in a.seeds.split(",")]:
             order = train.shuffle(seed=seed)["idx"]
-            json.dump({"task": task, "seed": seed, "calibration": order[:n], "heldout": order[n:n + h]},
-                      open(os.path.join(a.out, "indices", f"{task}_seed{seed}.json"), "w"))
+            rec = {"task": task, "seed": seed, "calibration": order[:n], "heldout": order[n:n + h]}
+            if spec.get("qa"):
+                rec["unit"] = "squad_examples"
+            json.dump(rec, open(os.path.join(a.out, "indices", f"{task}_seed{seed}.json"), "w"))
         model, tok = load_model(spec, "cpu")
         if "label_order" in spec:  # MNLI: every method prunes the SAME permuted checkpoint (Phase 0 decision)
             permute_classifier(model, spec["label_order"])

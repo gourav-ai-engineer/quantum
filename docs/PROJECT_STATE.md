@@ -556,9 +556,10 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   cost and block downdate with ridge on non-bias features, sensitivity, sequential-refit hooks and BertLayer calls
   for transformers 4.51.3, MAC accounting, no validation leakage, H11 rule, add-on anchors and old-env APIs).
   Findings and actions: (1) H11 inputs for MNLI/SQuAD: `v15_prepare_baselines.py` now uses step22's SPECS and saves
-  the **permuted** MNLI checkpoint; **open before H11:** both official codes index SQuAD training *features* (after
-  windowing), so our example indices must be mapped to their feature indices (the script refuses SQuAD until
-  then). (2) Correction of implementation choice (iii): P is recomputed every 25 `remove()` calls (each call removes
+  the **permuted** MNLI checkpoint; both official codes index SQuAD training *features* (after windowing), so the
+  index file for SQuAD carries our **example** rows (`unit: squad_examples`) and the add-on maps them, inside each
+  official environment, to every feature of those examples with the same 384/128 windowing (checked on CPU: 88,524
+  training features in total; for 50 calibration examples the mapped feature count equals GRP's own). (2) Correction of implementation choice (iii): P is recomputed every 25 `remove()` calls (each call removes
   up to 1% of a module's units), not every 25 units; downdates are exact in exact arithmetic, the running H10 code is
   left unchanged so that the analysed code is the run code. (3) **H10 interpretation, fixed before the data:**
   GRP must be >= 10% below **both** baselines at the **same** constraint, at >= 2 of the 4 constraints, on both

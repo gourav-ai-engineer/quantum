@@ -23,11 +23,34 @@ TASK_TO_KEYS = {"cola": ("sentence", None), "mnli": ("premise", "hypothesis"), "
                 "rte": ("sentence1", "sentence2"), "sst2": ("sentence", None), "stsb": ("sentence1", "sentence2")}
 
 
+def _squad_feature_indices(example_idx, n_total):
+    """Both official codes window SQuAD train examples into features (HF prepare_train_features: max length 384,
+    stride 128, only_second, question lstrip) in example order. Rebuild the feature -> example map with the same
+    tokenizer settings and return every feature of the given examples."""
+    from datasets import load_dataset
+    from transformers import AutoTokenizer
+    train = load_dataset("squad")["train"]
+    tok = AutoTokenizer.from_pretrained("bert-base-uncased", use_fast=True)
+    feats_of, offset = {}, 0
+    for start in range(0, len(train), 2000):
+        rows = train[start:start + 2000]
+        enc = tok([q.lstrip() for q in rows["question"]], rows["context"], truncation="only_second", max_length=384,
+                  stride=128, return_overflowing_tokens=True)
+        for f, e in enumerate(enc["overflow_to_sample_mapping"]):
+            feats_of.setdefault(start + e, []).append(offset + f)
+        offset += len(enc["input_ids"])
+    assert offset == n_total, "feature count %d differs from the official dataset (%d)" % (offset, n_total)
+    return [f for e in example_idx for f in feats_of[e]]
+
+
 def v15_indices(n_total, n_samples):
     f = os.environ.get("V15_INDEX_FILE")
     if not f:
         return np.random.choice(n_total, n_samples).tolist()
-    idx = json.load(open(f))["calibration"]
+    spec = json.load(open(f))
+    idx = spec["calibration"]
+    if spec.get("unit") == "squad_examples":  # our indices are examples; the official dataset holds features
+        idx = _squad_feature_indices(idx, n_total)
     assert max(idx) < n_total
     return list(idx)
 
