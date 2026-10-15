@@ -124,6 +124,8 @@ def mcc_binary(labels, preds) -> float:
 
 
 def _grid_stats(preds: np.ndarray, labels: np.ndarray, metric: str) -> list[np.ndarray]:
+    if metric == "score":  # preds are per-example scores (e.g. SQuAD F1); labels are ignored
+        return [preds.astype(np.float64)]
     y = labels[None, :].astype(int)
     p = preds.astype(int)
     if metric == "accuracy":
@@ -134,7 +136,7 @@ def _grid_stats(preds: np.ndarray, labels: np.ndarray, metric: str) -> list[np.n
 
 
 def _grid_metric(totals: list[np.ndarray], metric: str, cells: float):
-    if metric == "accuracy":
+    if metric in ("accuracy", "score"):
         return totals[0] / cells
     return mcc_from_counts(*totals)
 

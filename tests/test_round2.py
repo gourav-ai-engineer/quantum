@@ -155,3 +155,11 @@ def test_cluster_bootstrap_validates_inputs():
         cluster_bootstrap_delta(np.zeros((2, 10)), np.zeros((3, 10)), labels)
     with pytest.raises(ValueError):
         cluster_bootstrap_delta(np.zeros((2, 10)), np.zeros((2, 10)), labels, "f1")
+
+
+def test_cluster_bootstrap_score_metric_is_mean_difference():
+    rng = np.random.default_rng(0)
+    a, b = rng.random((3, 200)), rng.random((3, 200)) * 0.5
+    out = cluster_bootstrap_delta(a, b, np.zeros(200), "score", n_boot=500, seed=1)
+    assert out["observed_delta"] == pytest.approx(a.mean() - b.mean())
+    assert out["ci_low"] > 0
