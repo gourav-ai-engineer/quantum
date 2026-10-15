@@ -1,0 +1,180 @@
+% DRAFT (2026-10-15). Outcome-independent sections only. Every number is copied from a results file in this repo
+% (path given in a comment next to it). V15 results are placeholders until the pre-registered gates are run.
+% Not paper-ready: rule 11 (independent check of code, numbers and the proofs) has not been done.
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb,amsthm,booktabs,natbib,hyperref}
+\newtheorem{proposition}{Proposition}
+\newtheorem{theorem}{Theorem}
+\newcommand{\todo}[1]{\textbf{[TODO: #1]}}
+\title{When Does Head Selection Matter? Output-Space Redundancy, Closed-Form Compensation, and Global Allocation in Retraining-Free Transformer Pruning}
+\author{Anonymous}
+\date{}
+\begin{document}
+\maketitle
+
+\begin{abstract}
+\todo{write last, after the pre-registered V15 gates (H10, H11) are decided; it must state the V14 negative results and whichever V15 outcome occurs.}
+\end{abstract}
+
+\section{Introduction}
+Retraining-free (post-training) structured pruning removes attention heads and feed-forward (FFN) neurons from a
+fine-tuned transformer using only a small calibration set, and repairs the damage with a closed-form or few-second
+weight update instead of fine-tuning~\citep{kwon2022fast,park2024kprune,nova2023kcm}. Two questions are usually
+entangled in this setting: \emph{which} units to remove (selection), and \emph{how} to compensate for the removed units
+(reconstruction). This paper separates them with pre-registered experiments.
+
+Our starting point was a representation of each head by its normalized attention pattern and a fidelity-based coverage
+objective for choosing redundant heads. We show that attention-pattern similarity is a poor redundancy signal: it is
+blind to how a head mixes values (Proposition~\ref{prop:blind}), and on BERT-base most head pairs that it calls
+near-identical produce dissimilar outputs (Section~\ref{sec:diag}). Moving the similarity to the head's output operator
+gives a coverage bound on the merge error that ranks subsets well (Theorem~\ref{thm:bound}), yet in a pre-registered
+factorial over five GLUE tasks and five calibration seeds, once the remaining heads are refit by least squares the
+choice of selector barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). \todo{one paragraph on V15 (GRP:
+global allocation over heads and FFN neurons with refit-aware costs) once H10/H11 are decided.}
+
+\paragraph{Contributions.} (i) A characterization of when attention-pattern similarity fails as a redundancy proxy, with
+a proposition and a measurement on BERT-base. (ii) An output-space coverage bound for merging pruned heads into kept
+heads, with its tightness measured. (iii) A pre-registered selector $\times$ compensation factorial showing that, at
+moderate sparsity, closed-form compensation explains most of the retraining-free recovery and selectors are
+statistically indistinguishable after it. (iv) \todo{V15 contribution, conditional on its gates.} All hypotheses,
+thresholds and analysis code were fixed before the corresponding data were seen; negative results are reported as such.
+
+\section{Related work}
+\paragraph{Head and structured pruning.} Many heads can be removed with little loss~\citep{michel2019sixteen,voita2019analyzing};
+head pruning has also been cast as differentiable subset selection~\citep{li2021dsp}. Training-based structured pruning
+recovers accuracy by fine-tuning~\citep{sanh2020movement,xia2022cofi}.
+\paragraph{Retraining-free pruning of encoders.} \citet{kwon2022fast} search Fisher-based masks over heads and FFN
+filters under a FLOPs constraint and rescale the kept units by layer-wise least squares. KCM prunes with unlabeled data and
+no gradients~\citep{nova2023kcm}. K-prune scores units by predictive and representational knowledge per FLOP and tunes the
+weights of each pruned sublayer by least squares~\citep{park2024kprune}. OSSCAR solves a layer-wise combinatorial
+reconstruction problem with local search~\citep{meng2024osscar}; CORP folds closed-form ridge compensation into the
+weights~\citep{zhang2026corp}; Neuron Merging folds removed neurons into kept ones~\citep{kim2020neuron}.
+\paragraph{One-shot pruning of large models.} SparseGPT, Wanda, LLM-Pruner, SliceGPT and ZipLM prune large decoders with
+little or no retraining~\citep{frantar2023sparsegpt,sun2024wanda,ma2023llmpruner,ashkboos2024slicegpt,kurtic2023ziplm}.
+\paragraph{Positioning.} Removal costs from least-squares downdates and closed-form compensation are each known. Our
+claims are (a) an analysis of which redundancy notion matters, (b) controlled, pre-registered evidence on the relative
+roles of selection and compensation, and \todo{(c) whatever V15 supports}.
+
+\section{Setup and notation}
+For one layer, let $Z_h\in\mathbb{R}^{N\times d}$ be the context vectors of head $h$ over the $N$ non-padding calibration
+tokens ($d=64$, $H=12$ heads), $Z=[Z_1,\dots,Z_H]$, and $W_O=[W_1;\dots;W_H]$ the attention output projection with
+$W_h\in\mathbb{R}^{d\times D}$. The attention output is $Y=ZW_O=\sum_h Z_hW_h$. Everything below depends on the data only
+through the Gram matrix $G=Z^\top Z$. Keeping a set $S$ of heads, the least-squares (LS) compensation is
+$\widehat W_S=\arg\min_{V}\|Y-Z_SV\|_F^2$ (with a small ridge in practice).
+
+\paragraph{Output fidelity.} For heads $i,j$ define
+$F_{ij}=\big(\|Z_i^\top Z_j\|_*/(\|Z_i\|_F\|Z_j\|_F)\big)^2\in[0,1]$, the squared Uhlmann fidelity between the head
+operators. The attention-pattern alternative represents head $h$ by $\rho_h=A_hA_h^\top/\mathrm{tr}(A_hA_h^\top)$ for
+its attention matrix $A_h$.
+
+\section{Theory}
+\begin{proposition}[Attention-pattern fidelity is blind to value mixing]\label{prop:blind}
+If $A_j=A_iQ$ with $QQ^\top=I$ (for example, a permutation of keys), then $\rho_j=\rho_i$, so the attention-pattern
+fidelity of heads $i$ and $j$ is 1, while their outputs $A_iV_i$ and $A_jV_j=A_iQV_j$ can be arbitrary.
+\end{proposition}
+\begin{proof}
+$(A_iQ)(A_iQ)^\top=A_iQQ^\top A_i^\top=A_iA_i^\top$. The outputs depend on $QV_j$, which $\rho$ does not constrain.
+\end{proof}
+
+\begin{proposition}[Scaled-orthogonal Procrustes residual]\label{prop:proc}
+$\min_{s\in\mathbb{R},\,U^\top U=I}\|Z_j-sZ_iU\|_F=\|Z_j\|_F\sqrt{1-F_{ij}}$.
+\end{proposition}
+\begin{proof}
+For fixed $U$ the optimal $s=\mathrm{tr}(U^\top Z_i^\top Z_j)/\|Z_i\|_F^2$ and the squared residual is
+$\|Z_j\|_F^2-\mathrm{tr}(U^\top Z_i^\top Z_j)^2/\|Z_i\|_F^2$. Over orthogonal $U$ the trace is maximized by the polar
+factor of $Z_i^\top Z_j$, where it equals $\|Z_i^\top Z_j\|_*$ (von Neumann's trace inequality).
+\end{proof}
+
+\begin{theorem}[Output-space coverage bound]\label{thm:bound}
+Let $S$ be the kept heads and assign each pruned head $j$ to $\pi(j)=\arg\min_{i\in S}\sqrt{1-F_{ji}}$. Merging
+$W_{\pi(j)}\leftarrow W_{\pi(j)}+R_jW_j$ with the Procrustes map $R_j$ of Proposition~\ref{prop:proc} gives
+\[\|Y-\widehat Y_{\mathrm{merge}}\|_F\le B(S)=\sum_{j\notin S}w_j\min_{i\in S}\sqrt{1-F_{ji}},\qquad
+w_j=\|W_j\|_2\,\|Z_j\|_F,\]
+and the (unregularized) LS-refit error is at most the merge error.
+\end{theorem}
+\begin{proof}
+$Y-\widehat Y_{\mathrm{merge}}=\sum_{j\notin S}(Z_j-Z_{\pi(j)}R_j)W_j$; apply the triangle inequality,
+$\|MW_j\|_F\le\|M\|_F\|W_j\|_2$ and Proposition~\ref{prop:proc}. The merged weights are feasible for the LS problem
+over $Z_S$, so the LS optimum is no larger.
+\end{proof}
+Since $B(S)=\sum_{j\notin S}w_j-f(S)$ with $f$ a weighted facility-location function, greedy maximization of $f$ carries
+the usual $(1-1/e)$ guarantee on $f$; this is an additive statement, not a guarantee on $B$ or on accuracy.
+\todo{independent check of all three proofs (rule 11).}
+
+\section{Methods compared}
+\paragraph{V14 factorial (heads only, $k=6$ of 12 per layer).} Selectors: output-space coverage (BCM, greedy on $f$),
+Fisher top-$k$ (Michel gate sensitivity), magnitude top-$k$ ($w_j$), greedy exact LS, and attention-pattern coverage.
+Compensation: none, merge (Theorem~\ref{thm:bound}), one-shot LS, sequential LS (layer by layer, teacher targets,
+student inputs).
+\paragraph{V15: global reconstruction pruning (GRP).} Units are heads (blocks of $d$ features of $Z$) and FFN neurons
+(single features of the GELU activation entering $W_2$), in all layers. For a module with augmented Gram $G$ (a constant
+feature fits the bias) and refit $V=P\,G_{S:}W$, $P=(G_{SS}+\lambda I)^{-1}$, removing unit $R$ increases the refit
+objective by $\Delta E_R=\mathrm{tr}(V_R^\top P_{RR}^{-1}V_R)$ (exact block downdate). GRP repeatedly removes the units
+with the smallest $s_m\Delta E_R/\mathrm{MAC}_R$ across all modules, where $s_m$ is the expected Fisher of the module
+output under teacher-sampled labels, until the MAC budget of \citet{kwon2022fast} is met; it then prunes the matrices
+physically and refits $W_O$ and $W_2$ (with biases) layer by layer. K-prune~\citep{park2024kprune} is the closest prior
+method; GRP differs in the refit-aware cost (error \emph{after} the optimal refit rather than the output norm), the
+module-output sensitivity, and a single global greedy instead of a per-sublayer threshold.
+
+\section{Pre-registered protocol}
+Models: fine-tuned BERT-base~\citep{devlin2019bert} checkpoints with pinned revisions; tasks from
+GLUE~\citep{wang2018glue} (SST-2, MRPC development; RTE, QNLI, CoLA confirmatory for V14) and, for V15,
+SQuAD~v1.1~\citep{rajpurkar2016squad}. Calibration: train only (512 examples for V14, 2048 for V15), five seeds
+(7, 42, 77, 123, 2024); evaluation on the full validation split. Statistics: paired cluster bootstrap over
+(seed $\times$ example), 10{,}000 resamples, Holm across confirmatory tasks; Random is a distribution of 100 masks.
+Decision rules and thresholds were committed before any data (repository file \texttt{docs/PROJECT\_STATE.md}).
+
+\section{Results}
+\subsection{Attention similarity versus output similarity}\label{sec:diag}
+% results/v14_bcm_diag/4bd649f (CPU diagnostic, seed 7, calibration data only)
+On SST-2 and MRPC (seed 7), 54 and 36 of the 792 within-layer head pairs have attention-pattern fidelity above 0.99;
+of these, 39 and 35 have output fidelity below 0.5. The median per-layer Spearman correlation between the two
+similarities is 0.437 and 0.263. The coverage bound ranks random subsets almost as the true merge error does (median
+per-layer Spearman 0.929 and 0.959) but is loose (median ratio 3.26 and 3.12). At layer level, BCM (relative LS error
+0.334 / 0.304) is close to the exhaustive optimum (0.320 / 0.296) and to greedy exact LS (0.321 / 0.297), better than
+Fisher (0.359 / 0.402) and attention coverage (0.417 / 0.391), but tied by magnitude top-$k$ (0.334 / 0.307).
+\todo{extend D1--D3 to 5 tasks $\times$ 5 seeds (CPU, deterministic) before submission.}
+
+\subsection{Selection versus compensation (V14, pre-registered)}\label{sec:v14}
+% results/v14_bcm/9c4b999 ; v14_verdicts.json
+\begin{table}[t]\centering\small
+\caption{Validation metric (accuracy; CoLA: MCC), mean over 5 calibration seeds, BERT-base, 6 of 12 heads kept in every
+layer. Random: mean $\pm$ sd over 100 masks. Source: \texttt{results/v14\_bcm/9c4b999}.}
+\begin{tabular}{lccccc}\toprule
+ & SST-2 & MRPC & RTE & QNLI & CoLA\\\midrule
+Unpruned & 0.9243 & 0.8775 & 0.7256 & 0.9154 & 0.5339\\
+Random (no comp.) & 0.879$\pm$0.018 & 0.730$\pm$0.064 & 0.589$\pm$0.040 & 0.700$\pm$0.092 & 0.228$\pm$0.143\\
+Attention coverage, none & 0.8784 & 0.7328 & 0.5884 & 0.5669 & 0.0093\\
+Attention coverage, seq.\ LS & 0.9050 & 0.7814 & 0.6787 & 0.8289 & 0.5141\\
+BCM, none & 0.9142 & 0.8186 & 0.6368 & 0.8559 & 0.4970\\
+BCM, merge & 0.9174 & 0.8667 & 0.6477 & 0.8816 & 0.5452\\
+BCM, seq.\ LS & 0.9193 & 0.8564 & 0.7083 & 0.8962 & 0.5429\\
+Fisher, seq.\ LS & 0.9151 & 0.8583 & 0.6953 & 0.8992 & 0.5402\\
+Magnitude, seq.\ LS & 0.9167 & 0.8598 & 0.7011 & 0.8937 & 0.5285\\
+Greedy exact LS, seq.\ LS & 0.9170 & 0.8623 & 0.6960 & 0.8936 & 0.5374\\\bottomrule
+\end{tabular}\end{table}
+Sequential LS compensation raises every selector's mean on every task; for BCM the paired gain is +4.03 points on QNLI
+(95\% CI [+3.27, +4.82]) and +7.15 on RTE ([+2.45, +11.84]). After compensation, the pre-registered comparisons are
+null: BCM minus Fisher ranges from $-0.30$ (QNLI, CI [$-0.93$, +0.36]) to +1.30 (RTE, [$-1.73$, +4.33]) points with no
+Holm-significant difference on any task (H9b), and BCM versus greedy exact LS is likewise null (H9c). Merging into the
+coverage-assigned head beats merging into a random kept head only on QNLI (+1.11, [+0.78, +1.45]; H9d not supported).
+Attention-pattern coverage without compensation is at the Random mean on SST-2, MRPC and RTE and below it on QNLI and
+CoLA. A calibration-side check confirms that the refit lowers the per-layer output error and the logit KL in every
+layer, seed, selector and task examined, on held-out training data too (\texttt{results/v14\_h9a\_check/fdd808d}); the
+pre-registered H9a failure for BCM and Fisher on SST-2 and MRPC reflects ceiling and sample size, not an
+implementation error.
+
+\subsection{Global allocation over heads and neurons (V15, pre-registered)}
+\todo{Phase~1 reproduction of Kwon et al.\ and K-prune (amendment A1); H10 calibration-side KL gate; then, only if
+supported, H11 accuracy at 50\% MACs on QNLI, MNLI-m, SQuAD~v1.1, latency of physically pruned models (H12), ablations
+(H13), RoBERTa-base~\citep{liu2019roberta}.}
+
+\section{Limitations}
+One model family so far (BERT-base); V14 uses a single, uniform sparsity level; masking results do not measure speed
+(V15 measures latency on physically pruned models); the V14 Kaggle run did not record exact package version strings;
+\todo{complete after V15}.
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
+\end{document}
