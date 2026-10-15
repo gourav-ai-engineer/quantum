@@ -3,7 +3,7 @@
 % Not paper-ready: rule 11 (independent check of code, numbers and the proofs) has not been done.
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
-\usepackage{amsmath,amssymb,amsthm,booktabs,natbib,hyperref}
+\usepackage{amsmath,amssymb,amsthm,booktabs,natbib,hyperref,graphicx}
 \newtheorem{proposition}{Proposition}
 \newtheorem{theorem}{Theorem}
 \newcommand{\todo}[1]{\textbf{[TODO: #1]}}
@@ -134,7 +134,15 @@ similarities is 0.437 and 0.263. The coverage bound ranks random subsets almost 
 per-layer Spearman 0.929 and 0.959) but is loose (median ratio 3.26 and 3.12). At layer level, BCM (relative LS error
 0.334 / 0.304) is close to the exhaustive optimum (0.320 / 0.296) and to greedy exact LS (0.321 / 0.297), better than
 Fisher (0.359 / 0.402) and attention coverage (0.417 / 0.391), but tied by magnitude top-$k$ (0.334 / 0.307).
-\todo{extend D1--D3 to 5 tasks $\times$ 5 seeds (CPU, deterministic) before submission.}
+Figure~\ref{fig:pairs} shows every head pair: the pairs that attention-pattern similarity calls near-identical are
+spread over output fidelities from about 0.1 to 0.5.
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figs/fig_pairs.pdf}
+\caption{Attention-pattern fidelity versus output fidelity for all 792 within-layer head pairs of BERT-base
+(calibration data, seed 7). Shaded: attention fidelity above 0.99 but output fidelity below 0.5. Source:
+\texttt{results/v14\_pairs/71cb52d}.}\label{fig:pairs}
+\end{figure}
+\todo{extend D1--D3 to 5 tasks $\times$ 5 seeds (CPU, deterministic; running: results/v14\_bcm\_diag/full\_be03d75).}
 
 \subsection{Selection versus compensation (V14, pre-registered)}\label{sec:v14}
 % results/v14_bcm/9c4b999 ; v14_verdicts.json

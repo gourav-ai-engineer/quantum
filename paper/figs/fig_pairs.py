@@ -28,20 +28,25 @@ def main():
         is_flag = [p["attn_F"] > 0.99 and p["out_F"] < 0.5 for p in pts]
         flag = [p for p, f in zip(pts, is_flag) if f]
         rest = [p for p, f in zip(pts, is_flag) if not f]
-        ax.axvspan(0.99, 1.0, ymin=0, ymax=0.5, color="#ecebe6", zorder=0, lw=0)
-        ax.scatter([p["attn_F"] for p in rest], [p["out_F"] for p in rest], s=9, c=BLUE, alpha=0.55, lw=0,
+        gap = lambda p: max(1.0 - p["attn_F"], 1e-6)  # noqa: E731  (log scale spreads the pairs near F = 1)
+        ax.axvspan(1e-6, 0.01, ymin=0, ymax=0.5, color="#ecebe6", zorder=0, lw=0)
+        ax.axvline(0.01, color=MUTED, lw=0.6, ls=(0, (3, 2)), zorder=1)
+        ax.scatter([gap(p) for p in rest], [p["out_F"] for p in rest], s=9, c=BLUE, alpha=0.55, lw=0,
                    label="head pair", zorder=2)
-        ax.scatter([p["attn_F"] for p in flag], [p["out_F"] for p in flag], s=22, c=ORANGE, marker="^",
-                   edgecolors="white", linewidths=0.6, label="attention F > 0.99, output F < 0.5", zorder=3)
+        ax.scatter([gap(p) for p in flag], [p["out_F"] for p in flag], s=22, c=ORANGE, marker="^",
+                   edgecolors="white", linewidths=0.6, label="attention F > 0.99 but output F < 0.5", zorder=3)
         n_hi = sum(p["attn_F"] > 0.99 for p in pts)
         ax.set_title(f"{name}: {len(flag)} of {n_hi} pairs with attention F > 0.99", fontsize=9, color=INK, loc="left")
-        ax.set_xlabel("attention-pattern fidelity")
+        ax.set_xscale("log")
+        ax.invert_xaxis()  # more similar attention to the right
+        ax.set_xlabel("1 - attention-pattern fidelity (log scale)")
         ax.grid(True, color="#e4e3dc", lw=0.5, zorder=1)
-        ax.set_xlim(min(p["attn_F"] for p in pts) - 0.01, 1.003)
+        ax.set_xlim(max(gap(p) for p in pts) * 1.3, min(gap(p) for p in pts) / 1.3)
         ax.set_ylim(0, 1.0)
     axes[0].set_ylabel("output fidelity")
-    axes[1].legend(loc="lower left", frameon=False, fontsize=8)
-    fig.tight_layout()
+    handles, labels = axes[0].get_legend_handles_labels()
+    fig.legend(handles, labels, loc="upper center", ncol=2, frameon=False, fontsize=8, bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout(rect=(0, 0, 1, 0.93))
     fig.savefig(out + ".pdf")
     fig.savefig(out + ".png", dpi=200)
     print("wrote", out + ".pdf/.png")
