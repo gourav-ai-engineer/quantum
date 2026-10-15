@@ -32,10 +32,50 @@ def v15_indices(n_total, n_samples):
     return list(idx)
 
 
+def _neuron_hooks(model, neuron_mask):
+    """Kwon's convention: scale the input of layer.output (the FFN activations)."""
+    if neuron_mask is None:
+        return []
+    layers = getattr(model, model.base_model_prefix).encoder.layer
+    return [layer.output.register_forward_pre_hook(lambda m, inp, l=l: (inp[0] * neuron_mask[l],) + tuple(inp[1:]))
+            for l, layer in enumerate(layers)]
+
+
+@torch.no_grad()
+def v15_dump_squad(model, tokenizer, head_mask, neuron_mask, out_dir, tag):
+    """Per-example SQuAD v1.1 validation F1/EM with OUR preprocessing and official metric (squad_v15.py is a copy of
+    src/qfc/squad.py), so every method is scored identically."""
+    from datasets import load_dataset
+    from squad_v15 import batches_from_features, make_features, per_example_scores, postprocess
+    valid = load_dataset("squad")["validation"]
+    feats = make_features(valid[:], tokenizer)
+    handles = _neuron_hooks(model, neuron_mask)
+    device = next(model.parameters()).device
+    starts, ends = [], []
+    try:
+        model.eval()
+        for b in batches_from_features(feats, tokenizer, 32):
+            kw = {} if head_mask is None else {"head_mask": head_mask}
+            o = model(**{k: v.to(device) for k, v in b.items()}, **kw)
+            for s, e, m in zip(o.start_logits.float().cpu(), o.end_logits.float().cpu(), b["attention_mask"]):
+                n = int(m.sum())
+                starts.append(s[:n].numpy())
+                ends.append(e[:n].numpy())
+    finally:
+        for h in handles:
+            h.remove()
+    f1, em = per_example_scores(valid, postprocess(valid, feats, starts, ends))
+    torch.save({"f1": torch.tensor(f1), "em": torch.tensor(em)}, os.path.join(out_dir, "v15_%s_validation.pt" % tag))
+
+
 @torch.no_grad()
 def v15_dump(model, tokenizer, task, head_mask, neuron_mask, out_dir, tag):
     f = os.environ.get("V15_INDEX_FILE")
-    if not f or task not in TASK_TO_KEYS:
+    if not f:
+        return
+    if task == "squad":
+        return v15_dump_squad(model, tokenizer, head_mask, neuron_mask, out_dir, tag)
+    if task not in TASK_TO_KEYS:
         return
     from datasets import load_dataset
     spec = json.load(open(f))
@@ -43,12 +83,7 @@ def v15_dump(model, tokenizer, task, head_mask, neuron_mask, out_dir, tag):
     splits = {"heldout": (raw["train"].select(spec["heldout"]), spec["heldout"]),
               "validation": (raw["validation_matched" if task == "mnli" else "validation"], None)}
     k1, k2 = TASK_TO_KEYS[task]
-    layers = getattr(model, model.base_model_prefix).encoder.layer
-    handles = []
-    if neuron_mask is not None:  # Kwon's convention: scale the input of layer.output (the FFN activations)
-        for l, layer in enumerate(layers):
-            handles.append(layer.output.register_forward_pre_hook(
-                lambda m, inp, l=l: (inp[0] * neuron_mask[l],) + tuple(inp[1:])))
+    handles = _neuron_hooks(model, neuron_mask)
     model.eval()
     device = next(model.parameters()).device
     try:
@@ -95,12 +130,14 @@ def patch(path, kind):
     if "v15_indices" in src:
         print("already patched:", path)
         return
+    nl = "\r\n" if "\r\n" in src else "\n"  # K-prune's main.py uses CRLF, Kwon's LF
     for old, new in PATCHES[kind]:
+        old, new = old.replace("\n", nl), new.replace("\n", nl)
         n = src.count(old)
         if n != 1:
             raise SystemExit("anchor found %d times in %s: %r" % (n, path, old))
         src = src.replace(old, new)
-    src = "from v15_official_addon import v15_indices, v15_dump\n" + src
+    src = "from v15_official_addon import v15_indices, v15_dump" + nl + src
     open(path, "w", newline="").write(src)
     print("patched:", path)
 

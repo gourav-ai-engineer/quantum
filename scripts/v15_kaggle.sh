@@ -32,6 +32,7 @@ setup)
   [ -d kwon ] || { git clone -q https://github.com/WoosukKwon/retraining-free-pruning kwon && git -C kwon checkout -q $KWON_SHA; }
   [ -d kprune ] || { git clone -q https://github.com/snudm-starlab/K-prune kprune && git -C kprune checkout -q $KPRUNE_SHA; }
   cp "$REPO/scripts/v15_official_addon.py" kwon/ && cp "$REPO/scripts/v15_official_addon.py" kprune/src/
+  cp "$REPO/src/qfc/squad.py" kwon/squad_v15.py && cp "$REPO/src/qfc/squad.py" kprune/src/squad_v15.py
   python "$REPO/scripts/v15_official_addon.py" patch kwon/main.py kwon
   python "$REPO/scripts/v15_official_addon.py" patch kprune/src/main.py kprune
   git -C kwon diff > patch_kwon.diff; git -C kprune diff > patch_kprune.diff

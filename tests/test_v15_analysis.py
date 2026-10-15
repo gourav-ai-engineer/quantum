@@ -60,6 +60,21 @@ def test_h11_end_to_end_synthetic(tmp_path, monkeypatch):
     assert out["verdict"] == "supported" and set(out["wins"]) == {"qnli", "mnli", "squad"}
 
 
+def test_official_patch_works_for_lf_and_crlf(tmp_path):
+    m = _mod("v15_official_addon")
+    body = ("import numpy as np\n    sample = Subset(\n        x,\n"
+            "        np.random.choice(len(training_dataset), num_samples).tolist(),\n    )\n"
+            "    st = time.time()\n    go()\n    # Save the model and masks\n    save()\n")
+    for nl in ("\n", "\r\n"):
+        p = tmp_path / ("crlf.py" if nl == "\r\n" else "lf.py")
+        p.write_bytes(body.replace("\n", nl).encode())
+        m.patch(str(p), "kprune")
+        out = p.read_bytes().decode()
+        assert out.count("v15_indices(len(training_dataset), num_samples),") == 1
+        assert out.count("v15_dump(") == 2 and out.startswith("from v15_official_addon import")
+        assert ("\r\n" in out) == (nl == "\r\n") and "\r\r" not in out
+
+
 def test_h10_gate_synthetic(tmp_path, monkeypatch):
     m = _mod("v15_h10_analysis")
     (tmp_path / "grp").mkdir()
