@@ -169,6 +169,21 @@ def test_permute_classifier_reorders_logits():
     assert torch.allclose(_logits(model, bs), before[:, [1, 2, 0]], atol=1e-6)
 
 
+def test_grp_runs_on_question_answering_model():
+    from transformers import BertConfig, BertForQuestionAnswering
+    cfg = BertConfig(vocab_size=50, hidden_size=32, num_hidden_layers=2, num_attention_heads=4,
+                     intermediate_size=64, max_position_embeddings=32)
+    cfg._attn_implementation = "eager"
+    torch.manual_seed(0)
+    qa = BertForQuestionAnswering(cfg).eval()
+    bs = _batches()
+    s = module_sensitivity(qa, bs, "cpu", seed=0)
+    assert all(math.isfinite(v) and v > 0 for v in s.values())
+    student, heads, neurons, info = grp_prune(qa, bs, "cpu", seq_len=10.0, constraint=0.5)
+    out = student(**bs[0])
+    assert torch.isfinite(out.start_logits).all() and info["mac_ratio"] <= 0.5 + 1e-12
+
+
 def test_grp_prune_end_to_end():
     teacher, bs = _tiny_bert(), _batches()
     student, heads, neurons, info = grp_prune(teacher, bs, "cpu", seq_len=10.0, constraint=0.5)

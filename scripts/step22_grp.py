@@ -33,6 +33,53 @@ SPECS = dict(_SPECS)
 SPECS["mnli"] = {"model_id": "textattack/bert-base-uncased-MNLI", "revision": "3a97f689528cbd91bcc71ab29ea6c20c089d8f28",
                  "dataset": ("glue", "mnli"), "text_fields": ("premise", "hypothesis"), "metric": "accuracy",
                  "valid_split": "validation_matched", "label_order": [1, 2, 0]}
+# Pinned in V15 Phase 0. SQuAD v1.1, extractive QA: features of length 384 with doc stride 128 (as both official codes).
+SPECS["squad"] = {"model_id": "csarron/bert-base-uncased-squad-v1", "revision": "c0773ca28abf86a669cd1cccc9104c7f829f2be0",
+                  "dataset": ("squad", None), "metric": "f1", "qa": True}
+
+
+def load_model(spec, device):
+    if not spec.get("qa"):
+        return load_sequence_classifier(spec["model_id"], device, revision=spec["revision"])
+    from transformers import AutoModelForQuestionAnswering, AutoTokenizer
+    tok = AutoTokenizer.from_pretrained(spec["model_id"], revision=spec["revision"])
+    model = AutoModelForQuestionAnswering.from_pretrained(spec["model_id"], revision=spec["revision"],
+                                                          attn_implementation="eager")
+    return model.to(device).eval(), tok
+
+
+def task_batches(spec, rows, tok, batch_size, max_length):
+    if not spec.get("qa"):
+        return make_batches(rows, tok, spec["text_fields"], batch_size, max_length)
+    from qfc.squad import batches_from_features, make_features
+    return batches_from_features(make_features(rows[:], tok), tok, max(1, batch_size // 2))
+
+
+@torch.no_grad()
+def outputs_of(spec, model, batches, device):
+    """Classification: logits [N, C]. QA: list of (start, end) log-probabilities over real tokens per feature."""
+    if not spec.get("qa"):
+        return logits_of(model, batches, device)
+    model.eval()
+    out = []
+    for b in batches:
+        o = model(**{k: v.to(device) for k, v in b.items()})
+        for s, e, m in zip(o.start_logits.float().cpu(), o.end_logits.float().cpu(), b["attention_mask"]):
+            n = int(m.sum())
+            out.append((s[:n].log_softmax(-1), e[:n].log_softmax(-1)))
+    return out
+
+
+def compare_outputs(spec, ref, new):
+    """Mean KL(teacher || pruned) and teacher agreement (QA: sum of start and end KL; agreement of the argmax span
+    endpoints)."""
+    if not spec.get("qa"):
+        return kl_and_agreement(ref, new)
+    kls, agree = [], []
+    for (ts, te), (ss, se) in zip(ref, new):
+        kls.append(float((ts.exp() * (ts - ss)).sum() + (te.exp() * (te - se)).sum()))
+        agree.append(float(int(ts.argmax()) == int(ss.argmax()) and int(te.argmax()) == int(se.argmax())))
+    return sum(kls) / len(kls), sum(agree) / len(agree)
 
 
 def make_batches(rows, tok, fields, batch_size, max_length):
@@ -85,7 +132,7 @@ def main():
         spec = SPECS[task]
         dn, cfg = spec["dataset"]
         ds = load_dataset(dn, cfg) if cfg else load_dataset(dn)
-        teacher, tok = load_sequence_classifier(spec["model_id"], a.device, revision=spec["revision"])
+        teacher, tok = load_model(spec, a.device)
         if "label_order" in spec:
             permute_classifier(teacher, spec["label_order"])
         n_seq = AVG_SEQ_LEN[task]
@@ -94,14 +141,21 @@ def main():
                  for x in ([f"random{i}" for i in range(a.random_per_seed)] if v == "random" else [v])]
         if a.mode == "accuracy":
             valid = ds[spec.get("valid_split", "validation")]
-            vb = make_batches(valid, tok, spec["text_fields"], a.batch_size, a.max_length)
-            lt_valid, labels = logits_of(teacher, vb, a.device), torch.tensor(valid["label"])
+            if spec.get("qa"):
+                from qfc.squad import make_features, per_example_scores, postprocess, predict_logits
+                v_feats = make_features(valid[:], tok)
+                from qfc.squad import batches_from_features
+                vb = batches_from_features(v_feats, tok, max(1, a.batch_size // 2))
+                t_st, t_en = predict_logits(teacher, vb, a.device)
+                unpruned_f1 = per_example_scores(valid, postprocess(valid, v_feats, t_st, t_en))[0]
+            else:
+                vb = make_batches(valid, tok, spec["text_fields"], a.batch_size, a.max_length)
+                lt_valid, labels = logits_of(teacher, vb, a.device), torch.tensor(valid["label"])
         for seed in [int(s) for s in a.seeds.split(",")]:
             shuf, n = ds["train"].shuffle(seed=seed), a.calibration_size
-            cb = make_batches(shuf.select(range(n)), tok, spec["text_fields"], a.batch_size, a.max_length)
-            hb = make_batches(shuf.select(range(n, n + a.heldout_size)), tok, spec["text_fields"], a.batch_size,
-                              a.max_length)
-            lt_held = logits_of(teacher, hb, a.device)
+            cb = task_batches(spec, shuf.select(range(n)), tok, a.batch_size, a.max_length)
+            hb = task_batches(spec, shuf.select(range(n, n + a.heldout_size)), tok, a.batch_size, a.max_length)
+            lt_held = outputs_of(spec, teacher, hb, a.device)
             stats = None  # budget-independent; computed on first use, shared by all constraints and variants
             for c in [float(x) for x in a.constraints.split(",")]:
                 for v in names:
@@ -127,9 +181,14 @@ def main():
                            "params_teacher": sum(q.numel() for q in teacher.parameters()),
                            "params_student": sum(q.numel() for q in student.parameters()), **info,
                            "model_id": spec["model_id"], "model_revision": spec["revision"]}
-                    rec["heldout_kl"], rec["heldout_teacher_agreement"] = kl_and_agreement(
-                        lt_held, logits_of(student, hb, a.device))
-                    if a.mode == "accuracy":
+                    rec["heldout_kl"], rec["heldout_teacher_agreement"] = compare_outputs(
+                        spec, lt_held, outputs_of(spec, student, hb, a.device))
+                    if a.mode == "accuracy" and spec.get("qa"):
+                        st_, en_ = predict_logits(student, vb, a.device)
+                        f1, em = per_example_scores(valid, postprocess(valid, v_feats, st_, en_))
+                        rec.update(evaluation_size=len(f1), valid_f1=f1, f1=sum(f1) / len(f1), em=sum(em) / len(em),
+                                   unpruned_f1=sum(unpruned_f1) / len(unpruned_f1))
+                    elif a.mode == "accuracy":
                         ls = logits_of(student, vb, a.device)
                         rec.update(evaluation_size=len(labels), valid_pred=ls.argmax(-1).tolist(),
                                    accuracy=float((ls.argmax(-1) == labels).float().mean()),

@@ -98,12 +98,18 @@ def module_sensitivity(model, batches, device: str, seed: int = 0) -> dict:
     for batch in batches:
         b = _batch_inputs(batch, device)
         with _hooks(model, specs) as st:
-            logits = model(**b, return_dict=True).logits
+            out = model(**b, return_dict=True)
             for y in st.values():
                 y.retain_grad()
-            probs = logits.detach().float().softmax(-1).cpu()
-            lab = torch.multinomial(probs, 1, generator=gen).squeeze(1).to(logits.device)
-            logp = logits.log_softmax(-1).gather(1, lab[:, None]).sum()
+            # classification: one label; extractive QA: independent start and end positions (masked to real tokens)
+            heads = [out.logits] if hasattr(out, "logits") and out.logits is not None else \
+                [out.start_logits.masked_fill(b["attention_mask"] == 0, -1e4),
+                 out.end_logits.masked_fill(b["attention_mask"] == 0, -1e4)]
+            logp = 0.0
+            for logits in heads:
+                probs = logits.detach().float().softmax(-1).cpu()
+                lab = torch.multinomial(probs, 1, generator=gen).squeeze(1).to(logits.device)
+                logp = logp + logits.log_softmax(-1).gather(1, lab[:, None]).sum()
             model.zero_grad(set_to_none=True)
             logp.backward()
             m = b["attention_mask"].bool()
