@@ -47,8 +47,8 @@ def v15_dump_squad(model, tokenizer, head_mask, neuron_mask, out_dir, tag):
     src/qfc/squad.py), so every method is scored identically."""
     from datasets import load_dataset
     from squad_v15 import batches_from_features, make_features, per_example_scores, postprocess
-    valid = load_dataset("squad")["validation"]
-    feats = make_features(valid[:], tokenizer)
+    valid = load_dataset("squad")["validation"][:]  # plain dict of lists (fast column access)
+    feats = make_features(valid, tokenizer)
     handles = _neuron_hooks(model, neuron_mask)
     device = next(model.parameters()).device
     starts, ends = [], []

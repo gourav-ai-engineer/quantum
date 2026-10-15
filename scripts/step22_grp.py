@@ -147,7 +147,8 @@ def main():
                 from qfc.squad import batches_from_features
                 vb = batches_from_features(v_feats, tok, max(1, a.batch_size // 2))
                 t_st, t_en = predict_logits(teacher, vb, a.device)
-                unpruned_f1 = per_example_scores(valid, postprocess(valid, v_feats, t_st, t_en))[0]
+                valid_d = valid[:]  # plain dict of lists: O(1) column access in postprocess
+                unpruned_f1 = per_example_scores(valid_d, postprocess(valid_d, v_feats, t_st, t_en))[0]
             else:
                 vb = make_batches(valid, tok, spec["text_fields"], a.batch_size, a.max_length)
                 lt_valid, labels = logits_of(teacher, vb, a.device), torch.tensor(valid["label"])
@@ -160,8 +161,8 @@ def main():
             for c in [float(x) for x in a.constraints.split(",")]:
                 for v in names:
                     path = os.path.join(a.output_dir, f"v15_{v}_{task}_seed{seed}_c{c}.json")
-                    if os.path.exists(path):
-                        continue
+                    if os.path.exists(path) and json.load(open(path)).get("mode") == a.mode:
+                        continue  # resume only a finished run of the same mode (a KL result is not an accuracy one)
                     t0 = time.time()
                     if v.startswith("random"):  # H13: random units (same budget), same joint refit
                         heads, neurons, info = random_select(cfg_m.num_hidden_layers, cfg_m.num_attention_heads,
@@ -185,7 +186,7 @@ def main():
                         spec, lt_held, outputs_of(spec, student, hb, a.device))
                     if a.mode == "accuracy" and spec.get("qa"):
                         st_, en_ = predict_logits(student, vb, a.device)
-                        f1, em = per_example_scores(valid, postprocess(valid, v_feats, st_, en_))
+                        f1, em = per_example_scores(valid_d, postprocess(valid_d, v_feats, st_, en_))
                         rec.update(evaluation_size=len(f1), valid_f1=f1, f1=sum(f1) / len(f1), em=sum(em) / len(em),
                                    unpruned_f1=sum(unpruned_f1) / len(unpruned_f1))
                     elif a.mode == "accuracy":

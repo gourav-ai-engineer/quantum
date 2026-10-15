@@ -552,6 +552,19 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   Phase 1 + H10 in one committed run, importable via File -> Import Notebook -> link to the raw GitHub file.
   (e) Paper draft started: `paper/main.tex` (theory, methods, protocol, V14 results; V15 slots marked TODO) and
   `paper/refs.bib` (22 entries verified against Semantic Scholar by arXiv id).
+- **Independent code review (2026-10-15, read-only subagent, before any V15 data): GRP core correct** (removal
+  cost and block downdate with ridge on non-bias features, sensitivity, sequential-refit hooks and BertLayer calls
+  for transformers 4.51.3, MAC accounting, no validation leakage, H11 rule, add-on anchors and old-env APIs).
+  Findings and actions: (1) H11 inputs for MNLI/SQuAD: `v15_prepare_baselines.py` now uses step22's SPECS and saves
+  the **permuted** MNLI checkpoint; **open before H11:** both official codes index SQuAD training *features* (after
+  windowing), so our example indices must be mapped to their feature indices (the script refuses SQuAD until
+  then). (2) Correction of implementation choice (iii): P is recomputed every 25 `remove()` calls (each call removes
+  up to 1% of a module's units), not every 25 units; downdates are exact in exact arithmetic, the running H10 code is
+  left unchanged so that the analysed code is the run code. (3) **H10 interpretation, fixed before the data:**
+  GRP must be >= 10% below **both** baselines at the **same** constraint, at >= 2 of the 4 constraints, on both
+  tasks (the stricter reading of "lower than each baseline at >= 2 of the 4 constraints"); this is what
+  `v15_h10_analysis.py` implements. (4) step22 resumes only a finished run of the same mode; SQuAD post-processing
+  uses plain dicts (was O(N^2) on the full validation set).
 - First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
   same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
   no code patch.

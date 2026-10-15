@@ -14,8 +14,8 @@ import os
 
 from datasets import load_dataset
 
-from qfc.hf_experiments import load_sequence_classifier
-from step20_round2 import SPECS
+from qfc.grp import permute_classifier
+from step22_grp import SPECS, load_model  # includes MNLI (with label_order) and SQuAD
 
 
 def main():
@@ -29,6 +29,10 @@ def main():
     os.makedirs(os.path.join(a.out, "indices"), exist_ok=True)
     for task in a.tasks.split(","):
         spec = SPECS[task]
+        if spec.get("qa"):
+            # Both official codes index SQuAD training FEATURES (after windowing), not examples, so our example
+            # indices cannot be passed through unchanged; the mapping must be written before H11 (PROJECT_STATE).
+            raise SystemExit("SQuAD calibration-index mapping for the official codes is not implemented yet")
         dn, cfg = spec["dataset"]
         train = (load_dataset(dn, cfg) if cfg else load_dataset(dn))["train"]
         assert train["idx"] == list(range(len(train))), "GLUE idx must equal row index"
@@ -37,7 +41,9 @@ def main():
             order = train.shuffle(seed=seed)["idx"]
             json.dump({"task": task, "seed": seed, "calibration": order[:n], "heldout": order[n:n + h]},
                       open(os.path.join(a.out, "indices", f"{task}_seed{seed}.json"), "w"))
-        model, tok = load_sequence_classifier(spec["model_id"], "cpu", revision=spec["revision"])
+        model, tok = load_model(spec, "cpu")
+        if "label_order" in spec:  # MNLI: every method prunes the SAME permuted checkpoint (Phase 0 decision)
+            permute_classifier(model, spec["label_order"])
         ck = os.path.join(a.out, "ckpt", task)
         model.save_pretrained(ck, safe_serialization=False)
         tok.save_pretrained(ck)
