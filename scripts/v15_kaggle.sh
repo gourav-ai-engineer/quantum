@@ -40,8 +40,10 @@ setup)
       transformers==4.12.0 datasets==2.14.7 numpy==1.23.5 scipy tqdm cupy-cuda12x; }
   [ -d env_kprune ] || { uv venv -q -p 3.10 env_kprune && uv pip install -q -p env_kprune/bin/python torch==1.12.1 \
       transformers==4.25.1 datasets==2.14.7 numpy==1.23.4 scipy==1.10.0 scikit-learn==1.2.1 tqdm colorama; }
-  [ -d ck_kprune ] || gdown -q --folder --remaining-ok https://drive.google.com/drive/folders/1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt -O ck_kprune
+  # (newer gdown dropped --remaining-ok; the folder has < 50 files, so it is not needed)
+  [ -d ck_kprune ] || gdown -q --folder https://drive.google.com/drive/folders/1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt -O ck_kprune
   ls ck_kprune/bert-base-uncased
+  for t in mrpc sst2; do [ -f ck_kprune/bert-base-uncased/$t/config.json ] || { echo "missing K-prune ckpt $t"; exit 1; }; done
   ;;
 phase1)
   mkdir -p phase1
