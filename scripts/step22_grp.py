@@ -20,9 +20,19 @@ import time
 import torch
 from datasets import load_dataset
 
-from qfc.grp import AVG_SEQ_LEN, grp_prune, teacher_stats
+import copy
+
+from qfc.grp import (AVG_SEQ_LEN, grp_prune, permute_classifier, prune_model, random_select, sequential_refit,
+                     teacher_stats)
 from qfc.hf_experiments import load_sequence_classifier
-from step20_round2 import SPECS
+from step20_round2 import SPECS as _SPECS
+
+SPECS = dict(_SPECS)
+# V15 Phase 0 (docs/PROJECT_STATE.md): textattack MNLI predicts in a permuted label order; fixed from TRAIN data as
+# pred m -> GLUE (0->2, 1->0, 2->1), i.e. new class g takes old classifier row label_order[g].
+SPECS["mnli"] = {"model_id": "textattack/bert-base-uncased-MNLI", "revision": "3a97f689528cbd91bcc71ab29ea6c20c089d8f28",
+                 "dataset": ("glue", "mnli"), "text_fields": ("premise", "hypothesis"), "metric": "accuracy",
+                 "valid_split": "validation_matched", "label_order": [1, 2, 0]}
 
 
 def make_batches(rows, tok, fields, batch_size, max_length):
@@ -53,7 +63,8 @@ def main():
     p.add_argument("--tasks", default="mrpc,sst2")
     p.add_argument("--seeds", default="7,42,77,123,2024")
     p.add_argument("--constraints", default="0.7,0.6,0.5,0.4")
-    p.add_argument("--variants", default="grp", help="comma list of grp,no_sens,no_refit")
+    p.add_argument("--variants", default="grp", help="comma list of grp,no_sens,no_refit,random")
+    p.add_argument("--random-per-seed", type=int, default=6, help="random unit sets per calibration seed (H13)")
     p.add_argument("--calibration-size", type=int, default=2048)
     p.add_argument("--heldout-size", type=int, default=512)
     p.add_argument("--ridge-rel", type=float, default=1e-4)
@@ -75,9 +86,14 @@ def main():
         dn, cfg = spec["dataset"]
         ds = load_dataset(dn, cfg) if cfg else load_dataset(dn)
         teacher, tok = load_sequence_classifier(spec["model_id"], a.device, revision=spec["revision"])
+        if "label_order" in spec:
+            permute_classifier(teacher, spec["label_order"])
         n_seq = AVG_SEQ_LEN[task]
+        cfg_m = teacher.config
+        names = [x for v in a.variants.split(",")
+                 for x in ([f"random{i}" for i in range(a.random_per_seed)] if v == "random" else [v])]
         if a.mode == "accuracy":
-            valid = ds["validation"]
+            valid = ds[spec.get("valid_split", "validation")]
             vb = make_batches(valid, tok, spec["text_fields"], a.batch_size, a.max_length)
             lt_valid, labels = logits_of(teacher, vb, a.device), torch.tensor(valid["label"])
         for seed in [int(s) for s in a.seeds.split(",")]:
@@ -88,14 +104,21 @@ def main():
             lt_held = logits_of(teacher, hb, a.device)
             stats = None  # budget-independent; computed on first use, shared by all constraints and variants
             for c in [float(x) for x in a.constraints.split(",")]:
-                for v in a.variants.split(","):
+                for v in names:
                     path = os.path.join(a.output_dir, f"v15_{v}_{task}_seed{seed}_c{c}.json")
                     if os.path.exists(path):
                         continue
                     t0 = time.time()
-                    stats = stats or teacher_stats(teacher, cb, a.device, seed)
-                    student, heads, neurons, info = grp_prune(teacher, cb, a.device, n_seq, c, a.ridge_rel,
-                                                              seed=seed, stats=stats, **variants[v])
+                    if v.startswith("random"):  # H13: random units (same budget), same joint refit
+                        heads, neurons, info = random_select(cfg_m.num_hidden_layers, cfg_m.num_attention_heads,
+                                                             cfg_m.intermediate_size, n_seq, cfg_m.hidden_size, c,
+                                                             seed=100 * seed + int(v[6:]))
+                        student = prune_model(copy.deepcopy(teacher), heads, neurons)
+                        sequential_refit(student, teacher, cb, a.device, a.ridge_rel)
+                    else:
+                        stats = stats or teacher_stats(teacher, cb, a.device, seed)
+                        student, heads, neurons, info = grp_prune(teacher, cb, a.device, n_seq, c, a.ridge_rel,
+                                                                  seed=seed, stats=stats, **variants[v])
                     rec = {"task": task, "seed": seed, "constraint": c, "variant": v, "mode": a.mode,
                            "calibration_size": n, "heldout": f"train.shuffle({seed})[{n}:{n + a.heldout_size}]",
                            "seq_len_for_macs": n_seq, "ridge_rel": a.ridge_rel, "seconds": time.time() - t0,

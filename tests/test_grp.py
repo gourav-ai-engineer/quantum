@@ -152,6 +152,23 @@ def test_sequential_refit_reduces_error_and_kl():
         assert kl(refit) < kl(plain)
 
 
+def test_random_select_budget_and_determinism():
+    from qfc.grp import random_select
+    a = random_select(2, 4, 64, 10.0, 32, 0.5, seed=3)
+    assert a[2]["mac_ratio"] <= 0.5 + 1e-12 and all(len(v) >= 1 for v in a[1].values())
+    assert a[:2] == random_select(2, 4, 64, 10.0, 32, 0.5, seed=3)[:2]
+    assert a[:2] != random_select(2, 4, 64, 10.0, 32, 0.5, seed=4)[:2]
+
+
+@torch.no_grad()
+def test_permute_classifier_reorders_logits():
+    from qfc.grp import permute_classifier
+    model, bs = _tiny_bert(), _batches()
+    before = _logits(model, bs)
+    permute_classifier(model, [1, 2, 0])
+    assert torch.allclose(_logits(model, bs), before[:, [1, 2, 0]], atol=1e-6)
+
+
 def test_grp_prune_end_to_end():
     teacher, bs = _tiny_bert(), _batches()
     student, heads, neurons, info = grp_prune(teacher, bs, "cpu", seq_len=10.0, constraint=0.5)

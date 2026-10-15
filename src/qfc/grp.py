@@ -231,6 +231,41 @@ def grp_select(G: dict, weights: dict, sens: dict | None, L: int, num_heads: int
     return heads, neurons, {"rounds": rounds, "mac_ratio": total / orig, "constraint": constraint}
 
 
+def random_select(L: int, num_heads: int, intermediate: int, seq_len: float, hidden_size: int, constraint: float,
+                  seed: int):
+    """H13 Random baseline: remove units uniformly at random (heads and neurons pooled) until MACs <= budget,
+    keeping >= 1 FFN neuron per layer; the same joint refit is applied afterwards."""
+    head_size = hidden_size // num_heads
+    f = {"att": mac_per_head(seq_len, hidden_size, head_size), "ffn": mac_per_neuron(seq_len, hidden_size)}
+    orig = model_mac([num_heads] * L, [intermediate] * L, seq_len, hidden_size, head_size)
+    units = [(l, "att", h) for l in range(L) for h in range(num_heads)] + \
+            [(l, "ffn", n) for l in range(L) for n in range(intermediate)]
+    order = torch.randperm(len(units), generator=torch.Generator().manual_seed(seed)).tolist()
+    heads = {l: set(range(num_heads)) for l in range(L)}
+    neurons = {l: set(range(intermediate)) for l in range(L)}
+    total = orig
+    for i in order:
+        if total <= constraint * orig:
+            break
+        l, kind, j = units[i]
+        if kind == "ffn" and len(neurons[l]) <= 1:
+            continue
+        (heads if kind == "att" else neurons)[l].discard(j)
+        total -= f[kind]
+    return ({l: sorted(v) for l, v in heads.items()}, {l: sorted(v) for l, v in neurons.items()},
+            {"mac_ratio": total / orig, "constraint": constraint, "seed": seed})
+
+
+@torch.no_grad()
+def permute_classifier(model, order) -> None:
+    """New output class g takes the classifier row of old class order[g] (fixes checkpoints whose label order differs
+    from the dataset's, e.g. textattack MNLI: order = [1, 2, 0], docs/PROJECT_STATE.md V15 Phase 0)."""
+    clf = model.classifier
+    idx = torch.tensor(order, device=clf.weight.device)
+    clf.weight.copy_(clf.weight[idx].clone())
+    clf.bias.copy_(clf.bias[idx].clone())
+
+
 # ---- physical pruning and joint sequential refit ---------------------------------------------------------------
 def prune_model(model, heads_kept: dict, neurons_kept: dict):
     """Physically remove heads (HF prune_heads) and FFN neurons (slice intermediate/output dense). In place."""
