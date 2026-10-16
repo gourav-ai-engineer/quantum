@@ -576,6 +576,21 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   **H10: not run** - `v15_prepare_baselines.py` asserted GLUE `idx == row`, false for MRPC (its idx has gaps).
   Fixes (before any H10 data): indices are row positions (f59a2ca; same rows as GRP's sampling, checked);
   scikit-learn added to the Kwon env and K-prune Phase 1 skipped by default on reruns (4e6e3de).
+- **Kaggle run, Version 3 (2026-10-16, notebook9bdaba41a4 scriptVersionId 358889491, code c9fa264, T4, stopped at
+  23628 s by `OSError: [Errno 28] No space left on device`).** Cause: envs, K-prune checkpoints and K-prune's
+  per-run `model.ckpt` (about 0.44 GB each) all lived in `/kaggle/working` (20 GB cap). **Phase 1, Kwon (A1):
+  all 30 runs finished** (official code, K-prune's BERT-base checkpoints, add-on inactive; read from the per-run logs,
+  each matched to its file name and its logged task/constraint/seed; MAC = constraint in every log). Accuracy, seeds 0-4:
+  MRPC c0.7 0.8824, 0.8824, 0.8824, 0.8799, 0.8799 (mean 0.8814); c0.6 0.8578, 0.8333, 0.8505, 0.8578, 0.8480
+  (0.8495); c0.5 0.8162, 0.8260, 0.8358, 0.8186, 0.8260 (0.8245). SST-2 c0.7 0.9163, 0.9140, 0.9174, 0.9209, 0.9266
+  (0.9190); c0.6 0.9209, 0.9106, 0.9128, 0.9094, 0.9094 (0.9126); c0.5 0.9048, 0.9071, 0.9025, 0.8888, 0.8922
+  (0.8991). **A1 verdict pending:** the rule needs the unpruned accuracy of these checkpoints under the same
+  evaluation code; K-prune's Table 5 numbers (MRPC 87.01, SST-2 93.12) come from K-prune's evaluation and are not
+  used. Added `scripts/v15_kwon_unpruned.py` (Kwon's `test_accuracy` with all-ones masks), run first in `phase1`;
+  the 30 pruned runs are skipped by default (`SKIP_KWON_PHASE1=0` reruns them). **H10: not finished** (32 of 40
+  baseline cells done when the disk filled; GRP not started); it is rerun from scratch rather than stitched across
+  versions. Fixes: work dir `/tmp/v15`, small results copied to `/kaggle/working/v15` after every (task, seed), each
+  K-prune `model.ckpt` deleted right after its run, GRP JSONs written straight to the output directory.
 - First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
   same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
   no code patch.

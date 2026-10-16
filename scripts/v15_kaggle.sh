@@ -7,10 +7,13 @@
 #   h10    : calibration-side gate. Our 2048 calibration rows and pinned textattack checkpoints for every method:
 #            Kwon (keep c), K-prune (--constraint 1-c = remove 1-c), GRP (step22 --mode kl). MRPC/SST-2, 5 seeds,
 #            c in 0.7/0.6/0.5/0.4. Logits on held-out TRAIN rows (and validation, unused by H10) are dumped.
-# Usage: bash scripts/v15_kaggle.sh <stage> [work_dir]
+# Usage: bash scripts/v15_kaggle.sh <stage> [work_dir] [out_dir]
+# Work happens in /tmp (envs, checkpoints and K-prune's per-run model.ckpt overflowed Kaggle's 20 GB /kaggle/working
+# in Version 3); each stage ends by copying its small results (logs, masks, logit dumps, JSONs) to out_dir.
 set -euo pipefail
 STAGE=$1
-W=${2:-/kaggle/working/v15}
+W=${2:-/tmp/v15}
+OUT=${3:-/kaggle/working/v15}
 REPO=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$W" && cd "$W"
 KWON_SHA=806ac5a6ff53b4978e5330d45a3de692493e4d0b
@@ -20,6 +23,7 @@ SEEDS="7 42 77 123 2024"
 CONS="0.7 0.6 0.5 0.4"
 
 kwon()   { (cd "$W/kwon" && "$W/env_kwon/bin/python" main.py --model_name bert-base-uncased "$@"); }
+publish() { mkdir -p "$OUT"; for d in "$@"; do [ -e "$W/$d" ] && { mkdir -p "$OUT/$(dirname "$d")"; cp -r "$W/$d" "$OUT/$(dirname "$d")/"; }; done; du -sh "$OUT"; }
 kprune() { (cd "$W/kprune/src" && "$W/env_kprune/bin/python" main.py --model_name bert-base-uncased --gpu 0 \
             --lam_pred 1. --lam_rep 2.5e-4 --T 2 --mu 64 --sublayerwise_tuning "$@"); }
 
@@ -31,6 +35,7 @@ setup)
   pip install -q -U uv gdown
   [ -d kwon ] || { git clone -q https://github.com/WoosukKwon/retraining-free-pruning kwon && git -C kwon checkout -q $KWON_SHA; }
   [ -d kprune ] || { git clone -q https://github.com/snudm-starlab/K-prune kprune && git -C kprune checkout -q $KPRUNE_SHA; }
+  cp "$REPO/scripts/v15_kwon_unpruned.py" kwon/
   cp "$REPO/scripts/v15_official_addon.py" kwon/ && cp "$REPO/scripts/v15_official_addon.py" kprune/src/
   cp "$REPO/src/qfc/squad.py" kwon/squad_v15.py && cp "$REPO/src/qfc/squad.py" kprune/src/squad_v15.py
   python "$REPO/scripts/v15_official_addon.py" patch kwon/main.py kwon
@@ -45,10 +50,15 @@ setup)
   [ -d ck_kprune ] || gdown -q --folder https://drive.google.com/drive/folders/1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt -O ck_kprune
   ls ck_kprune/bert-base-uncased
   for t in mrpc sst2; do [ -f ck_kprune/bert-base-uncased/$t/config.json ] || { echo "missing K-prune ckpt $t"; exit 1; }; done
+  publish patch_kwon.diff patch_kprune.diff
+  df -h /tmp /kaggle/working || true
   ;;
 phase1)
   mkdir -p phase1
-  for t in mrpc sst2; do for c in 0.7 0.6 0.5; do for s in 0 1 2 3 4; do
+  # A1: unpruned accuracy of K-prune's checkpoints under Kwon's own evaluation (the drop is pruned minus this).
+  for t in mrpc sst2; do (cd "$W/kwon" && "$W/env_kwon/bin/python" v15_kwon_unpruned.py $t "$W/ck_kprune/bert-base-uncased/$t")     > "$W/phase1/kwon_unpruned_$t.log" 2>&1 || echo "FAIL unpruned $t"; grep -H "Unpruned" "$W/phase1/kwon_unpruned_$t.log" || true; done
+  # Kwon Phase 1 pruned runs done in Version 3 (2026-10-16, all 30 read): skipped by default; SKIP_KWON_PHASE1=0 reruns.
+  [ "${SKIP_KWON_PHASE1:-1}" = 1 ] || for t in mrpc sst2; do for c in 0.7 0.6 0.5; do for s in 0 1 2 3 4; do
     o=$W/phase1/kwon_${t}_c${c}_s${s}; [ -f $o/head_mask.pt ] && continue
     kwon --task_name $t --ckpt_dir "$W/ck_kprune/bert-base-uncased/$t" --constraint $c --seed $s --output_dir $o \
       > $o.log 2>&1 || echo "FAIL $o"
@@ -61,6 +71,7 @@ phase1)
   done; done
   grep -H "Test accuracy" "$W"/phase1/kwon_*.log || true
   grep -H "FLOPs:" "$W"/phase1/kprune_*.log || true
+  publish phase1
   ;;
 h10)
   (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks mrpc,sst2 --out "$W/inputs")
@@ -75,13 +86,17 @@ h10)
       e=h10/kprune_${t}_seed${s}_c${c}
       [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { kprune --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
         --exp_name $e --seed 0 --constraint $r > "$W/h10/kprune_${t}_seed${s}_c${c}.log" 2>&1 || echo "FAIL $e"; }
+      rm -f "$KP_OUT/$e/model.ckpt"
     done
     unset V15_INDEX_FILE
+    # publish after every (task, seed) so a run stopped by Kaggle's 12 h limit keeps what it finished
+    mkdir -p "$W/h10/kprune_out" && cp -r "$KP_OUT/h10/." "$W/h10/kprune_out/" 2>/dev/null || true
+    find "$W/h10/kprune_out" -name model.ckpt -delete || true
+    publish h10 inputs/indices
   done; done
+  # GRP writes its JSONs (one per run, resumable) straight into the published directory
   (cd "$REPO" && PYTHONPATH=scripts python scripts/step22_grp.py --tasks mrpc,sst2 --constraints 0.7,0.6,0.5,0.4 \
-    --variants "${GRP_VARIANTS:-grp}" --mode kl --output-dir "$W/h10/grp" 2>&1 | grep -v -i warn | tail -45)
-  mkdir -p "$W/h10/kprune_out" && cp -r "$KP_OUT/h10/." "$W/h10/kprune_out/" 2>/dev/null || true
-  find "$W/h10/kprune_out" -name model.ckpt -delete || true
+    --variants "${GRP_VARIANTS:-grp}" --mode kl --output-dir "$OUT/h10/grp" 2>&1 | grep -v -i warn | tail -45)
   ;;
 h11)
   # Primary test (run only if Phase 1 and H10 pass). Constraint 0.5; dev tasks pick the better baseline once.
@@ -96,6 +111,7 @@ h11)
     e=h11/kprune_${t}_seed${s}_c0.5
     [ -f "$KP_OUT/$e/v15_student_validation.pt" ] || { kprune --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
       --exp_name $e --seed 0 --constraint 0.5 > "$W/h11/kprune_${t}_seed${s}.log" 2>&1 || echo "FAIL $e"; }
+    rm -f "$KP_OUT/$e/model.ckpt"
     unset V15_INDEX_FILE
   done; done
   (cd "$REPO" && PYTHONPATH=scripts python scripts/step22_grp.py --tasks "$(echo $TASKS | tr ' ' ,)" \
@@ -106,6 +122,8 @@ h11)
   (cd "$REPO" && python scripts/v15_latency.py --grp "$W/h11/grp/v15_grp_*_c0.5.json" \
     --kwon $(ls -d $W/h11/kwon_*_seed7_c0.5) --kprune $(ls -d $W/h11/kprune_out/kprune_*_seed7_c0.5) \
     --out "$W/h11/latency.json") || true
+  find "$W/h11/kprune_out" -name model.ckpt -delete || true
+  publish h11 inputs/indices
   ;;
 *) echo "unknown stage $STAGE"; exit 1 ;;
 esac
