@@ -142,7 +142,15 @@ spread over output fidelities from about 0.1 to 0.5.
 (calibration data, seed 7). Shaded: attention fidelity above 0.99 but output fidelity below 0.5. Source:
 \texttt{results/v14\_pairs/71cb52d}.}\label{fig:pairs}
 \end{figure}
-\todo{extend D1--D3 to 5 tasks $\times$ 5 seeds (CPU, deterministic; running: results/v14\_bcm\_diag/full\_be03d75).}
+Over all five tasks and five calibration seeds (\texttt{results/v14\_bcm\_diag/full\_be03d75/diag\_summary.json}),
+the share of attention-near-identical pairs (fidelity above 0.99) whose output fidelity is below 0.5 is 72\% on
+SST-2 (195 of 270), 97\% on MRPC (179/184), 92\% on RTE (57/62) and 82\% on QNLI (23/28), but only 20\% on CoLA
+(38/189), whose inputs are short single sentences; the blindness is therefore real but task-dependent. The
+other diagnostics replicate on every task: the coverage bound ranks random subsets like the true merge error
+(median per-layer Spearman 0.915--0.955) while overestimating it about threefold (median ratio 3.12--3.26);
+greedy exact LS is within 0.001--0.002 of the exhaustive per-layer optimum in mean relative error; BCM is within
+0.008--0.022 of the optimum, below Fisher top-$k$ and attention coverage on every task, and level with magnitude
+top-$k$ (difference at most 0.006, in both directions).
 
 \subsection{Selection versus compensation (V14, pre-registered)}\label{sec:v14}
 % results/v14_bcm/9c4b999 ; v14_verdicts.json
