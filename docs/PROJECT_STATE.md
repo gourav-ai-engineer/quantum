@@ -566,6 +566,16 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   tasks (the stricter reading of "lower than each baseline at >= 2 of the 4 constraints"); this is what
   `v15_h10_analysis.py` implements. (4) step22 resumes only a finished run of the same mode; SQuAD post-processing
   uses plain dicts (was O(N^2) on the full validation set).
+- **Kaggle run, Version 2 (2026-10-15/16, notebook9bdaba41a4, code 0829437, T4, 9740 s).**
+  **Phase 1, K-prune: REPRODUCED.** Official code (patched add-on inactive), K-prune's own BERT-base checkpoints,
+  `--constraint 0.8`, seeds 0-4: MRPC accuracy 0.8431, 0.8431, 0.8505, 0.8603, 0.8456 (mean 0.8485 vs published
+  84.80, +0.05 points); SQuAD v1.1 F1 74.73, 73.41, 73.71, 74.34, 74.81 (mean 74.20 vs published 74.16, +0.04).
+  Both within the 1.0-point margin; the K-prune gate passes. (FLOPs reported: 9.15 -> 1.83 and 29.94 -> 5.99 GFLOPs,
+  80.00% removed.) **Phase 1, Kwon: not run to completion** - all 30 runs pruned but crashed at evaluation
+  (`load_metric("glue")` needs scikit-learn, missing from the Kwon env); no Kwon number exists yet.
+  **H10: not run** - `v15_prepare_baselines.py` asserted GLUE `idx == row`, false for MRPC (its idx has gaps).
+  Fixes (before any H10 data): indices are row positions (f59a2ca; same rows as GRP's sampling, checked);
+  scikit-learn added to the Kwon env and K-prune Phase 1 skipped by default on reruns (4e6e3de).
 - First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
   same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
   no code patch.
