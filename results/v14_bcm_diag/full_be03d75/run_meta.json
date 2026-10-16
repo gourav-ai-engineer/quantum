@@ -1,0 +1,8 @@
+{
+  "experiment": "V14 diagnostics D1-D3, full (5 tasks x 5 seeds)",
+  "code": "scripts/step21_bcm.py --diagnostics-only at commit be03d75 (diagnostic code path unchanged since 4bd649f)",
+  "command": "PYTHONPATH=scripts python scripts/step21_bcm.py --tasks sst2,mrpc,rte,qnli,cola --seeds 7,42,77,123,2024 --diagnostics-only --output-dir results/v14_bcm_diag/full_be03d75",
+  "environment": ".venv-ci (torch 2.6.0, transformers 4.51.3, datasets 3.6.0, pyarrow 24.0.0), CPU, Windows; calibration data only (train.shuffle(seed)[:512]); deterministic",
+  "dates": "2026-10-15 to 2026-10-16",
+  "summary": "diag_summary.json via scripts/v14_diag_summary.py; seed-7 SST-2/MRPC values reproduce results/v14_bcm_diag/4bd649f"
+}

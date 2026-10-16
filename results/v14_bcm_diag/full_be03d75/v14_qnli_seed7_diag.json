@@ -1,0 +1,1127 @@
+{
+  "layers": {
+    "0": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": 0.23406742511220124,
+      "D2_spearman_bound_vs_merge_error": 0.9554989863291312,
+      "D2_spearman_bound_vs_ls_error": 0.9336639982959227,
+      "D2_median_slack_bound_over_merge": 3.2848947543207423,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            1,
+            2,
+            3,
+            9,
+            10
+          ],
+          "ls_error": 322.35724243790685,
+          "delete_error": 573.7273008553723,
+          "merge_error": 438.10512793009235,
+          "bound": 1417.8736298446504
+        },
+        "fisher": {
+          "heads": [
+            0,
+            1,
+            4,
+            5,
+            9,
+            10
+          ],
+          "ls_error": 516.2669821582591,
+          "delete_error": 735.2817471517577,
+          "merge_error": 611.5827646604419,
+          "bound": 1895.658883065048
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            2,
+            3,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 338.3452671206464,
+          "delete_error": 574.3874034503824,
+          "merge_error": 451.79158263044883,
+          "bound": 1427.444969010708
+        },
+        "greedy_ls": {
+          "heads": [
+            1,
+            2,
+            3,
+            8,
+            10,
+            11
+          ],
+          "ls_error": 314.89178860922624,
+          "delete_error": 611.7385807644777,
+          "merge_error": 474.1577204695611,
+          "bound": 1527.247548751031
+        },
+        "qfc_attn": {
+          "heads": [
+            0,
+            3,
+            5,
+            6,
+            7,
+            8
+          ],
+          "ls_error": 516.068922196624,
+          "delete_error": 735.1897759956948,
+          "merge_error": 625.4297313986324,
+          "bound": 2168.307214562191
+        },
+        "exhaustive_opt": {
+          "heads": [
+            0,
+            1,
+            2,
+            3,
+            5,
+            10
+          ],
+          "ls_error": 311.13406582004734
+        }
+      },
+      "total_output_norm": 1128.7860160417267
+    },
+    "1": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": 0.4507045193612358,
+      "D2_spearman_bound_vs_merge_error": 0.974728413321773,
+      "D2_spearman_bound_vs_ls_error": 0.9664840588145291,
+      "D2_median_slack_bound_over_merge": 3.5373652926667924,
+      "D3": {
+        "bcm": {
+          "heads": [
+            1,
+            4,
+            6,
+            7,
+            10,
+            11
+          ],
+          "ls_error": 353.26173799732123,
+          "delete_error": 498.8259725946911,
+          "merge_error": 432.4380763967141,
+          "bound": 1585.1220697621488
+        },
+        "fisher": {
+          "heads": [
+            1,
+            4,
+            5,
+            7,
+            10,
+            11
+          ],
+          "ls_error": 341.35591779658574,
+          "delete_error": 514.3050515976212,
+          "merge_error": 452.26820778619253,
+          "bound": 1688.75278748645
+        },
+        "magnitude": {
+          "heads": [
+            1,
+            4,
+            6,
+            7,
+            10,
+            11
+          ],
+          "ls_error": 353.26173799732123,
+          "delete_error": 498.8259725946911,
+          "merge_error": 432.4380763967141,
+          "bound": 1585.1220697621488
+        },
+        "greedy_ls": {
+          "heads": [
+            1,
+            4,
+            5,
+            7,
+            10,
+            11
+          ],
+          "ls_error": 341.35591779658574,
+          "delete_error": 514.3050515976212,
+          "merge_error": 452.26820778619253,
+          "bound": 1688.75278748645
+        },
+        "qfc_attn": {
+          "heads": [
+            0,
+            1,
+            3,
+            5,
+            7,
+            10
+          ],
+          "ls_error": 526.6695977931048,
+          "delete_error": 697.7067486628108,
+          "merge_error": 636.788948135289,
+          "bound": 2320.764430225164
+        },
+        "exhaustive_opt": {
+          "heads": [
+            1,
+            4,
+            5,
+            7,
+            10,
+            11
+          ],
+          "ls_error": 341.35591779658574
+        }
+      },
+      "total_output_norm": 1054.783880628424
+    },
+    "2": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 1,
+      "D1_spearman_attnF_vs_outF": 0.5835507775806283,
+      "D2_spearman_bound_vs_merge_error": 0.9512178657816278,
+      "D2_spearman_bound_vs_ls_error": 0.959591232116405,
+      "D2_median_slack_bound_over_merge": 3.5238583311537965,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            1,
+            6,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 405.5074636507935,
+          "delete_error": 575.2345273414953,
+          "merge_error": 505.77662062977845,
+          "bound": 1808.3480099585372
+        },
+        "fisher": {
+          "heads": [
+            0,
+            2,
+            6,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 490.5905470133799,
+          "delete_error": 641.939585842461,
+          "merge_error": 585.0642133267896,
+          "bound": 2014.9100365687173
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            1,
+            4,
+            6,
+            9,
+            11
+          ],
+          "ls_error": 403.9952909362369,
+          "delete_error": 559.1585170563342,
+          "merge_error": 504.2736989527059,
+          "bound": 1815.5848311431578
+        },
+        "greedy_ls": {
+          "heads": [
+            1,
+            4,
+            6,
+            8,
+            9,
+            11
+          ],
+          "ls_error": 399.8165788972611,
+          "delete_error": 645.3873547716863,
+          "merge_error": 503.2722460441445,
+          "bound": 1878.3565975048637
+        },
+        "qfc_attn": {
+          "heads": [
+            1,
+            3,
+            4,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 450.951683090472,
+          "delete_error": 686.604946543564,
+          "merge_error": 556.1534537115862,
+          "bound": 2062.0839431651943
+        },
+        "exhaustive_opt": {
+          "heads": [
+            0,
+            1,
+            4,
+            6,
+            8,
+            11
+          ],
+          "ls_error": 399.5848143268908
+        }
+      },
+      "total_output_norm": 1142.5430642348074
+    },
+    "3": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 1,
+      "D1_attnF_gt_0.99": 1,
+      "D1_spearman_attnF_vs_outF": 0.48310197265421145,
+      "D2_spearman_bound_vs_merge_error": 0.9304769797905174,
+      "D2_spearman_bound_vs_ls_error": 0.8956547174835088,
+      "D2_median_slack_bound_over_merge": 3.447941150915211,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            5,
+            8,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 448.7828528398157,
+          "delete_error": 598.0774942333644,
+          "merge_error": 542.1225859923153,
+          "bound": 1858.021064839993
+        },
+        "fisher": {
+          "heads": [
+            0,
+            2,
+            3,
+            5,
+            7,
+            8
+          ],
+          "ls_error": 586.332753511991,
+          "delete_error": 762.6256934641776,
+          "merge_error": 686.7978474642639,
+          "bound": 2274.153549579631
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            3,
+            5,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 439.46053830360233,
+          "delete_error": 573.1464360963005,
+          "merge_error": 529.8565833465981,
+          "bound": 1877.2314827948896
+        },
+        "greedy_ls": {
+          "heads": [
+            0,
+            3,
+            5,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 439.46053830360233,
+          "delete_error": 573.1464360963005,
+          "merge_error": 529.8565833465981,
+          "bound": 1877.2314827948896
+        },
+        "qfc_attn": {
+          "heads": [
+            2,
+            3,
+            5,
+            7,
+            8,
+            10
+          ],
+          "ls_error": 585.0007909881682,
+          "delete_error": 781.3255643484263,
+          "merge_error": 691.3587813250929,
+          "bound": 2339.629037620855
+        },
+        "exhaustive_opt": {
+          "heads": [
+            0,
+            3,
+            5,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 439.46053830360233
+        }
+      },
+      "total_output_norm": 1137.836556058407
+    },
+    "4": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": -0.075294854399332,
+      "D2_spearman_bound_vs_merge_error": 0.9543563454175213,
+      "D2_spearman_bound_vs_ls_error": 0.9494286667891711,
+      "D2_median_slack_bound_over_merge": 3.215405067747504,
+      "D3": {
+        "bcm": {
+          "heads": [
+            3,
+            5,
+            7,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 508.0777614625283,
+          "delete_error": 658.7344832846246,
+          "merge_error": 597.6682719727386,
+          "bound": 1912.3769448520873
+        },
+        "fisher": {
+          "heads": [
+            1,
+            3,
+            4,
+            7,
+            9,
+            10
+          ],
+          "ls_error": 640.0248393879604,
+          "delete_error": 806.918163847617,
+          "merge_error": 738.8230572379617,
+          "bound": 2297.712151671587
+        },
+        "magnitude": {
+          "heads": [
+            3,
+            5,
+            7,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 508.0777614625283,
+          "delete_error": 658.7344832846246,
+          "merge_error": 597.6682719727386,
+          "bound": 1912.3769448520873
+        },
+        "greedy_ls": {
+          "heads": [
+            3,
+            4,
+            5,
+            7,
+            10,
+            11
+          ],
+          "ls_error": 494.15635672125217,
+          "delete_error": 646.4349617005528,
+          "merge_error": 590.7836844184578,
+          "bound": 1971.5907772425517
+        },
+        "qfc_attn": {
+          "heads": [
+            1,
+            2,
+            5,
+            7,
+            8,
+            9
+          ],
+          "ls_error": 708.7339194329143,
+          "delete_error": 905.3133239520329,
+          "merge_error": 809.4314605342462,
+          "bound": 2514.041335832544
+        },
+        "exhaustive_opt": {
+          "heads": [
+            3,
+            4,
+            5,
+            7,
+            10,
+            11
+          ],
+          "ls_error": 494.15635672125217
+        }
+      },
+      "total_output_norm": 1193.338563306738
+    },
+    "5": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": 0.14877361444525625,
+      "D2_spearman_bound_vs_merge_error": 0.8407681530305805,
+      "D2_spearman_bound_vs_ls_error": 0.8261875260636209,
+      "D2_median_slack_bound_over_merge": 3.1259404017329437,
+      "D3": {
+        "bcm": {
+          "heads": [
+            3,
+            5,
+            7,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 580.0171855034472,
+          "delete_error": 731.8747607542584,
+          "merge_error": 678.3843109308588,
+          "bound": 2165.0137925381655
+        },
+        "fisher": {
+          "heads": [
+            0,
+            4,
+            5,
+            8,
+            10,
+            11
+          ],
+          "ls_error": 676.4847097624577,
+          "delete_error": 848.0859921892184,
+          "merge_error": 768.0561967182003,
+          "bound": 2385.980696731678
+        },
+        "magnitude": {
+          "heads": [
+            3,
+            5,
+            7,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 580.0171855034472,
+          "delete_error": 731.8747607542584,
+          "merge_error": 678.3843109308588,
+          "bound": 2165.0137925381655
+        },
+        "greedy_ls": {
+          "heads": [
+            0,
+            3,
+            6,
+            7,
+            8,
+            10
+          ],
+          "ls_error": 582.7112542154651,
+          "delete_error": 738.2032416495107,
+          "merge_error": 678.0766473769365,
+          "bound": 2331.901981739369
+        },
+        "qfc_attn": {
+          "heads": [
+            0,
+            4,
+            6,
+            7,
+            9,
+            10
+          ],
+          "ls_error": 625.8762968158009,
+          "delete_error": 800.6224326282423,
+          "merge_error": 720.1398894699582,
+          "bound": 2266.388478829662
+        },
+        "exhaustive_opt": {
+          "heads": [
+            3,
+            6,
+            7,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 568.8872134832637
+        }
+      },
+      "total_output_norm": 1271.6964910327238
+    },
+    "6": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": 0.10731656403298194,
+      "D2_spearman_bound_vs_merge_error": 0.6918765952308269,
+      "D2_spearman_bound_vs_ls_error": 0.4468926422310242,
+      "D2_median_slack_bound_over_merge": 3.080775164915903,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            1,
+            5,
+            6,
+            8,
+            11
+          ],
+          "ls_error": 641.5035053806904,
+          "delete_error": 838.1516833638964,
+          "merge_error": 753.0182863613078,
+          "bound": 2192.0472946885343
+        },
+        "fisher": {
+          "heads": [
+            2,
+            4,
+            5,
+            6,
+            8,
+            9
+          ],
+          "ls_error": 646.3850104148222,
+          "delete_error": 830.5223051269649,
+          "merge_error": 755.3304028537033,
+          "bound": 2373.1907274004457
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            1,
+            5,
+            6,
+            8,
+            11
+          ],
+          "ls_error": 641.5035053806904,
+          "delete_error": 838.1516833638964,
+          "merge_error": 753.0182863613078,
+          "bound": 2192.0472946885343
+        },
+        "greedy_ls": {
+          "heads": [
+            0,
+            1,
+            4,
+            5,
+            6,
+            9
+          ],
+          "ls_error": 588.3334202119894,
+          "delete_error": 784.8690900122399,
+          "merge_error": 717.804268202496,
+          "bound": 2340.170552643782
+        },
+        "qfc_attn": {
+          "heads": [
+            1,
+            2,
+            6,
+            7,
+            9,
+            11
+          ],
+          "ls_error": 702.1853220519781,
+          "delete_error": 926.7869693126397,
+          "merge_error": 828.6867925970065,
+          "bound": 2435.4217879146227
+        },
+        "exhaustive_opt": {
+          "heads": [
+            0,
+            1,
+            4,
+            5,
+            6,
+            9
+          ],
+          "ls_error": 588.3334202119894
+        }
+      },
+      "total_output_norm": 1285.1429623201248
+    },
+    "7": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 2,
+      "D1_attnF_gt_0.99": 2,
+      "D1_spearman_attnF_vs_outF": -0.035716522283686464,
+      "D2_spearman_bound_vs_merge_error": 0.9619120336132941,
+      "D2_spearman_bound_vs_ls_error": 0.9572813553321803,
+      "D2_median_slack_bound_over_merge": 2.9167273347237703,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            1,
+            4,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 423.55963276712896,
+          "delete_error": 529.0517205764329,
+          "merge_error": 490.8389294793691,
+          "bound": 1455.3357883300382
+        },
+        "fisher": {
+          "heads": [
+            0,
+            1,
+            4,
+            5,
+            8,
+            10
+          ],
+          "ls_error": 446.14383793864806,
+          "delete_error": 566.6260220850031,
+          "merge_error": 512.7577176606752,
+          "bound": 1541.5182590536301
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            1,
+            4,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 423.55963276712896,
+          "delete_error": 529.0517205764329,
+          "merge_error": 490.8389294793691,
+          "bound": 1455.3357883300382
+        },
+        "greedy_ls": {
+          "heads": [
+            0,
+            1,
+            4,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 423.55963276712896,
+          "delete_error": 529.0517205764329,
+          "merge_error": 490.8389294793691,
+          "bound": 1455.3357883300382
+        },
+        "qfc_attn": {
+          "heads": [
+            0,
+            2,
+            3,
+            4,
+            5,
+            10
+          ],
+          "ls_error": 536.969433691014,
+          "delete_error": 675.0211361509871,
+          "merge_error": 617.0508866450391,
+          "bound": 1772.0284877811837
+        },
+        "exhaustive_opt": {
+          "heads": [
+            0,
+            1,
+            4,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 423.55963276712896
+        }
+      },
+      "total_output_norm": 1152.7559891006608
+    },
+    "8": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": 0.25164387850955017,
+      "D2_spearman_bound_vs_merge_error": 0.8854375893471899,
+      "D2_spearman_bound_vs_ls_error": 0.8381827700366464,
+      "D2_median_slack_bound_over_merge": 3.2872904175006763,
+      "D3": {
+        "bcm": {
+          "heads": [
+            1,
+            4,
+            5,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 511.39140893293404,
+          "delete_error": 700.4448831994314,
+          "merge_error": 614.9217251754701,
+          "bound": 2079.9372649024867
+        },
+        "fisher": {
+          "heads": [
+            1,
+            3,
+            7,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 553.7352958964846,
+          "delete_error": 767.1236945069535,
+          "merge_error": 667.8662281172179,
+          "bound": 2334.182208854564
+        },
+        "magnitude": {
+          "heads": [
+            1,
+            5,
+            8,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 527.5057708378471,
+          "delete_error": 712.4449644235539,
+          "merge_error": 633.2766385543064,
+          "bound": 2080.8612722089065
+        },
+        "greedy_ls": {
+          "heads": [
+            1,
+            5,
+            7,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 501.13904671824565,
+          "delete_error": 682.1546850265062,
+          "merge_error": 604.8250223168375,
+          "bound": 2143.5016534843735
+        },
+        "qfc_attn": {
+          "heads": [
+            0,
+            1,
+            2,
+            3,
+            6,
+            10
+          ],
+          "ls_error": 633.078718923901,
+          "delete_error": 933.3145866521277,
+          "merge_error": 788.2348508279501,
+          "bound": 2638.2852368089852
+        },
+        "exhaustive_opt": {
+          "heads": [
+            1,
+            5,
+            7,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 501.13904671824565
+        }
+      },
+      "total_output_norm": 1268.3118165466306
+    },
+    "9": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": 0.21340152384928504,
+      "D2_spearman_bound_vs_merge_error": 0.9373590413423728,
+      "D2_spearman_bound_vs_ls_error": 0.8823008803095523,
+      "D2_median_slack_bound_over_merge": 3.3406796883076177,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            1,
+            3,
+            6,
+            8,
+            11
+          ],
+          "ls_error": 501.1517342674518,
+          "delete_error": 688.1338677707062,
+          "merge_error": 608.7403379866175,
+          "bound": 1930.2317726644874
+        },
+        "fisher": {
+          "heads": [
+            0,
+            1,
+            3,
+            6,
+            8,
+            11
+          ],
+          "ls_error": 501.1517342674518,
+          "delete_error": 688.1338677707062,
+          "merge_error": 608.7403379866175,
+          "bound": 1930.2317726644874
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            1,
+            3,
+            6,
+            8,
+            11
+          ],
+          "ls_error": 501.1517342674518,
+          "delete_error": 688.1338677707062,
+          "merge_error": 608.7403379866175,
+          "bound": 1930.2317726644874
+        },
+        "greedy_ls": {
+          "heads": [
+            0,
+            1,
+            6,
+            7,
+            8,
+            11
+          ],
+          "ls_error": 492.70038444510703,
+          "delete_error": 692.3952380259651,
+          "merge_error": 604.8286055086181,
+          "bound": 2028.6050158179833
+        },
+        "qfc_attn": {
+          "heads": [
+            0,
+            1,
+            3,
+            5,
+            9,
+            10
+          ],
+          "ls_error": 655.0049569848413,
+          "delete_error": 926.9552612749588,
+          "merge_error": 828.9660041037914,
+          "bound": 2836.6211586445834
+        },
+        "exhaustive_opt": {
+          "heads": [
+            0,
+            1,
+            6,
+            7,
+            8,
+            11
+          ],
+          "ls_error": 492.70038444510703
+        }
+      },
+      "total_output_norm": 1243.1760775776736
+    },
+    "10": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 0,
+      "D1_attnF_gt_0.99": 0,
+      "D1_spearman_attnF_vs_outF": 0.32036321887068153,
+      "D2_spearman_bound_vs_merge_error": 0.915220918083789,
+      "D2_spearman_bound_vs_ls_error": 0.9173375075096922,
+      "D2_median_slack_bound_over_merge": 2.968016820196383,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            2,
+            3,
+            6,
+            9,
+            11
+          ],
+          "ls_error": 406.4928732602192,
+          "delete_error": 526.7486392253317,
+          "merge_error": 487.023424532129,
+          "bound": 1449.4031530456518
+        },
+        "fisher": {
+          "heads": [
+            0,
+            2,
+            3,
+            7,
+            8,
+            10
+          ],
+          "ls_error": 590.2592847478836,
+          "delete_error": 778.9129084500935,
+          "merge_error": 715.4923272184744,
+          "bound": 1989.3353778740156
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            2,
+            3,
+            6,
+            9,
+            11
+          ],
+          "ls_error": 406.4928732602192,
+          "delete_error": 526.7486392253317,
+          "merge_error": 487.023424532129,
+          "bound": 1449.4031530456518
+        },
+        "greedy_ls": {
+          "heads": [
+            2,
+            3,
+            6,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 399.3542559805258,
+          "delete_error": 530.8849013490097,
+          "merge_error": 486.1056024018826,
+          "bound": 1474.6509493098652
+        },
+        "qfc_attn": {
+          "heads": [
+            2,
+            5,
+            7,
+            8,
+            9,
+            10
+          ],
+          "ls_error": 560.4713055493975,
+          "delete_error": 717.6320432357287,
+          "merge_error": 673.4796981227508,
+          "bound": 2112.8123349413745
+        },
+        "exhaustive_opt": {
+          "heads": [
+            2,
+            3,
+            6,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 399.3542559805258
+        }
+      },
+      "total_output_norm": 1020.0820982559501
+    },
+    "11": {
+      "D1_pairs": 66,
+      "D1_attnF_gt_0.99_and_outF_lt_0.5": 4,
+      "D1_attnF_gt_0.99": 4,
+      "D1_spearman_attnF_vs_outF": 0.5289009497964722,
+      "D2_spearman_bound_vs_merge_error": 0.9857104927224917,
+      "D2_spearman_bound_vs_ls_error": 0.9444215269642072,
+      "D2_median_slack_bound_over_merge": 2.786778536268835,
+      "D3": {
+        "bcm": {
+          "heads": [
+            0,
+            2,
+            3,
+            5,
+            8,
+            9
+          ],
+          "ls_error": 418.4768991256903,
+          "delete_error": 629.6068488118817,
+          "merge_error": 544.5115204169435,
+          "bound": 1615.1221355475886
+        },
+        "fisher": {
+          "heads": [
+            2,
+            4,
+            6,
+            9,
+            10,
+            11
+          ],
+          "ls_error": 665.1655671222466,
+          "delete_error": 949.8517111343172,
+          "merge_error": 814.4821783843219,
+          "bound": 2174.2305765260344
+        },
+        "magnitude": {
+          "heads": [
+            0,
+            2,
+            3,
+            5,
+            8,
+            9
+          ],
+          "ls_error": 418.4768991256903,
+          "delete_error": 629.6068488118817,
+          "merge_error": 544.5115204169435,
+          "bound": 1615.1221355475886
+        },
+        "greedy_ls": {
+          "heads": [
+            2,
+            3,
+            4,
+            5,
+            8,
+            9
+          ],
+          "ls_error": 414.0484704666628,
+          "delete_error": 624.549855097119,
+          "merge_error": 546.4649795423363,
+          "bound": 1622.3407838305077
+        },
+        "qfc_attn": {
+          "heads": [
+            0,
+            1,
+            5,
+            8,
+            9,
+            11
+          ],
+          "ls_error": 454.48059159620664,
+          "delete_error": 686.0639250293402,
+          "merge_error": 595.7769380737683,
+          "bound": 1782.8708792189236
+        },
+        "exhaustive_opt": {
+          "heads": [
+            2,
+            3,
+            4,
+            5,
+            8,
+            9
+          ],
+          "ls_error": 414.0484704666628
+        }
+      },
+      "total_output_norm": 1242.891159069763
+    }
+  },
+  "task": "qnli",
+  "seed": 7,
+  "k": 6,
+  "calibration_size": 512,
+  "ridge_rel": 0.0001,
+  "model_id": "textattack/bert-base-uncased-QNLI",
+  "model_revision": "a63ef5bad18761ededbc04fb8e0f0a2729b1508d"
+}
