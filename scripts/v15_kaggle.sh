@@ -37,7 +37,8 @@ setup)
   python "$REPO/scripts/v15_official_addon.py" patch kprune/src/main.py kprune
   git -C kwon diff > patch_kwon.diff; git -C kprune diff > patch_kprune.diff
   [ -d env_kwon ] || { uv venv -q -p 3.9 env_kwon && uv pip install -q -p env_kwon/bin/python torch==1.13.1 \
-      transformers==4.12.0 datasets==2.14.7 numpy==1.23.5 scipy tqdm cupy-cuda12x; }
+      transformers==4.12.0 datasets==2.14.7 numpy==1.23.5 scipy scikit-learn==1.2.2 tqdm cupy-cuda12x; }
+  "$W/env_kwon/bin/python" -c "import sklearn" 2>/dev/null || uv pip install -q -p env_kwon/bin/python scikit-learn==1.2.2  # load_metric('glue') needs it
   [ -d env_kprune ] || { uv venv -q -p 3.10 env_kprune && uv pip install -q -p env_kprune/bin/python torch==1.12.1 \
       transformers==4.25.1 datasets==2.14.7 numpy==1.23.4 scipy==1.10.0 scikit-learn==1.2.1 tqdm colorama; }
   # (newer gdown dropped --remaining-ok; the folder has < 50 files, so it is not needed)
@@ -52,7 +53,8 @@ phase1)
     kwon --task_name $t --ckpt_dir "$W/ck_kprune/bert-base-uncased/$t" --constraint $c --seed $s --output_dir $o \
       > $o.log 2>&1 || echo "FAIL $o"
   done; done; done
-  for t in mrpc squad; do for s in 0 1 2 3 4; do
+  # K-prune Phase 1 reproduced on 2026-10-16 (Version 2): skipped by default; SKIP_KPRUNE_PHASE1=0 reruns it.
+  [ "${SKIP_KPRUNE_PHASE1:-1}" = 1 ] || for t in mrpc squad; do for s in 0 1 2 3 4; do
     e=phase1/kprune_${t}_r0.8_s${s}; [ -f "$KP_OUT/$e/model.ckpt" ] && continue
     kprune --task_name $t --ckpt_dir "$W/ck_kprune/bert-base-uncased/$t" --exp_name $e --seed $s \
       --num_tokens 100000 --constraint 0.8 > "$W/phase1/kprune_${t}_r0.8_s${s}.log" 2>&1 || echo "FAIL $e"
