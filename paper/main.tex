@@ -26,8 +26,8 @@ entangled in this setting: \emph{which} units to remove (selection), and \emph{h
 
 Our starting point was a representation of each head by its normalized attention pattern and a fidelity-based coverage
 objective for choosing redundant heads. We show that attention-pattern similarity is a poor redundancy signal: it is
-blind to how a head mixes values (Proposition~\ref{prop:blind}), and on BERT-base most head pairs that it calls
-near-identical produce dissimilar outputs (Section~\ref{sec:diag}). Moving the similarity to the head's output operator
+blind to how a head mixes values (Proposition~\ref{prop:blind}), and on BERT-base, on four of five GLUE tasks, most
+head pairs that it calls near-identical produce dissimilar outputs (Section~\ref{sec:diag}). Moving the similarity to the head's output operator
 gives a coverage bound on the merge error that ranks subsets well (Theorem~\ref{thm:bound}), yet in a pre-registered
 factorial over five GLUE tasks and five calibration seeds, once the remaining heads are refit by least squares the
 choice of selector barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). \todo{one paragraph on V15 (GRP:
