@@ -31,14 +31,12 @@ def main():
         spec = SPECS[task]
         dn, cfg = spec["dataset"]
         train = (load_dataset(dn, cfg) if cfg else load_dataset(dn))["train"]
-        if spec.get("qa"):
-            # SQuAD has no 'idx'; the indices are EXAMPLE rows, and the add-on maps them to the official codes'
-            # feature indices (every window of each example), so all methods use the same calibration examples.
-            train = train.add_column("idx", list(range(len(train))))
-        assert train["idx"] == list(range(len(train))), "idx must equal row index"
+        # Row POSITIONS (what Subset/.select index), not GLUE's 'idx' column: MRPC's idx has gaps (row 9 -> idx 10).
+        # For SQuAD these are example rows; the add-on maps them to the official codes' feature indices.
+        train = train.add_column("_row", list(range(len(train))))
         n, h = a.calibration_size, a.heldout_size
         for seed in [int(s) for s in a.seeds.split(",")]:
-            order = train.shuffle(seed=seed)["idx"]
+            order = train.shuffle(seed=seed)["_row"]
             rec = {"task": task, "seed": seed, "calibration": order[:n], "heldout": order[n:n + h]}
             if spec.get("qa"):
                 rec["unit"] = "squad_examples"
