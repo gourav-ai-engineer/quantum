@@ -591,6 +591,36 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   baseline cells done when the disk filled; GRP not started); it is rerun from scratch rather than stitched across
   versions. Fixes: work dir `/tmp/v15`, small results copied to `/kaggle/working/v15` after every (task, seed), each
   K-prune `model.ckpt` deleted right after its run, GRP JSONs written straight to the output directory.
+- **Kaggle run, Version 4 (2026-10-17, notebook9bdaba41a4, code c43dd3e, T4, 35924 s, successful).** Numbers below
+  are copied from the run log (printed by the scripts); the output archive is not yet in the repo.
+  **A1 unpruned accuracy (Kwon's `test_accuracy`, all-ones masks, K-prune's checkpoints):** MRPC 0.8701, SST-2
+  0.9312 (equal to K-prune's Table 5). **A1 drops** (5-seed mean pruned minus unpruned, vs Kwon Table 4): MRPC c0.7
+  +1.13 vs -0.2 (missed by 1.33), c0.6 -2.06 vs -1.0 (missed by 1.06), c0.5 -4.56 vs -3.1 (missed by 1.46); SST-2
+  c0.7 -1.22 vs -0.6 (0.62), c0.6 -1.86 vs -1.1 (0.76), c0.5 -3.21 vs -2.0 (missed by 1.21). Rule: stop only if
+  missed at the majority of constraints on **both** tasks; MRPC misses at 3/3, SST-2 at 1/3. **A1 verdict: Kwon
+  reproduction gate PASSES** (as written; the MRPC c0.7 miss is in the favourable direction, and MRPC has 408
+  validation examples, about 0.25 points each). Both Phase 1 gates pass.
+  **H10 (mean logit KL(teacher || pruned) on 512 held-out train rows, 5 calibration seeds; GRP = `grp` variant):**
+
+  | task | c | Kwon | K-prune | GRP | GRP >= 10% below both? |
+  |---|---|---|---|---|---|
+  | MRPC | 0.7 | 0.0194 | 0.0111 | 0.0104 | no (6% below K-prune) |
+  | MRPC | 0.6 | 0.0464 | 0.0239 | 0.0242 | no |
+  | MRPC | 0.5 | 0.1123 | 0.0481 | 0.0527 | no (K-prune lower) |
+  | MRPC | 0.4 | 0.2249 | 0.0703 | 0.0946 | no (K-prune lower) |
+  | SST-2 | 0.7 | 0.0256 | 0.0125 | 0.0031 | yes |
+  | SST-2 | 0.6 | 0.0758 | 0.0254 | 0.0077 | yes |
+  | SST-2 | 0.5 | 0.1497 | 0.0534 | 0.0205 | yes |
+  | SST-2 | 0.4 | 0.3009 | 0.0909 | 0.0543 | yes |
+
+  `v15_h10_analysis.py` verdict: `not_supported {'mrpc': [], 'sst2': [0.7, 0.6, 0.5, 0.4]}`. **H10 NOT SUPPORTED**
+  (the rule needs >= 2 of 4 constraints on both tasks; MRPC has 0). GRP met every FLOPs target (MAC 0.398-0.700) and
+  its per-run agreement with the teacher on held-out train was 0.887-0.998. No run printed FAIL. **Per the
+  pre-registration (Phase 2 stop, final): V15 stops before any GPU accuracy run; no H11/H12 runs; the paper is the TMLR
+  analysis paper (V14 + V15 gate result).** Descriptive reading (not a claim): GRP's KL is 40-75% below K-prune's on
+  SST-2 at every constraint (75/70/62/40% at 0.7/0.6/0.5/0.4) but 10% and 35% above it on MRPC at 0.5/0.4, so the calibration-side advantage is
+  task-dependent; any follow-up on why needs its own dated pre-registration (rule 7) and may not reuse these runs as
+  confirmation.
 - First smoke attempt (2026-10-13): K-prune failed with `RuntimeError: indices should be either on cpu or on the
   same device as the indexed tensor (cpu)` under torch 1.13.1 (repo does not pin torch); retried with torch 1.12.1,
   no code patch.
