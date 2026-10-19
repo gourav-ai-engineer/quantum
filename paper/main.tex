@@ -216,8 +216,17 @@ SST-2 & Kwon et al. & 0.0256 & 0.0758 & 0.1497 & 0.3009\\
 \end{tabular}\end{table}
 
 \subsection{Why the advantage is task-dependent (V16, pre-registered diagnosis)}\label{sec:v16}
-\todo{Stage A: transplant decomposition (K-prune selection + GRP refit; K-prune allocation + GRP within-module
-selection) and the exchange-rate probe; decision branch A-1/A-2/A-3; Stage B on QNLI, MNLI-m, QQP only if A-1 or A-2.}
+% results/v16_stageA/b2b444e ; v16_stageA_verdict.json
+A second pre-registered study decomposed the gap on the development tasks by transplanting parts between the two
+methods (same calibration and held-out rows). Applying GRP's refit to K-prune's own selected units makes the KL 34--60\%
+\emph{worse} than K-prune's own compensation. Restricting GRP to K-prune's per-module unit counts while letting it choose
+units inside each module does not help on either task. Removing GRP's sensitivity weight lowers the KL on MRPC at 50\%
+of MACs (0.0445 vs 0.0527) but costs most of the SST-2 advantage (0.0480 vs 0.0205). A probe of the exchange rate
+between local refit error and logit KL was too noisy at a 2\% removal to support a correction. No transplant met the
+pre-registered criterion, so the study stopped before any confirmatory run (branch A-3). Reading K-prune's code shows one
+concrete difference in compensation: its least-squares target is the teacher's sublayer output minus the
+\emph{student's} residual input, which also cancels drift accumulated in earlier layers, whereas GRP fits the
+module output alone. \todo{report V17 if run.}
 
 \section{Limitations}
 One model family so far (BERT-base); V14 uses a single, uniform sparsity level; masking results do not measure speed

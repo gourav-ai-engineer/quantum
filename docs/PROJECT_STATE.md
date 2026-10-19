@@ -723,6 +723,33 @@ would differ in four ways: the probe is an actual unit removal followed by the o
 noise perturbation); the response is logit KL; the rate is per module (attention vs FFN); and the rate enters a
 per-unit global greedy with no tuned coefficient.
 
+**Stage A result (2026-10-19, Kaggle notebook9db70b7056 V1, code b2b444e, T4, 21772 s; `results/v16_stageA/b2b444e`,
+re-derived locally).** Mean held-out-train KL over 5 seeds, as a ratio to official K-prune (V15) at the same budget:
+
+  | part | MRPC c0.5 | MRPC c0.4 | SST-2 c0.5 | SST-2 c0.4 |
+  |---|---|---|---|---|
+  | d2i: K-prune masks + GRP refit | 1.48 (0.0711) | 1.53 (0.1075) | 1.34 (0.0715) | 1.60 (0.1450) |
+  | d2ii: K-prune counts + GRP selection + refit | 1.17 (0.0565) | 1.47 (0.1031) | 1.44 (0.0771) | 1.95 (0.1777) |
+  | no_sens: GRP with s_m = 1 | 0.93 (0.0445) | 1.27 (0.0894) | 0.90 (0.0480) | 1.17 (0.1060) |
+  | GRP (V15, reference) | 1.10 (0.0527) | 1.35 (0.0946) | 0.38 (0.0205) | 0.60 (0.0543) |
+
+  D1 (median rho of layers 9-11 / layers 0-8): MRPC 1.60 (seed 7) and 4.49 (seed 42); SST-2 24.3 and 1.76. Many probe
+  Delta KL values are negative (refit noise at 2% removals). **Decision table: no part beats K-prune; MRPC
+  underpricing holds for one seed only. Branch A-3 (applied mechanically): no Stage B, no GRP-X.** V16 goes into the
+  analysis paper.
+  **Descriptive readings (exploratory, not claims):** (1) GRP's joint refit applied to K-prune's own units is 34-60%
+  worse than K-prune's own tuning, so on the same units K-prune's compensation is the stronger one. (2) Constrained to
+  K-prune's per-module counts, GRP's within-module choice does not help either (d2ii); GRP's SST-2 advantage needs
+  its own global allocation and its sensitivity weight (without s_m it shrinks from 62% to 10% below K-prune at c0.5).
+  (3) The sensitivity weight helps on SST-2 but hurts on MRPC at c0.5 (no_sens 0.0445 vs GRP 0.0527). (4) D1 is too
+  noisy at a 2% probe to support an exchange-rate correction.
+  **Mechanism read from K-prune's code (src/prune.py `knowledge_reconstruction`, commit 9ca629a1, 2026-10-19):** its
+  least-squares target is `kd_output - s_inputs - bias`, i.e. the teacher's sublayer output minus the student's own
+  residual-stream input to that sublayer (no ridge, `lstsq`, bottom to top, W_O / W_2 only). It therefore also cancels
+  the residual drift accumulated from earlier pruned sublayers. GRP's refit (`sequential_refit`) targets only the
+  teacher's module output y_t, so drift in the residual stream is left uncorrected. This is a candidate explanation of
+  reading (1). It is a hypothesis for any follow-up, not a V16 finding.
+
 **Budget (Kaggle T4, about 30 GPU-h/week).** Stage A: about 80 GRP-type runs at about 4 min plus D1 probes, about
 6-7 GPU-h, one week. Stage B: 3 tasks x 4 constraints x 5 seeds x 3 methods = 180 runs (about 24 GPU-h) for H16a,
 then about 10 GPU-h for H16b. About 3 weeks in total if every gate passes.
