@@ -763,6 +763,48 @@ task or threshold after seeing Stage B data.
 **Do not claim:** that the exploratory allocation observation is a finding; novelty of layer-adaptive allocation;
 speedup from masking; anything about MRPC/SST-2 beyond development diagnostics.
 
+## Pre-registration V17: drift-corrected compensation for GRP (GRP-R) (written 2026-10-19, after V16 Stage A, BEFORE any V17 code or data; registered under the owner's standing autonomy grant of 2026-10-19, so there was no separate confirmation; the paper must disclose that the hypothesis was formed after V15/V16 development data)
+
+**Hypothesis (from a mechanism, stated before testing).** GRP's compensation is weaker than K-prune's because its
+least-squares target is the teacher's module output alone. K-prune's target is the teacher's sublayer sum minus the
+student's residual input, which also cancels residual-stream drift from earlier pruned sublayers (V16 Stage A reading
+(1) and K-prune's `knowledge_reconstruction`). If so, giving GRP the drift-corrected target, with everything else
+unchanged, removes its MRPC deficit and keeps its SST-2 advantage.
+
+**GRP-R (fixed now).** Selection is identical to GRP (same s_m, refit-aware cost, global greedy, budgets). Only the
+joint sequential refit changes. For each sublayer, with x_s the student's input to the dense layer, h_s and h_t the
+student's and teacher's residual inputs to the Add & LayerNorm (`input_tensor`), and y_t the teacher's dense output:
+fit [W; b] = argmin ||(y_t + h_t - h_s) - [x_s, 1][W; b]||_F^2 + lam ||W||_F^2, with the same ridge rule as GRP
+(ridge_rel 1e-4 x mean diagonal of the non-bias Gram). It is applied bottom to top, attention then FFN, with student
+inputs from the already-refit student. Unit tests before any run: (a) with h_s = h_t it equals GRP's refit exactly;
+(b) on a toy model with one pruned sublayer upstream, the drift-corrected refit gives a lower pre-LayerNorm error at
+the next sublayer than GRP's refit.
+
+**Stage R-dev (development tasks MRPC, SST-2; held-out-train KL; V15 protocol; reused V15/V16 baselines; validation
+never touched).** Runs: (i) d2i-R = K-prune's masks + drift-corrected refit (mechanism check); (ii) GRP-R; at c0.5 and
+c0.4, 5 seeds. **Gate to Stage R-conf (all must hold):** GRP-R mean KL <= 1.0 x official K-prune at both c0.5 and c0.4
+on MRPC, **and** <= 0.9 x K-prune at both on SST-2. (i) is descriptive only: if d2i-R is not within 1.1 x K-prune at
+both budgets on both tasks, the mechanism is reported as not confirmed even if the gate passes.
+
+**Stage R-conf (only if the gate passes; tasks QNLI, MNLI-m, QQP, never used for GRP development).** Official Kwon
+and K-prune runs on the same checkpoints and calibration rows (V15 add-on). QQP checkpoint: textattack BERT-base QQP,
+revision pinned and label order checked on train before any run. **H17a:** GRP-R held-out-train KL >= 10% below both
+baselines at the same budget, at >= 2 of 4 budgets (0.7/0.6/0.5/0.4), on >= 2 of 3 tasks. **H17b (primary):** accuracy
+at 0.5 on the full validation split (MNLI matched): GRP-R minus the better baseline, chosen per task by H17a KL before
+any validation data is touched. Paired cluster bootstrap (seed x example, 10,000 resamples), Holm over the 3 tasks.
+Supported if Holm p < 0.05 and CI lower bound > 0 on >= 2 of 3 tasks, with no Holm-significant loss. **H17c:** latency
+of physically pruned models (rule 8). **H17d (ablation, no rule):** GRP-R without s_m. RoBERTa-base replication under a
+dated addition only if H17b is supported.
+
+**Novelty (honest).** The drift-corrected target is K-prune's, and student-input sequential reconstruction is
+standard (SparseGPT/OBC-style). GRP-R's only possible contribution is the combination with refit-aware global
+allocation, and only if R-conf supports it. Venue by outcome: H17a+H17b on BERT and RoBERTa means an applied Q1
+method paper (Neurocomputing / Knowledge-Based Systems / Neural Networks) is defensible. Otherwise V17 joins the TMLR
+analysis paper. Rule 12 applies: no change after seeing R-conf data.
+
+**Budget.** R-dev: 40 runs at about 4 min, about 3 GPU-h. R-conf: 180 baseline+GRP-R KL runs (about 24 GPU-h), then
+about 10 GPU-h for H17b. About 2 weeks of quota.
+
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
    bootstrap on the full validation set, Random as a distribution): write a method paper; add
