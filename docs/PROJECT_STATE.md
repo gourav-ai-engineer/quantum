@@ -715,6 +715,13 @@ global dynamic-programming allocation. It is a further baseline candidate and mu
 code is found. GRP-X's remaining distinction is narrow: a measured end-to-end KL exchange rate per module inside a
 refit-aware, exact-downdate global greedy for structured BERT heads and neurons. Any GRP-X paper must present it
 as an instance of the absorption/repairability line, not as a new principle.
+Full text of 2606.15161 read 2026-10-19. Absorption r_l = E[R_L / R_l] is the hidden-state drift ratio after a
+Gaussian perturbation (eta = 1e-2) injected at layer l. It feeds a log-clip-centered per-layer sparsity correction
+with strength beta grid-searched on WikiText-2 perplexity, which is also the reported metric. Models are decoder LLMs
+pruned with Wanda/SparseGPT (unstructured per-layer rates); there is no refit, encoder or head/neuron setting. GRP-X
+would differ in four ways: the probe is an actual unit removal followed by the optimal refit (repair-aware, not a
+noise perturbation); the response is logit KL; the rate is per module (attention vs FFN); and the rate enters a
+per-unit global greedy with no tuned coefficient.
 
 **Budget (Kaggle T4, about 30 GPU-h/week).** Stage A: about 80 GRP-type runs at about 4 min plus D1 probes, about
 6-7 GPU-h, one week. Stage B: 3 tasks x 4 constraints x 5 seeds x 3 methods = 180 runs (about 24 GPU-h) for H16a,
