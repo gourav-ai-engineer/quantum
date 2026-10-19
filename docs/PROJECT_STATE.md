@@ -629,7 +629,7 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
 - V15 raw outputs: `results/v15_h10/c43dd3e/` (verdict, GRP JSONs, logs, patch diffs; logit dumps kept with the
   archive, sha256 in run_meta.json). The H10 verdict was re-derived locally from the archive on 2026-10-19.
 
-## Pre-registration V16: why is GRP's advantage task-dependent, and does a fixed correction transfer? (written 2026-10-19, BEFORE any V16 code or data; status DRAFT, owner confirmation pending)
+## Pre-registration V16: why is GRP's advantage task-dependent, and does a fixed correction transfer? (written 2026-10-19, BEFORE any V16 code or data; CONFIRMED by the owner 2026-10-19 without edits; Stage A started)
 
 **Starting point (V15, final).** H10 not supported: on held-out train, GRP's logit KL is 40-75% below K-prune's on
 SST-2 at every constraint, but on MRPC it is never 10% below both baselines and is 10% / 35% above K-prune at 0.5 /
@@ -703,6 +703,18 @@ and K-prune code via the V15 add-on.
 allocation from activation outliers), BESA (blockwise learned sparsity allocation), and Kwon et al. / K-prune
 (already baselines). Layer-adaptive allocation is not novel by itself; any claim is about the empirical exchange
 rate in a refit-aware global greedy, and only if Stage B supports it.
+
+**Novelty check (2026-10-19, after confirmation, before any V16 data; abstracts only, full texts to be read before
+writing).** Close prior work found: (1) Jing et al., arXiv 2606.15161 (Jun 2026), "Beyond Layer Importance in
+Layer-wise Sparsity: an inter-layer perturbation-absorption perspective". It shows that later layers absorb pruning
+perturbations and proposes an absorption-aware correction on top of OWL and AlphaPruning (LLMs, 70% sparsity). The idea
+that allocation should account for downstream compensation is therefore **not new**. (2) Zhan et al., arXiv 2605.25508
+(May 2026), "Relative Repairability": fraction of layer damage left after repair (variance matching) as an
+allocation diagnostic (CNNs). (3) Yao et al., DP-Prune (IPCCC 2024): retraining-free BERT head/FFN pruning with a
+global dynamic-programming allocation. It is a further baseline candidate and must be cited; it is not re-run unless
+code is found. GRP-X's remaining distinction is narrow: a measured end-to-end KL exchange rate per module inside a
+refit-aware, exact-downdate global greedy for structured BERT heads and neurons. Any GRP-X paper must present it
+as an instance of the absorption/repairability line, not as a new principle.
 
 **Budget (Kaggle T4, about 30 GPU-h/week).** Stage A: about 80 GRP-type runs at about 4 min plus D1 probes, about
 6-7 GPU-h, one week. Stage B: 3 tasks x 4 constraints x 5 seeds x 3 methods = 180 runs (about 24 GPU-h) for H16a,

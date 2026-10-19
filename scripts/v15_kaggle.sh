@@ -125,5 +125,16 @@ h11)
   find "$W/h11/kprune_out" -name model.ckpt -delete || true
   publish h11 inputs/indices
   ;;
+v16a)
+  # V16 Stage A (docs/PROJECT_STATE.md, "Pre-registration V16"): our env only; K-prune masks and GRP solutions come
+  # from results/v15_h10/c43dd3e in the repo. JSONs are written straight to the published dir (resumable).
+  pip install -q -r "$REPO/requirements-ci.txt" && pip install -q -e "$REPO" --no-deps
+  pip uninstall -y -q torchvision torchaudio || true
+  python "$REPO/scripts/preflight.py" check
+  mkdir -p "$OUT/v16a"
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/step23_v16_stageA.py --output-dir "$OUT/v16a" 2>&1 \
+    | grep -v -i warn | tail -120)
+  (cd "$REPO" && python scripts/v16_stageA_analysis.py "$OUT/v16a" results/v15_h10/c43dd3e/h10/v15_h10_verdict.json) || true
+  ;;
 *) echo "unknown stage $STAGE"; exit 1 ;;
 esac

@@ -173,6 +173,13 @@ class ModuleState:
             out[i] = torch.trace(self.V[r].T @ torch.linalg.solve(self.P[r, r], self.V[r]))
         return out
 
+    def block_cost(self, units) -> float:
+        """Exact increase of the ridge refit objective from removing ``units`` jointly (V16 D1 probe)."""
+        pos = {j: i for i, j in enumerate(self.kept)}
+        u = self.unit_size
+        R = torch.cat([torch.arange(pos[j] * u, (pos[j] + 1) * u) for j in units])
+        return float(torch.trace(self.V[R].T @ torch.linalg.solve(self.P[R][:, R], self.V[R])))
+
     def remove(self, units) -> None:
         pos = {j: i for i, j in enumerate(self.kept)}
         u = self.unit_size
@@ -235,6 +242,23 @@ def grp_select(G: dict, weights: dict, sens: dict | None, L: int, num_heads: int
     heads = {l: list(states[(l, "att")].kept) for l in range(L)}
     neurons = {l: list(states[(l, "ffn")].kept) for l in range(L)}
     return heads, neurons, {"rounds": rounds, "mac_ratio": total / orig, "constraint": constraint}
+
+
+def grp_select_counts(G: dict, weights: dict, counts: dict, num_heads: int, ridge_rel: float = 1e-4,
+                      max_frac: float = 0.01):
+    """V16 D2(ii): per-module kept counts fixed from outside (e.g. K-prune's masks); inside each module GRP removes
+    its cheapest units by the refit-aware cost, max(1, floor(max_frac * |kept|)) per round, until it has counts[key].
+    Returns (heads_kept, neurons_kept)."""
+    head_size = (G[(0, "att")].shape[0] - 1) // num_heads
+    kept = {}
+    for key, target in counts.items():
+        st = ModuleState(G[key], weights[key], head_size if key[1] == "att" else 1, ridge_rel)
+        while len(st.kept) > target:
+            k = min(max(1, int(max_frac * len(st.kept))), len(st.kept) - target)
+            st.remove([st.kept[i] for i in torch.argsort(st.costs())[:k].tolist()])
+        kept[key] = list(st.kept)
+    L = len({l for l, _ in counts})
+    return {l: kept[(l, "att")] for l in range(L)}, {l: kept[(l, "ffn")] for l in range(L)}
 
 
 def random_select(L: int, num_heads: int, intermediate: int, seq_len: float, hidden_size: int, constraint: float,

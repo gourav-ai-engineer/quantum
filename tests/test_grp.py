@@ -190,3 +190,33 @@ def test_grp_prune_end_to_end():
     assert info["mac_ratio"] <= 0.5 + 1e-12 and info["sensitivity"]
     assert torch.isfinite(_logits(student, bs)).all()
     assert sum(p.numel() for p in student.parameters()) < sum(p.numel() for p in teacher.parameters())
+
+
+# ---- V16 Stage A ---------------------------------------------------------------------------------------------------
+@pytest.mark.parametrize("unit", [1, 3])
+def test_block_cost_matches_brute_force_joint_removal(unit):
+    g = torch.Generator().manual_seed(3)
+    n_units, N, D = 7, 150, 4
+    X = _aug(torch.randn(N, n_units * unit, generator=g, dtype=torch.float64))
+    Y = X @ torch.randn(n_units * unit + 1, D, generator=g, dtype=torch.float64) + 0.1 * torch.randn(N, D, generator=g, dtype=torch.float64)
+    st = ModuleState(X.T @ X, torch.linalg.lstsq(X, Y).solution, unit, ridge_rel=1e-2, refresh_every=1000)
+    st.remove([2])
+
+    def cols(units):
+        return [f for j in units for f in range(j * unit, (j + 1) * unit)] + [n_units * unit]
+
+    base = _ridge_obj(X, Y, cols(st.kept), st.lam)
+    rest = [u for u in st.kept if u not in (0, 5)]
+    assert st.block_cost([0, 5]) == pytest.approx(_ridge_obj(X, Y, cols(rest), st.lam) - base, rel=1e-6)
+
+
+def test_grp_select_counts_hits_counts_and_matches_single_module_greedy():
+    from qfc.grp import grp_select_counts
+    model, bs = _tiny_bert(), _batches()
+    G = collect_grams(model, bs, "cpu")
+    W = {(l, k): teacher_weight(model, l, k) for l in range(2) for k in ("att", "ffn")}
+    counts = {(0, "att"): 2, (0, "ffn"): 10, (1, "att"): 4, (1, "ffn"): 63}
+    heads, neurons = grp_select_counts(G, W, counts, 4)
+    assert [len(heads[0]), len(neurons[0]), len(heads[1]), len(neurons[1])] == [2, 10, 4, 63]
+    st = ModuleState(G[(1, "ffn")], W[(1, "ffn")], 1)  # one removal: the single cheapest neuron goes
+    assert set(range(64)) - set(neurons[1]) == {int(torch.argmin(st.costs()))}
