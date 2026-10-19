@@ -226,7 +226,26 @@ between local refit error and logit KL was too noisy at a 2\% removal to support
 pre-registered criterion, so the study stopped before any confirmatory run (branch A-3). Reading K-prune's code shows one
 concrete difference in compensation: its least-squares target is the teacher's sublayer output minus the
 \emph{student's} residual input, which also cancels drift accumulated in earlier layers, whereas GRP fits the
-module output alone. \todo{report V17 if run.}
+module output alone.
+
+% results/v17_rdev/195c18f ; v17_rdev_verdict.json
+A third pre-registered study tested that difference directly. Refitting K-prune's selected units with the
+drift-corrected target reproduces K-prune's own KL within 3\% on both tasks and both budgets, so this target accounts
+fully for K-prune's compensation advantage. Giving GRP the same compensation (GRP-R) does not remove its MRPC deficit:
+its KL is 1.19 and 1.29 times K-prune's at 50\% and 40\% of MACs, against 0.31 and 0.50 on SST-2. The pre-registered gate
+failed, and no confirmatory run was made. Table~\ref{tab:factorial} holds compensation fixed: the remaining
+difference is selection, and which selection rule wins depends on the task.
+\begin{table}[t]\centering\small
+\caption{Selection $\times$ compensation on held-out training rows: mean KL as a ratio to official K-prune at the same
+budget (five seeds; lower is better). Sources: \texttt{results/v16\_stageA/b2b444e}, \texttt{results/v17\_rdev/195c18f},
+\texttt{results/v15\_h10/c43dd3e}.}\label{tab:factorial}
+\begin{tabular}{llcccc}\toprule
+Selection & Compensation & MRPC 0.5 & MRPC 0.4 & SST-2 0.5 & SST-2 0.4\\\midrule
+K-prune & module-output LS & 1.48 & 1.53 & 1.34 & 1.60\\
+K-prune & drift-corrected LS & 0.98 & 0.97 & 1.00 & 1.00\\
+GRP & module-output LS & 1.10 & 1.35 & 0.38 & 0.60\\
+GRP & drift-corrected LS & 1.19 & 1.29 & 0.31 & 0.50\\\bottomrule
+\end{tabular}\end{table}
 
 \section{Limitations}
 One model family so far (BERT-base); V14 uses a single, uniform sparsity level; masking results do not measure speed

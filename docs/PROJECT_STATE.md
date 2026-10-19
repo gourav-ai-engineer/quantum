@@ -802,6 +802,26 @@ allocation, and only if R-conf supports it. Venue by outcome: H17a+H17b on BERT 
 method paper (Neurocomputing / Knowledge-Based Systems / Neural Networks) is defensible. Otherwise V17 joins the TMLR
 analysis paper. Rule 12 applies: no change after seeing R-conf data.
 
+**Stage R-dev result (2026-10-20, Kaggle notebookc09d6e2ea7 V2, code 195c18f, T4, 7910 s; `results/v17_rdev/195c18f`,
+re-derived locally).** Mean held-out-train KL, ratio to official K-prune: GRP-R MRPC 1.19 (0.0575) / 1.29 (0.0910),
+SST-2 0.31 (0.0165) / 0.50 (0.0458) at c0.5 / c0.4; d2i-R MRPC 0.98 / 0.97, SST-2 1.00 / 1.00. **Gate FAILS** (MRPC
+above 1.0 at both budgets). **Mechanism CONFIRMED**: our drift-corrected refit on K-prune's masks reproduces K-prune's
+own result to within 3%, so K-prune's compensation is exactly the drift-corrected LS refit. **Per the pre-registration:
+no R-conf. V17 stops and joins the analysis paper.**
+**Selection x compensation factorial (same rows, all KL ratios to official K-prune; descriptive):**
+
+  | selection | refit | MRPC c0.5 | MRPC c0.4 | SST-2 c0.5 | SST-2 c0.4 |
+  |---|---|---|---|---|---|
+  | K-prune | module-output LS (GRP's) | 1.48 | 1.53 | 1.34 | 1.60 |
+  | K-prune | drift-corrected LS | 0.98 | 0.97 | 1.00 | 1.00 |
+  | GRP | module-output LS | 1.10 | 1.35 | 0.38 | 0.60 |
+  | GRP | drift-corrected LS | 1.19 | 1.29 | 0.31 | 0.50 |
+
+  Reading: drift correction is worth 34-60% KL for K-prune's selection and a little for GRP's (it even hurts GRP on
+  MRPC at c0.5). With compensation held equal, the remaining gap is selection. GRP's allocation (it empties layers 9-11)
+  is 3x better than K-prune's on SST-2 and about 20-30% worse on MRPC, so which selection rule wins depends on the task.
+  This is what the analysis paper reports; it is not a method claim.
+
 **R-conf Phase 0 (2026-10-19, train data only, before any R-conf run).** QQP checkpoint pinned:
 `textattack/bert-base-uncased-QQP` @ 226962dced5a914fa7d486b5f91307f2aee5f37e. On 1000 train rows (`shuffle(0)`),
 identity-order accuracy is 0.970 and swapped is 0.030, so no permutation is needed. Added to step22 SPECS.
