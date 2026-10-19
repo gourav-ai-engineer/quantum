@@ -1,0 +1,14 @@
+{
+  "experiment": "V16 Stage A (d2i, d2ii, no_sens, d1) on MRPC/SST-2, held-out-train KL",
+  "commit": "b2b444ead0335973975259ea056f5d7f34e3d9e1",
+  "date_utc": "2026-10-19",
+  "platform": "Kaggle notebook gouravcseai/notebook9db70b7056 Version 1 (scriptVersionId 359942433), GPU T4 x2, 21771.7 s, successful",
+  "driver": "bash scripts/v15_kaggle.sh v16a /tmp/v16 /kaggle/working/v16",
+  "environment": ".venv-ci pins (requirements-ci.txt), preflight passed",
+  "archive": {
+    "file": "v16a_results.tgz",
+    "bytes": 1487117,
+    "sha256": "a2145c2bb684cde8b96232c1f4cf5e2d1956e1363457d166aadc9bf3fd3e1f29"
+  },
+  "reanalysis": "2026-10-19: scripts/v16_stageA_analysis.py rerun locally on this directory gives branch A-3 (same as the Kaggle log)"
+}
