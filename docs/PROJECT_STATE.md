@@ -626,6 +626,96 @@ Status changed from DRAFT to ACTIVE; Phase 0 started 2026-10-11.
   no code patch.
 - **Still open in Phase 0:** smoke-run both official codes (on Kaggle, GPU, separate environments; first cell of
   Phase 1). K-prune Figure 1 is not used as a gate (see the amendment above).
+- V15 raw outputs: `results/v15_h10/c43dd3e/` (verdict, GRP JSONs, logs, patch diffs; logit dumps kept with the
+  archive, sha256 in run_meta.json). The H10 verdict was re-derived locally from the archive on 2026-10-19.
+
+## Pre-registration V16: why is GRP's advantage task-dependent, and does a fixed correction transfer? (written 2026-10-19, BEFORE any V16 code or data; status DRAFT, owner confirmation pending)
+
+**Starting point (V15, final).** H10 not supported: on held-out train, GRP's logit KL is 40-75% below K-prune's on
+SST-2 at every constraint, but on MRPC it is never 10% below both baselines and is 10% / 35% above K-prune at 0.5 /
+0.4. V15's method claim is closed; nothing below re-opens it, and no V15 number is used as confirmation.
+
+**Exploratory observation that motivates V16 (2026-10-19, V15 held-out-train dumps only; validation dumps not
+opened).** GRP empties the top layers on both tasks: at c0.5, seed 7, layers 9-11 keep 6/3/1 heads and 399/173/64
+neurons on MRPC (2/1/1 heads, 209/97/44 neurons on SST-2), while K-prune keeps 6/6/5 heads and 711/1007/1466 neurons
+on MRPC (8/11/11 heads, 1255/1350/1777 neurons on SST-2). Across seeds GRP keeps more heads overall (MRPC c0.5:
+96.0 vs 83.4) and fewer neurons (15,253 vs 16,922). The allocation pattern is the same on both tasks, yet GRP wins
+on one and loses on the other, so allocation alone does not explain the task dependence; its interaction with the
+task is the open question. Candidate cause, stated before any test: GRP ranks units across layers by
+s_m * Delta E (Fisher of the module output x local error after refit). This local proxy may misprice upper-layer
+units, whose error cannot be compensated by any later refit, and may do so more on some tasks than on others.
+
+**Scientific question.** Which GRP ingredient produces the MRPC loss (cross-layer allocation, within-module
+selection, or compensation)? Does one correction, fixed in advance from that diagnosis, beat both official baselines
+on tasks never used in V15 or V16 development?
+
+**Stage A: diagnostics on the development tasks (MRPC, SST-2). Exploratory, with a fixed decision table.** Same
+checkpoints, calibration rows (2048 per seed, seeds 7/42/77/123/2024), 512 held-out train rows, MAC formula and
+official-code baseline runs as V15 (the V15 Kwon/K-prune runs are reused as baselines only, not as a test of anything
+new). Constraints 0.5 and 0.4. Metric: mean logit KL(teacher || pruned) on the held-out train rows. Validation data is
+not used in Stage A.
+- **D1, exchange-rate check.** At GRP's c0.5 solution (seeds 7 and 42), for each of the 24 modules, remove the
+  cheapest units worth 2% of that module's current MACs, refit (same joint refit), and measure the KL increase
+  Delta KL_m on the **calibration** rows. Report Spearman(s_m * Delta E_m, Delta KL_m) and the ratio
+  rho_m = Delta KL_m / (s_m * Delta E_m) per layer.
+- **D2, transplant decomposition (5 seeds, both constraints, both tasks).**
+  (i) *K-prune selection + GRP compensation:* K-prune's official masks, physically pruned, then GRP's joint sequential
+  refit instead of K-prune's tuning.
+  (ii) *K-prune allocation + GRP within-module selection + GRP compensation:* per-module kept counts copied from
+  K-prune's masks; inside each module GRP removes greedily by its refit-aware cost until it reaches that count; then
+  joint refit. The MACs equal K-prune's by construction.
+  (iii) *GRP without sensitivity* (`no_sens`, s_m = 1, already implemented).
+- **Decision table (applied mechanically after Stage A; exactly one branch).** "Beats" = mean KL at least 10% below
+  official K-prune at **both** c0.5 and c0.4 on MRPC, without losing the SST-2 win (still at least 10% below K-prune at
+  both constraints).
+  **A-1 (allocation):** D2(ii) beats K-prune and D1 shows upper-layer underpricing (median rho_m over layers 9-11 at
+  least 2x the median over layers 0-8 on MRPC, for both seeds) -> Stage B tests GRP-X (defined below).
+  **A-2 (compensation only):** D2(i) beats K-prune but D2(ii) does not -> no new method. The finding is that GRP's
+  refit improves K-prune's selection. Stage B tests "K-prune selection + GRP refit" as a drop-in compensation step
+  (a weaker claim; venue below).
+  **A-3 (none):** neither branch applies -> no Stage B. The TMLR analysis paper gains the decomposition.
+  If A-1 and A-2 both apply, A-1 is taken.
+- **GRP-X (fixed now, implemented only if A-1 fires).** Same as GRP, except that the Fisher proxy s_m is replaced by
+  an empirical exchange rate e_m = Delta KL_m / Delta E_m. It is measured once, before greedy selection, on the
+  calibration rows by the D1 probe (cheapest 2% of module m's MACs, refit, KL increase) on the **unpruned** model. It
+  is then held fixed: greedy priority e_m * Delta E_j / MACs(j). No tuned coefficient, no task-specific choice; the
+  probe size 2% is fixed now. Unit tests before any run: e_m reproduces a brute-force Delta KL on a toy model;
+  priorities equal GRP's when e_m is proportional to s_m.
+
+**Stage B: confirmatory (only if A-1 or A-2 fires). Tasks never used in V14-V16 development: QNLI, MNLI-m, QQP.**
+Checkpoints: textattack BERT-base QNLI (already in SPECS), MNLI with the V15 row permutation, QQP (pin a
+textattack BERT-base QQP revision in Stage B Phase 0, and check its label order on train as was done for MNLI;
+replace it if it cannot be verified). Same calibration/held-out protocol, constraints 0.7/0.6/0.5/0.4, official Kwon
+and K-prune code via the V15 add-on.
+- **H16a (calibration gate):** the Stage B method's held-out-train KL is at least 10% below **both** baselines at the
+  same constraint, at >= 2 of 4 constraints, on >= 2 of the 3 tasks. If not supported, stop; V16 goes into the
+  analysis paper.
+- **H16b (primary, accuracy at FLOPs 0.5, full validation split; MNLI matched):** method minus the better of
+  {Kwon, K-prune}. The better baseline is chosen per task by its held-out-train KL in H16a, before any validation
+  data is touched, then fixed. Paired cluster bootstrap over (seed x example), 10,000 resamples, Holm over the 3
+  tasks. Supported if the Holm-adjusted p < 0.05 and the CI lower bound > 0 on >= 2 of 3 tasks, with no Holm-significant
+  loss on any task (including against the other baseline).
+- **H16c (descriptive):** physically pruned parameter counts, MACs and FP16 latency (rule 8, `scripts/v15_latency.py`).
+- **Replication for a tier-one claim:** if H16b is supported, the same H16a/H16b on RoBERTa-base (QNLI, MNLI-m,
+  QQP), under a dated addition written before any RoBERTa run.
+
+**Prior work to position against (verify each before citing):** OWL (outlier-weighted layer-wise sparsity; layer
+allocation from activation outliers), BESA (blockwise learned sparsity allocation), and Kwon et al. / K-prune
+(already baselines). Layer-adaptive allocation is not novel by itself; any claim is about the empirical exchange
+rate in a refit-aware global greedy, and only if Stage B supports it.
+
+**Budget (Kaggle T4, about 30 GPU-h/week).** Stage A: about 80 GRP-type runs at about 4 min plus D1 probes, about
+6-7 GPU-h, one week. Stage B: 3 tasks x 4 constraints x 5 seeds x 3 methods = 180 runs (about 24 GPU-h) for H16a,
+then about 10 GPU-h for H16b. About 3 weeks in total if every gate passes.
+
+**Venues by outcome (honest).** H16b supported on BERT and RoBERTa with A-1: a Q1 method paper is defensible
+(Neural Networks / Neurocomputing / Pattern Recognition; TNNLS only with the latency table and the rule-11 check).
+A-2 with H16b supported: a short compensation note or a section of the analysis paper. A-3, or any gate failing:
+TMLR analysis paper (V14 + V15 + V16 decomposition). Rule 12 holds throughout: no change of method, constraint,
+task or threshold after seeing Stage B data.
+
+**Do not claim:** that the exploratory allocation observation is a finding; novelty of layer-adaptive allocation;
+speedup from masking; anything about MRPC/SST-2 beyond development diagnostics.
 
 ## Decision tree after V10/V6/V11 reruns
 A. Alignment supported AND QFC/IWQFC competitive with corrected baselines (judge with paired
