@@ -802,6 +802,10 @@ allocation, and only if R-conf supports it. Venue by outcome: H17a+H17b on BERT 
 method paper (Neurocomputing / Knowledge-Based Systems / Neural Networks) is defensible. Otherwise V17 joins the TMLR
 analysis paper. Rule 12 applies: no change after seeing R-conf data.
 
+**R-conf Phase 0 (2026-10-19, train data only, before any R-conf run).** QQP checkpoint pinned:
+`textattack/bert-base-uncased-QQP` @ 226962dced5a914fa7d486b5f91307f2aee5f37e. On 1000 train rows (`shuffle(0)`),
+identity-order accuracy is 0.970 and swapped is 0.030, so no permutation is needed. Added to step22 SPECS.
+
 **Budget.** R-dev: 40 runs at about 4 min, about 3 GPU-h. R-conf: 180 baseline+GRP-R KL runs (about 24 GPU-h), then
 about 10 GPU-h for H17b. About 2 weeks of quota.
 

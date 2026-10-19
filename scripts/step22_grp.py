@@ -33,6 +33,10 @@ SPECS = dict(_SPECS)
 SPECS["mnli"] = {"model_id": "textattack/bert-base-uncased-MNLI", "revision": "3a97f689528cbd91bcc71ab29ea6c20c089d8f28",
                  "dataset": ("glue", "mnli"), "text_fields": ("premise", "hypothesis"), "metric": "accuracy",
                  "valid_split": "validation_matched", "label_order": [1, 2, 0]}
+# Pinned 2026-10-19 for V17 R-conf (docs/PROJECT_STATE.md): label order checked on 1000 TRAIN rows (shuffle(0)):
+# identity 0.970, swapped 0.030, so no permutation.
+SPECS["qqp"] = {"model_id": "textattack/bert-base-uncased-QQP", "revision": "226962dced5a914fa7d486b5f91307f2aee5f37e",
+                "dataset": ("glue", "qqp"), "text_fields": ("question1", "question2"), "metric": "accuracy"}
 # Pinned in V15 Phase 0. SQuAD v1.1, extractive QA: features of length 384 with doc stride 128 (as both official codes).
 SPECS["squad"] = {"model_id": "csarron/bert-base-uncased-squad-v1", "revision": "c0773ca28abf86a669cd1cccc9104c7f829f2be0",
                   "dataset": ("squad", None), "metric": "f1", "qa": True}
