@@ -1,0 +1,25 @@
+{
+  "experiment": "v15 Kaggle Version 4: Phase 1 A1 unpruned eval + H10 calibration gate",
+  "commit": "c43dd3ed58a8ba1acb829343e30db679318e9259",
+  "date_utc": "2026-10-17",
+  "platform": "Kaggle notebook gouravcseai/notebook9bdaba41a4, Version 4 (scriptVersionId 359177953), GPU T4 x2, 35923.8 s, successful",
+  "drivers": [
+    "scripts/v15_kaggle.sh setup",
+    "scripts/v15_kaggle.sh phase1",
+    "scripts/v15_kaggle.sh h10",
+    "scripts/v15_h10_analysis.py"
+  ],
+  "environments": {
+    "ours": ".venv-ci pins (requirements-ci.txt) on Kaggle system python",
+    "kwon": "env_kwon: torch 1.13.1, transformers 4.12.0 @ 806ac5a6",
+    "kprune": "env_kprune: torch 1.12.1, transformers 4.25.1 @ 9ca629a1"
+  },
+  "archive": {
+    "file": "v15_results.tgz",
+    "bytes": 5744529,
+    "sha256": "38602b5702b22ec9552ea9feb5e110cea04dffc3fb9ce2f009c4d5b0c16e226e",
+    "not_committed": "logit dumps v15_*.pt (11 MB) and K-prune .pkl files; kept with the archive (owner's copy)"
+  },
+  "reanalysis": "2026-10-19: v15_h10_analysis.py rerun locally on the extracted archive reproduced the verdict exactly",
+  "kwon_phase1_pruned_runs": "Version 3 (scriptVersionId 358889491, code c9fa264); numbers in docs/PROJECT_STATE.md"
+}

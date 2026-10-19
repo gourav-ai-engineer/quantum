@@ -1,0 +1,34 @@
+diff --git a/src/main.py b/src/main.py
+index e3cc723..c0e5f34 100644
+--- a/src/main.py
++++ b/src/main.py
+@@ -1,3 +1,4 @@
++from v15_official_addon import v15_indices, v15_dump
+ ###############################################################
+ # main.py
+ # - codes for running K-prune
+@@ -145,7 +146,7 @@ def main():
+     logger.info(f"Num sampels: {num_samples}")
+     sample_dataset = Subset(
+         training_dataset,
+-        np.random.choice(len(training_dataset), num_samples).tolist(),
++        v15_indices(len(training_dataset), num_samples),
+     )
+ 
+     sample_dataloader = DataLoader(
+@@ -183,6 +184,7 @@ def main():
+     f_head = flops_per_head(seq_len, head_dim, embed_dim) / 1e9
+     f_neuron = flops_per_neuron(seq_len, embed_dim) / 1e9
+ 
++    v15_dump(model, tokenizer, args.task_name, None, None, OUTPUT_DIR, 'teacher')
+     st = time.time()
+ 
+     # Perform K-prune
+@@ -218,6 +220,7 @@ def main():
+     flops_pruned_ratio = (1. - pruned_model_flops / model_flops) * 100
+     test_acc = test_accuracy(model, tokenizer, args.task_name)
+ 
++    v15_dump(model, tokenizer, args.task_name, None, None, OUTPUT_DIR, 'student')
+     # Save the model and masks
+     head_mask_path = os.path.join(OUTPUT_DIR, 'head_masks.pkl')
+     neuron_mask_path = os.path.join(OUTPUT_DIR, 'neuron_masks.pkl')

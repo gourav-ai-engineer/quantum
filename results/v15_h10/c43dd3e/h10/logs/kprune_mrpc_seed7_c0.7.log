@@ -1,0 +1,39 @@
+The cache for model files in Transformers v4.22.0 has been updated. Migrating your old cache. This is a one-time only operation. You can interrupt this and resume the migration later on by calling `transformers.utils.move_cache()`.
+Moving 4 files to the new cache system
+  0%|          | 0/4 [00:00<?, ?it/s] 25%|██▌       | 1/4 [00:00<00:00,  3.94it/s] 50%|█████     | 2/4 [00:00<00:00,  4.07it/s] 75%|███████▌  | 3/4 [00:00<00:00,  4.05it/s]100%|██████████| 4/4 [00:00<00:00,  4.17it/s]100%|██████████| 4/4 [00:00<00:00,  4.12it/s]
+10/17/2026 00:30:35 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='mrpc', ckpt_dir='/tmp/v15/inputs/ckpt/mrpc', exp_name='h10/kprune_mrpc_seed7_c0.7', gpu=0, constraint=0.3, seed=0, sublayerwise_tuning=True, num_tokens=100000, lam_pred=1.0, lam_rep=0.00025, mu=64.0, T=2.0)
+10/17/2026 00:30:35 - INFO - __main__ - Seed number: 0
+Map:   0%|          | 0/3668 [00:00<?, ? examples/s]Map:  27%|██▋       | 1000/3668 [00:00<00:00, 6387.74 examples/s]Map:  55%|█████▍    | 2000/3668 [00:00<00:00, 7754.55 examples/s]Map:  82%|████████▏ | 3000/3668 [00:00<00:00, 8490.38 examples/s]Map: 100%|██████████| 3668/3668 [00:00<00:00, 8239.88 examples/s]
+Map:   0%|          | 0/408 [00:00<?, ? examples/s]Map: 100%|██████████| 408/408 [00:00<00:00, 8774.42 examples/s]
+Map:   0%|          | 0/1725 [00:00<?, ? examples/s]Map:  58%|█████▊    | 1000/1725 [00:00<00:00, 9696.33 examples/s]Map: 100%|██████████| 1725/1725 [00:00<00:00, 6599.28 examples/s]
+10/17/2026 00:30:48 - INFO - __main__ - Num sampels: 1878
+You're using a BertTokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+10/17/2026 00:31:40 - INFO - __main__ - ( 0) [MHA] 4 heads pruned (37.6s)
+10/17/2026 00:32:08 - INFO - __main__ - ( 0) [FFN] 423 neurons pruned (28.5s)
+10/17/2026 00:32:34 - INFO - __main__ - ( 1) [MHA] 5 heads pruned (26.2s)
+10/17/2026 00:33:01 - INFO - __main__ - ( 1) [FFN] 797 neurons pruned (26.9s)
+10/17/2026 00:33:28 - INFO - __main__ - ( 2) [MHA] 3 heads pruned (26.7s)
+10/17/2026 00:33:55 - INFO - __main__ - ( 2) [FFN] 565 neurons pruned (27.2s)
+10/17/2026 00:34:22 - INFO - __main__ - ( 3) [MHA] 3 heads pruned (26.4s)
+10/17/2026 00:34:49 - INFO - __main__ - ( 3) [FFN] 472 neurons pruned (27.2s)
+10/17/2026 00:35:16 - INFO - __main__ - ( 4) [MHA] 0 heads pruned (26.8s)
+10/17/2026 00:35:43 - INFO - __main__ - ( 4) [FFN] 694 neurons pruned (27.7s)
+10/17/2026 00:36:10 - INFO - __main__ - ( 5) [MHA] 0 heads pruned (27.0s)
+10/17/2026 00:36:38 - INFO - __main__ - ( 5) [FFN] 736 neurons pruned (27.8s)
+10/17/2026 00:37:05 - INFO - __main__ - ( 6) [MHA] 1 heads pruned (27.1s)
+10/17/2026 00:37:33 - INFO - __main__ - ( 6) [FFN] 1181 neurons pruned (27.7s)
+10/17/2026 00:38:00 - INFO - __main__ - ( 7) [MHA] 3 heads pruned (27.0s)
+10/17/2026 00:38:27 - INFO - __main__ - ( 7) [FFN] 1520 neurons pruned (27.3s)
+10/17/2026 00:38:54 - INFO - __main__ - ( 8) [MHA] 4 heads pruned (26.3s)
+10/17/2026 00:39:20 - INFO - __main__ - ( 8) [FFN] 1694 neurons pruned (26.6s)
+10/17/2026 00:39:46 - INFO - __main__ - ( 9) [MHA] 4 heads pruned (25.7s)
+10/17/2026 00:40:12 - INFO - __main__ - ( 9) [FFN] 1755 neurons pruned (25.7s)
+10/17/2026 00:40:36 - INFO - __main__ - (10) [MHA] 3 heads pruned (24.8s)
+10/17/2026 00:41:01 - INFO - __main__ - (10) [FFN] 1392 neurons pruned (25.1s)
+10/17/2026 00:41:26 - INFO - __main__ - (11) [MHA] 6 heads pruned (24.2s)
+10/17/2026 00:41:50 - INFO - __main__ - (11) [FFN] 784 neurons pruned (24.7s)
+10/17/2026 00:41:51 - INFO - __main__ - Time for K-prune: 648.833
+Map:   0%|          | 0/3668 [00:00<?, ? examples/s]Map:  27%|██▋       | 1000/3668 [00:00<00:00, 9050.84 examples/s]Map:  55%|█████▍    | 2000/3668 [00:00<00:00, 9147.15 examples/s]Map:  82%|████████▏ | 3000/3668 [00:00<00:00, 9198.45 examples/s]Map: 100%|██████████| 3668/3668 [00:00<00:00, 9144.39 examples/s]
+Map:   0%|          | 0/408 [00:00<?, ? examples/s]Map: 100%|██████████| 408/408 [00:00<00:00, 8553.94 examples/s]
+Map:   0%|          | 0/1725 [00:00<?, ? examples/s]Map:  58%|█████▊    | 1000/1725 [00:00<00:00, 9568.11 examples/s]Map: 100%|██████████| 1725/1725 [00:00<00:00, 9405.44 examples/s]
+10/17/2026 00:42:05 - INFO - __main__ - * FLOPs: 9.15 -> 6.40 (30.0005%)| acc: 0.8701

@@ -1,0 +1,13 @@
+10/17/2026 00:42:12 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='mrpc', ckpt_dir='/tmp/v15/inputs/ckpt/mrpc', output_dir='/tmp/v15/h10/kwon_mrpc_seed7_c0.6', gpu=0, metric='mac', constraint=0.6, mha_lut=None, ffn_lut=None, num_samples=2048, seed=0)
+10/17/2026 00:42:12 - INFO - __main__ - Seed number: 0
+Downloading:   0%|          | 0.00/48.0 [00:00<?, ?B/s]Downloading: 100%|██████████| 48.0/48.0 [00:00<00:00, 281kB/s]
+Downloading:   0%|          | 0.00/570 [00:00<?, ?B/s]Downloading: 100%|██████████| 570/570 [00:00<00:00, 2.69MB/s]
+Downloading: 0.00B [00:00, ?B/s]Downloading: 129kB [00:00, 1.32MB/s]Downloading: 226kB [00:00, 940kB/s] 
+Downloading: 0.00B [00:00, ?B/s]Downloading: 153kB [00:00, 1.55MB/s]Downloading: 305kB [00:00, 1.17MB/s]Downloading: 455kB [00:00, 1.34MB/s]
+Map:   0%|          | 0/1725 [00:00<?, ? examples/s]Map:  58%|█████▊    | 1000/1725 [00:00<00:00, 8264.44 examples/s]Map: 100%|██████████| 1725/1725 [00:00<00:00, 8303.90 examples/s]
+10/17/2026 00:42:52 - INFO - __main__ - Pruned Model MAC: 60.00 %
+  0%|          | 0/12 [00:00<?, ?it/s]  8%|▊         | 1/12 [00:29<05:23, 29.41s/it] 17%|█▋        | 2/12 [00:36<02:44, 16.49s/it] 25%|██▌       | 3/12 [00:43<01:48, 12.11s/it] 33%|███▎      | 4/12 [00:50<01:21, 10.13s/it] 42%|████▏     | 5/12 [00:57<01:03,  9.05s/it] 50%|█████     | 6/12 [01:05<00:50,  8.45s/it] 58%|█████▊    | 7/12 [01:12<00:40,  8.14s/it] 67%|██████▋   | 8/12 [01:20<00:32,  8.03s/it] 75%|███████▌  | 9/12 [01:28<00:24,  8.03s/it] 83%|████████▎ | 10/12 [01:35<00:15,  7.64s/it] 92%|█████████▏| 11/12 [01:41<00:07,  7.31s/it] 92%|█████████▏| 11/12 [01:48<00:09,  9.87s/it]
+10/17/2026 00:44:44 - INFO - __main__ - mrpc Pruning time (s): 135.0360848903656
+/tmp/v15/kwon/evaluate/glue.py:11: FutureWarning: load_metric is deprecated and will be removed in the next major version of datasets. Use 'evaluate.load' instead, from the new library 🤗 Evaluate: https://huggingface.co/docs/evaluate
+  metric = load_metric("glue", task_name)
+10/17/2026 00:44:50 - INFO - __main__ - mrpc Test accuracy: 0.8554

@@ -1,0 +1,36 @@
+10/17/2026 04:59:17 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='sst2', ckpt_dir='/tmp/v15/inputs/ckpt/sst2', exp_name='h10/kprune_sst2_seed7_c0.7', gpu=0, constraint=0.3, seed=0, sublayerwise_tuning=True, num_tokens=100000, lam_pred=1.0, lam_rep=0.00025, mu=64.0, T=2.0)
+10/17/2026 04:59:17 - INFO - __main__ - Seed number: 0
+Map:   0%|          | 0/67349 [00:00<?, ? examples/s]Map:   6%|▌         | 4000/67349 [00:00<00:02, 29234.56 examples/s]Map:  12%|█▏        | 8000/67349 [00:00<00:01, 30456.73 examples/s]Map:  18%|█▊        | 12000/67349 [00:00<00:02, 24446.50 examples/s]Map:  24%|██▍       | 16000/67349 [00:00<00:01, 26498.08 examples/s]Map:  30%|██▉       | 20000/67349 [00:00<00:01, 28138.97 examples/s]Map:  36%|███▌      | 24000/67349 [00:00<00:01, 24922.10 examples/s]Map:  42%|████▏     | 28000/67349 [00:01<00:01, 26726.62 examples/s]Map:  48%|████▊     | 32000/67349 [00:01<00:01, 28065.52 examples/s]Map:  53%|█████▎    | 36000/67349 [00:01<00:01, 24730.24 examples/s]Map:  59%|█████▉    | 40000/67349 [00:01<00:01, 26347.55 examples/s]Map:  65%|██████▌   | 44000/67349 [00:01<00:00, 27570.21 examples/s]Map:  71%|███████▏  | 48000/67349 [00:01<00:00, 24830.20 examples/s]Map:  77%|███████▋  | 52000/67349 [00:01<00:00, 26216.67 examples/s]Map:  83%|████████▎ | 56000/67349 [00:02<00:00, 27444.69 examples/s]Map:  89%|████████▉ | 60000/67349 [00:02<00:00, 24646.31 examples/s]Map:  95%|█████████▌| 64000/67349 [00:02<00:00, 26056.30 examples/s]Map: 100%|██████████| 67349/67349 [00:02<00:00, 27163.73 examples/s]Map: 100%|██████████| 67349/67349 [00:02<00:00, 26459.78 examples/s]
+Map:   0%|          | 0/872 [00:00<?, ? examples/s]Map: 100%|██████████| 872/872 [00:00<00:00, 16993.14 examples/s]
+Map:   0%|          | 0/1821 [00:00<?, ? examples/s]Map: 100%|██████████| 1821/1821 [00:00<00:00, 18490.22 examples/s]
+10/17/2026 04:59:32 - INFO - __main__ - Num sampels: 3974
+You're using a BertTokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+10/17/2026 05:00:00 - INFO - __main__ - ( 0) [MHA] 6 heads pruned (15.9s)
+10/17/2026 05:00:14 - INFO - __main__ - ( 0) [FFN] 1321 neurons pruned (14.1s)
+10/17/2026 05:00:28 - INFO - __main__ - ( 1) [MHA] 8 heads pruned (13.7s)
+10/17/2026 05:00:41 - INFO - __main__ - ( 1) [FFN] 1349 neurons pruned (12.9s)
+10/17/2026 05:00:53 - INFO - __main__ - ( 2) [MHA] 7 heads pruned (12.1s)
+10/17/2026 05:01:05 - INFO - __main__ - ( 2) [FFN] 801 neurons pruned (12.1s)
+10/17/2026 05:01:17 - INFO - __main__ - ( 3) [MHA] 6 heads pruned (12.1s)
+10/17/2026 05:01:29 - INFO - __main__ - ( 3) [FFN] 670 neurons pruned (12.3s)
+10/17/2026 05:01:41 - INFO - __main__ - ( 4) [MHA] 5 heads pruned (12.3s)
+10/17/2026 05:01:54 - INFO - __main__ - ( 4) [FFN] 829 neurons pruned (12.4s)
+10/17/2026 05:02:06 - INFO - __main__ - ( 5) [MHA] 3 heads pruned (12.0s)
+10/17/2026 05:02:18 - INFO - __main__ - ( 5) [FFN] 688 neurons pruned (12.0s)
+10/17/2026 05:02:29 - INFO - __main__ - ( 6) [MHA] 1 heads pruned (11.7s)
+10/17/2026 05:02:41 - INFO - __main__ - ( 6) [FFN] 643 neurons pruned (11.9s)
+10/17/2026 05:02:53 - INFO - __main__ - ( 7) [MHA] 3 heads pruned (11.8s)
+10/17/2026 05:03:05 - INFO - __main__ - ( 7) [FFN] 770 neurons pruned (12.0s)
+10/17/2026 05:03:17 - INFO - __main__ - ( 8) [MHA] 2 heads pruned (11.9s)
+10/17/2026 05:03:29 - INFO - __main__ - ( 8) [FFN] 1201 neurons pruned (12.0s)
+10/17/2026 05:03:41 - INFO - __main__ - ( 9) [MHA] 1 heads pruned (11.5s)
+10/17/2026 05:03:52 - INFO - __main__ - ( 9) [FFN] 1209 neurons pruned (11.6s)
+10/17/2026 05:04:03 - INFO - __main__ - (10) [MHA] 0 heads pruned (11.2s)
+10/17/2026 05:04:15 - INFO - __main__ - (10) [FFN] 1129 neurons pruned (11.4s)
+10/17/2026 05:04:26 - INFO - __main__ - (11) [MHA] 0 heads pruned (11.1s)
+10/17/2026 05:04:37 - INFO - __main__ - (11) [FFN] 606 neurons pruned (11.4s)
+10/17/2026 05:04:38 - INFO - __main__ - Time for K-prune: 293.713
+Map:   0%|          | 0/67349 [00:00<?, ? examples/s]Map:   6%|▌         | 4000/67349 [00:00<00:02, 29142.34 examples/s]Map:  12%|█▏        | 8000/67349 [00:00<00:01, 30386.86 examples/s]Map:  19%|█▉        | 13000/67349 [00:00<00:02, 24560.10 examples/s]Map:  25%|██▌       | 17000/67349 [00:00<00:01, 26539.45 examples/s]Map:  31%|███       | 21000/67349 [00:00<00:01, 27551.83 examples/s]Map:  37%|███▋      | 25000/67349 [00:00<00:01, 24389.37 examples/s]Map:  43%|████▎     | 29000/67349 [00:01<00:01, 26092.22 examples/s]Map:  49%|████▉     | 33000/67349 [00:01<00:01, 26977.76 examples/s]Map:  55%|█████▍    | 37000/67349 [00:01<00:01, 23855.96 examples/s]Map:  61%|██████    | 41000/67349 [00:01<00:01, 25598.57 examples/s]Map:  67%|██████▋   | 45000/67349 [00:01<00:00, 26938.64 examples/s]Map:  71%|███████▏  | 48000/67349 [00:01<00:00, 23941.31 examples/s]Map:  77%|███████▋  | 52000/67349 [00:02<00:00, 25681.07 examples/s]Map:  83%|████████▎ | 56000/67349 [00:02<00:00, 27065.21 examples/s]Map:  89%|████████▉ | 60000/67349 [00:02<00:00, 24273.10 examples/s]Map:  95%|█████████▌| 64000/67349 [00:02<00:00, 26061.38 examples/s]Map: 100%|██████████| 67349/67349 [00:02<00:00, 27081.79 examples/s]Map: 100%|██████████| 67349/67349 [00:02<00:00, 26031.71 examples/s]
+Map:   0%|          | 0/872 [00:00<?, ? examples/s]Map: 100%|██████████| 872/872 [00:00<00:00, 17194.70 examples/s]
+Map:   0%|          | 0/1821 [00:00<?, ? examples/s]Map: 100%|██████████| 1821/1821 [00:00<00:00, 18195.14 examples/s]Map: 100%|██████████| 1821/1821 [00:00<00:00, 17825.36 examples/s]
+10/17/2026 05:04:54 - INFO - __main__ - * FLOPs: 4.30 -> 3.01 (30.0012%)| acc: 0.9300

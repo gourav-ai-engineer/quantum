@@ -1,0 +1,8 @@
+10/17/2026 07:04:34 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='sst2', ckpt_dir='/tmp/v15/inputs/ckpt/sst2', output_dir='/tmp/v15/h10/kwon_sst2_seed2024_c0.5', gpu=0, metric='mac', constraint=0.5, mha_lut=None, ffn_lut=None, num_samples=2048, seed=0)
+10/17/2026 07:04:34 - INFO - __main__ - Seed number: 0
+10/17/2026 07:05:00 - INFO - __main__ - Pruned Model MAC: 50.00 %
+  0%|          | 0/12 [00:00<?, ?it/s]  8%|▊         | 1/12 [00:14<02:43, 14.87s/it] 17%|█▋        | 2/12 [00:18<01:25,  8.51s/it] 25%|██▌       | 3/12 [00:22<00:56,  6.31s/it] 33%|███▎      | 4/12 [00:26<00:42,  5.34s/it] 42%|████▏     | 5/12 [00:30<00:33,  4.77s/it] 50%|█████     | 6/12 [00:33<00:26,  4.42s/it] 58%|█████▊    | 7/12 [00:37<00:20,  4.19s/it] 67%|██████▋   | 8/12 [00:41<00:16,  4.13s/it] 75%|███████▌  | 9/12 [00:45<00:12,  4.04s/it] 75%|███████▌  | 9/12 [00:48<00:16,  5.41s/it]
+10/17/2026 07:05:52 - INFO - __main__ - sst2 Pruning time (s): 62.97563982009888
+/tmp/v15/kwon/evaluate/glue.py:11: FutureWarning: load_metric is deprecated and will be removed in the next major version of datasets. Use 'evaluate.load' instead, from the new library 🤗 Evaluate: https://huggingface.co/docs/evaluate
+  metric = load_metric("glue", task_name)
+10/17/2026 07:05:59 - INFO - __main__ - sst2 Test accuracy: 0.8911

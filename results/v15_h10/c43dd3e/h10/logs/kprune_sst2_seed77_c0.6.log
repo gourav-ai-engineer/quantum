@@ -1,0 +1,30 @@
+10/17/2026 06:02:43 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='sst2', ckpt_dir='/tmp/v15/inputs/ckpt/sst2', exp_name='h10/kprune_sst2_seed77_c0.6', gpu=0, constraint=0.4, seed=0, sublayerwise_tuning=True, num_tokens=100000, lam_pred=1.0, lam_rep=0.00025, mu=64.0, T=2.0)
+10/17/2026 06:02:43 - INFO - __main__ - Seed number: 0
+10/17/2026 06:02:55 - INFO - __main__ - Num sampels: 3974
+You're using a BertTokenizerFast tokenizer. Please note that with a fast tokenizer, using the `__call__` method is faster than using a method to encode the text followed by a call to the `pad` method to get a padded encoding.
+10/17/2026 06:03:23 - INFO - __main__ - ( 0) [MHA] 8 heads pruned (16.1s)
+10/17/2026 06:03:38 - INFO - __main__ - ( 0) [FFN] 1622 neurons pruned (14.4s)
+10/17/2026 06:03:51 - INFO - __main__ - ( 1) [MHA] 8 heads pruned (13.8s)
+10/17/2026 06:04:05 - INFO - __main__ - ( 1) [FFN] 1622 neurons pruned (13.1s)
+10/17/2026 06:04:17 - INFO - __main__ - ( 2) [MHA] 8 heads pruned (12.3s)
+10/17/2026 06:04:29 - INFO - __main__ - ( 2) [FFN] 1138 neurons pruned (12.1s)
+10/17/2026 06:04:41 - INFO - __main__ - ( 3) [MHA] 7 heads pruned (11.9s)
+10/17/2026 06:04:53 - INFO - __main__ - ( 3) [FFN] 972 neurons pruned (12.0s)
+10/17/2026 06:05:05 - INFO - __main__ - ( 4) [MHA] 6 heads pruned (11.9s)
+10/17/2026 06:05:17 - INFO - __main__ - ( 4) [FFN] 1102 neurons pruned (12.0s)
+10/17/2026 06:05:28 - INFO - __main__ - ( 5) [MHA] 4 heads pruned (11.5s)
+10/17/2026 06:05:40 - INFO - __main__ - ( 5) [FFN] 997 neurons pruned (11.5s)
+10/17/2026 06:05:51 - INFO - __main__ - ( 6) [MHA] 4 heads pruned (11.1s)
+10/17/2026 06:06:02 - INFO - __main__ - ( 6) [FFN] 939 neurons pruned (11.1s)
+10/17/2026 06:06:13 - INFO - __main__ - ( 7) [MHA] 3 heads pruned (10.9s)
+10/17/2026 06:06:24 - INFO - __main__ - ( 7) [FFN] 1045 neurons pruned (11.1s)
+10/17/2026 06:06:35 - INFO - __main__ - ( 8) [MHA] 4 heads pruned (10.8s)
+10/17/2026 06:06:46 - INFO - __main__ - ( 8) [FFN] 1555 neurons pruned (10.8s)
+10/17/2026 06:06:56 - INFO - __main__ - ( 9) [MHA] 2 heads pruned (10.4s)
+10/17/2026 06:07:07 - INFO - __main__ - ( 9) [FFN] 1551 neurons pruned (10.5s)
+10/17/2026 06:07:17 - INFO - __main__ - (10) [MHA] 1 heads pruned (10.0s)
+10/17/2026 06:07:27 - INFO - __main__ - (10) [FFN] 1453 neurons pruned (10.1s)
+10/17/2026 06:07:36 - INFO - __main__ - (11) [MHA] 1 heads pruned (9.7s)
+10/17/2026 06:07:46 - INFO - __main__ - (11) [FFN] 958 neurons pruned (9.8s)
+10/17/2026 06:07:46 - INFO - __main__ - Time for K-prune: 279.181
+10/17/2026 06:07:59 - INFO - __main__ - * FLOPs: 4.30 -> 2.58 (40.0004%)| acc: 0.9243

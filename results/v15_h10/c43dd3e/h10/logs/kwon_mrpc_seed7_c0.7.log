@@ -1,0 +1,10 @@
+10/17/2026 00:27:37 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='mrpc', ckpt_dir='/tmp/v15/inputs/ckpt/mrpc', output_dir='/tmp/v15/h10/kwon_mrpc_seed7_c0.7', gpu=0, metric='mac', constraint=0.7, mha_lut=None, ffn_lut=None, num_samples=2048, seed=0)
+10/17/2026 00:27:37 - INFO - __main__ - Seed number: 0
+Map:   0%|          | 0/408 [00:00<?, ? examples/s]Map: 100%|██████████| 408/408 [00:00<00:00, 7192.20 examples/s]
+10/17/2026 00:28:10 - INFO - __main__ - Pruned Model MAC: 70.00 %
+  0%|          | 0/12 [00:00<?, ?it/s]  8%|▊         | 1/12 [00:25<04:41, 25.57s/it] 17%|█▋        | 2/12 [00:32<02:25, 14.58s/it] 25%|██▌       | 3/12 [00:39<01:38, 10.95s/it] 33%|███▎      | 4/12 [00:46<01:15,  9.40s/it] 42%|████▏     | 5/12 [00:53<01:00,  8.63s/it] 50%|█████     | 6/12 [01:00<00:49,  8.28s/it] 58%|█████▊    | 7/12 [01:09<00:41,  8.25s/it] 67%|██████▋   | 8/12 [01:17<00:33,  8.30s/it] 75%|███████▌  | 9/12 [01:26<00:25,  8.44s/it] 83%|████████▎ | 10/12 [01:33<00:16,  8.13s/it] 92%|█████████▏| 11/12 [01:40<00:07,  7.72s/it] 92%|█████████▏| 11/12 [01:47<00:09,  9.76s/it]
+10/17/2026 00:30:02 - INFO - __main__ - mrpc Pruning time (s): 129.44549942016602
+Map:   0%|          | 0/3668 [00:00<?, ? examples/s]Map:  27%|██▋       | 1000/3668 [00:00<00:00, 8723.76 examples/s]Map:  55%|█████▍    | 2000/3668 [00:00<00:00, 8918.64 examples/s]Map:  82%|████████▏ | 3000/3668 [00:00<00:00, 9005.05 examples/s]Map: 100%|██████████| 3668/3668 [00:00<00:00, 8901.95 examples/s]
+/tmp/v15/kwon/evaluate/glue.py:11: FutureWarning: load_metric is deprecated and will be removed in the next major version of datasets. Use 'evaluate.load' instead, from the new library 🤗 Evaluate: https://huggingface.co/docs/evaluate
+  metric = load_metric("glue", task_name)
+10/17/2026 00:30:08 - INFO - __main__ - mrpc Test accuracy: 0.8725

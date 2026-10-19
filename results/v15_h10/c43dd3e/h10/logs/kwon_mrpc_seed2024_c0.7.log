@@ -1,0 +1,8 @@
+10/17/2026 04:03:42 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='mrpc', ckpt_dir='/tmp/v15/inputs/ckpt/mrpc', output_dir='/tmp/v15/h10/kwon_mrpc_seed2024_c0.7', gpu=0, metric='mac', constraint=0.7, mha_lut=None, ffn_lut=None, num_samples=2048, seed=0)
+10/17/2026 04:03:42 - INFO - __main__ - Seed number: 0
+10/17/2026 04:04:20 - INFO - __main__ - Pruned Model MAC: 70.00 %
+  0%|          | 0/12 [00:00<?, ?it/s]  8%|▊         | 1/12 [00:29<05:21, 29.27s/it] 17%|█▋        | 2/12 [00:36<02:45, 16.51s/it] 25%|██▌       | 3/12 [00:43<01:50, 12.23s/it] 33%|███▎      | 4/12 [00:51<01:22, 10.32s/it] 42%|████▏     | 5/12 [00:58<01:04,  9.24s/it] 50%|█████     | 6/12 [01:06<00:51,  8.64s/it] 58%|█████▊    | 7/12 [01:14<00:41,  8.38s/it] 67%|██████▋   | 8/12 [01:21<00:32,  8.23s/it] 75%|███████▌  | 9/12 [01:30<00:24,  8.18s/it] 83%|████████▎ | 10/12 [01:36<00:15,  7.76s/it] 92%|█████████▏| 11/12 [01:43<00:07,  7.37s/it] 92%|█████████▏| 11/12 [01:49<00:09,  9.99s/it]
+10/17/2026 04:06:14 - INFO - __main__ - mrpc Pruning time (s): 135.94828987121582
+/tmp/v15/kwon/evaluate/glue.py:11: FutureWarning: load_metric is deprecated and will be removed in the next major version of datasets. Use 'evaluate.load' instead, from the new library 🤗 Evaluate: https://huggingface.co/docs/evaluate
+  metric = load_metric("glue", task_name)
+10/17/2026 04:06:20 - INFO - __main__ - mrpc Test accuracy: 0.8775
