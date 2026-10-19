@@ -1,0 +1,15 @@
+{
+  "experiment": "V17 Stage R-dev (grp_r, d2i_r) on MRPC/SST-2, held-out-train KL",
+  "commit": "195c18f12dea12fee9d3d9e66a4f348475a2995c",
+  "date_utc": "2026-10-19/20",
+  "platform": "Kaggle notebook gouravcseai/notebookc09d6e2ea7 Version 2 (scriptVersionId 360116309; Version 1 sat 4 h in the queue and was stopped before starting), GPU T4 x2, 7910.1 s, successful",
+  "driver": "bash scripts/v15_kaggle.sh v17r /tmp/v17 /kaggle/working/v17",
+  "environment": ".venv-ci pins, preflight passed",
+  "archive": {
+    "file": "v17r_results.tgz",
+    "bytes": 921552,
+    "sha256": "c1122db322ce00920c75516a7a3f46ff54d368f8ac7543922f976df1a66a44d7",
+    "note": "browser download left as .tmp with full size; copied and verified as a valid tar.gz (43 members)"
+  },
+  "reanalysis": "2026-10-20: scripts/v17_rdev_analysis.py rerun locally: gate_pass False, mechanism_confirmed True (same as the Kaggle log)"
+}
