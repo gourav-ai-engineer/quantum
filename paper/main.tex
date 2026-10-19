@@ -188,9 +188,36 @@ pre-registered H9a failure for BCM and Fisher on SST-2 and MRPC reflects ceiling
 implementation error.
 
 \subsection{Global allocation over heads and neurons (V15, pre-registered)}
-\todo{Phase~1 reproduction of Kwon et al.\ and K-prune (amendment A1); H10 calibration-side KL gate; then, only if
-supported, H11 accuracy at 50\% MACs on QNLI, MNLI-m, SQuAD~v1.1, latency of physically pruned models (H12), ablations
-(H13), RoBERTa-base~\citep{liu2019roberta}.}
+% Phase 1: docs/PROJECT_STATE.md (Kaggle Versions 2-4); H10: results/v15_h10/c43dd3e/h10/v15_h10_verdict.json
+\paragraph{Reproduction gate.} Both official codes reproduce. K-prune on its own BERT-base checkpoints at 80\% MAC
+reduction gives 84.85 on MRPC (published 84.80) and 74.20 SQuAD~v1.1 F1 (published 74.16), means over five seeds.
+Kwon et al.'s checkpoints are no longer available, so their code was run on K-prune's checkpoints and the accuracy
+\emph{drop} was compared with theirs (Appendix~\ref{app:repro}). The pre-registered rule passes (the drop is missed by
+more than one point at most budgets only on MRPC, where the validation set has 408 examples).
+
+\paragraph{Calibration gate (H10).} Before any accuracy run, GRP had to lower the logit KL to the teacher on 512
+held-out training rows by at least 10\% relative to \emph{both} baselines at the same budget, at two or more of four
+budgets, on both development tasks. Table~\ref{tab:h10} shows that it does so at every budget on SST-2, with KL 40--75\%
+below K-prune, but at no budget on MRPC, where K-prune is lower at 50\% and 40\% of MACs. H10 is therefore not
+supported, and following the pre-registration no accuracy comparison (H11) was run: GRP is not claimed to improve on
+K-prune. The task dependence motivates the diagnosis in Section~\ref{sec:v16}.
+\begin{table}[t]\centering\small
+\caption{Mean logit KL(teacher $\|$ pruned) on 512 held-out training rows, five calibration seeds, BERT-base, by
+fraction of MACs kept. Kwon et al.\ and K-prune: official code on the same checkpoints and calibration rows. Source:
+\texttt{results/v15\_h10/c43dd3e}.}\label{tab:h10}
+\begin{tabular}{llcccc}\toprule
+Task & Method & 0.7 & 0.6 & 0.5 & 0.4\\\midrule
+MRPC & Kwon et al. & 0.0194 & 0.0464 & 0.1123 & 0.2249\\
+ & K-prune & 0.0111 & 0.0239 & 0.0481 & 0.0703\\
+ & GRP & 0.0104 & 0.0242 & 0.0527 & 0.0946\\\midrule
+SST-2 & Kwon et al. & 0.0256 & 0.0758 & 0.1497 & 0.3009\\
+ & K-prune & 0.0125 & 0.0254 & 0.0534 & 0.0909\\
+ & GRP & 0.0031 & 0.0077 & 0.0205 & 0.0543\\\bottomrule
+\end{tabular}\end{table}
+
+\subsection{Why the advantage is task-dependent (V16, pre-registered diagnosis)}\label{sec:v16}
+\todo{Stage A: transplant decomposition (K-prune selection + GRP refit; K-prune allocation + GRP within-module
+selection) and the exchange-rate probe; decision branch A-1/A-2/A-3; Stage B on QNLI, MNLI-m, QQP only if A-1 or A-2.}
 
 \section{Limitations}
 One model family so far (BERT-base); V14 uses a single, uniform sparsity level; masking results do not measure speed
@@ -198,7 +225,7 @@ One model family so far (BERT-base); V14 uses a single, uniform sparsity level; 
 \todo{complete after V15}.
 
 \appendix
-\section{Reproducibility details for the baselines (V15)}
+\section{Reproducibility details for the baselines (V15)}\label{app:repro}
 \paragraph{Official code.} Kwon et al.: \texttt{github.com/WoosukKwon/retraining-free-pruning} at commit 806ac5a6;
 K-prune: \texttt{github.com/snudm-starlab/K-prune} at commit 9ca629a1. Each runs in its own environment (Python 3.9,
 PyTorch 1.13.1, Transformers 4.12.0, CuPy; and Python 3.10, PyTorch 1.12.1, Transformers 4.25.1). Exactly four lines
@@ -214,7 +241,13 @@ made before any baseline run, Kwon's code is reproduced on K-prune's released BE
 accuracy drop relative to the unpruned model with the drop reported by Kwon et al. All comparative runs use the
 pinned public checkpoints listed in Section~6; the MNLI checkpoint's classifier rows are permuted once to the GLUE
 label order (mapping fixed from training data).
-\todo{fill with Phase~1 reproduction numbers.}
+\paragraph{Phase~1 numbers.} K-prune, \texttt{--constraint 0.8}, seeds 0--4: MRPC accuracy 0.8431, 0.8431, 0.8505,
+0.8603, 0.8456 (mean 0.8485; published 84.80); SQuAD~v1.1 F1 74.73, 73.41, 73.71, 74.34, 74.81 (mean 74.20; published
+74.16). Kwon et al.'s code on K-prune's checkpoints, seeds 0--4, mean accuracy at 70/60/50\% of MACs: MRPC 0.8814 /
+0.8495 / 0.8245, SST-2 0.9190 / 0.9126 / 0.8991; unpruned under the same evaluation code: MRPC 0.8701, SST-2 0.9312.
+Drops versus Kwon et al.'s reported drops: MRPC $+1.13$ vs $-0.2$, $-2.06$ vs $-1.0$, $-4.56$ vs $-3.1$; SST-2 $-1.22$ vs
+$-0.6$, $-1.86$ vs $-1.1$, $-3.21$ vs $-2.0$. The pre-registered stop rule (miss by more than one point at most budgets
+on \emph{both} tasks) does not fire: MRPC misses at three budgets, SST-2 at one.
 
 \bibliographystyle{plainnat}
 \bibliography{refs}
