@@ -4,6 +4,8 @@ Parts (held-out-train KL, the V15 protocol: calibration = train.shuffle(seed)[:2
   d2i     : K-prune's official masks (V15 H10 runs) -> physical pruning -> GRP's joint sequential refit.
   d2ii    : per-module kept counts from K-prune's masks; GRP's refit-aware greedy inside each module; joint refit.
   no_sens : GRP with s_m = 1.
+  d2i_r   : V17 R-dev mechanism check: K-prune's masks + drift-corrected refit (GRP-R's compensation).
+  grp_r   : V17 GRP-R: GRP selection + drift-corrected joint refit.
   d1      : exchange-rate probe at GRP's V15 c0.5 solution: per module, remove the cheapest units worth 2% of the
             module's current MACs (max(1, round(0.02 * kept)) units), refit, KL increase on the CALIBRATION rows,
             against s_m * DeltaE_m (exact joint removal cost).
@@ -42,10 +44,10 @@ def mac_ratio(heads, neurons, cfg, n_seq):
     return model_mac([len(heads[l]) for l in heads], [len(neurons[l]) for l in neurons], n_seq, cfg.hidden_size, hs) / full
 
 
-def refit_student(teacher, heads, neurons, cb, device, ridge_rel):
+def refit_student(teacher, heads, neurons, cb, device, ridge_rel, drift_correct=False):
     assert all(len(v) >= 1 for v in neurons.values()), "a layer with 0 FFN neurons is not supported"
     s = prune_model(copy.deepcopy(teacher), heads, neurons)
-    sequential_refit(s, teacher, cb, device, ridge_rel)
+    sequential_refit(s, teacher, cb, device, ridge_rel, drift_correct)
     return s
 
 
@@ -121,24 +123,27 @@ def main():
             stats = None
             for c in [float(x) for x in a.constraints.split(",")]:
                 for part in [x for x in parts if x != "d1"]:
-                    path = os.path.join(a.output_dir, f"v16_{part}_{task}_seed{seed}_c{c}.json")
+                    prefix = "v17" if part.endswith("_r") else "v16"
+                    path = os.path.join(a.output_dir, f"{prefix}_{part}_{task}_seed{seed}_c{c}.json")
                     if os.path.exists(path):
                         continue
                     t0 = time.time()
-                    if part == "no_sens":
+                    if part in ("no_sens", "grp_r"):
                         stats = stats or teacher_stats(teacher, cb, a.device, seed)
                         student, heads, neurons, _ = grp_prune(teacher, cb, a.device, n_seq, c, a.ridge_rel,
-                                                               use_sensitivity=False, seed=seed, stats=stats)
+                                                               use_sensitivity=part != "no_sens", seed=seed,
+                                                               stats=stats, drift_correct=part == "grp_r")
                     else:
                         kh, kn = kprune_masks(a.kprune_masks, task, seed, c)
-                        if part == "d2i":
+                        if part in ("d2i", "d2i_r"):
                             heads, neurons = kh, kn
                         else:
                             stats = stats or teacher_stats(teacher, cb, a.device, seed)
                             counts = {**{(l, "att"): len(kh[l]) for l in kh}, **{(l, "ffn"): len(kn[l]) for l in kn}}
                             heads, neurons = grp_select_counts(stats["G"], stats["W"], counts,
                                                                cfg.num_attention_heads, a.ridge_rel)
-                        student = refit_student(teacher, heads, neurons, cb, a.device, a.ridge_rel)
+                        student = refit_student(teacher, heads, neurons, cb, a.device, a.ridge_rel,
+                                                drift_correct=part.endswith("_r"))
                     kl, agree = compare_outputs(spec, lt_held, logits_of(student, hb, a.device))
                     rec = {"task": task, "seed": seed, "constraint": c, "part": part, "calibration_size": n,
                            "heldout": f"train.shuffle({seed})[{n}:{n + a.heldout_size}]", "seq_len_for_macs": n_seq,

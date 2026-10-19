@@ -220,3 +220,41 @@ def test_grp_select_counts_hits_counts_and_matches_single_module_greedy():
     assert [len(heads[0]), len(neurons[0]), len(heads[1]), len(neurons[1])] == [2, 10, 4, 63]
     st = ModuleState(G[(1, "ffn")], W[(1, "ffn")], 1)  # one removal: the single cheapest neuron goes
     assert set(range(64)) - set(neurons[1]) == {int(torch.argmin(st.costs()))}
+
+
+# ---- V17 GRP-R (drift-corrected refit) -----------------------------------------------------------------------------
+def _refit(drift, heads, neurons):
+    teacher, bs = _tiny_bert(), _batches()
+    s = prune_model(copy.deepcopy(teacher), heads, neurons)
+    sequential_refit(s, teacher, bs, "cpu", ridge_rel=1e-4, drift_correct=drift)
+    return s, teacher, bs
+
+
+@torch.no_grad()
+def _preln_error(student, teacher, bs, l, kind):
+    """Squared error of the pre-LayerNorm sum dense(x) + h at sublayer (l, kind), non-padding tokens."""
+    err = 0.0
+    spec = [(l, kind, "out", "y"), (l, kind, "res", "h")]
+    with _hooks(student, spec) as s_st, _hooks(teacher, spec) as t_st:
+        for b in bs:
+            student(**b)
+            teacher(**b)
+            m = b["attention_mask"].bool()
+            err += float(((s_st["y"] + s_st["h"] - t_st["y"] - t_st["h"])[m].double() ** 2).sum())
+    return err
+
+
+def test_drift_correct_equals_plain_where_no_drift_exists():
+    # the first sublayer (layer 0 attention) adds the embedding output, identical in student and teacher: h_s == h_t
+    heads, neurons = {0: [0, 2]}, {0: list(range(0, 64, 2))}
+    a, _, _ = _refit(False, heads, neurons)
+    b, _, _ = _refit(True, heads, neurons)
+    da, db = a.bert.encoder.layer[0].attention.output.dense, b.bert.encoder.layer[0].attention.output.dense
+    assert torch.allclose(da.weight, db.weight, atol=1e-6) and torch.allclose(da.bias, db.bias, atol=1e-6)
+
+
+def test_drift_correct_lowers_downstream_preln_error():
+    heads, neurons = {0: [1], 1: list(range(4))}, {0: list(range(8)), 1: list(range(64))}  # heavy layer-0 pruning
+    plain, t, bs = _refit(False, heads, neurons)
+    drift, _, _ = _refit(True, heads, neurons)
+    assert _preln_error(drift, t, bs, 1, "att") < _preln_error(plain, t, bs, 1, "att")

@@ -136,5 +136,14 @@ v16a)
     | grep -v -i warn | tail -120)
   (cd "$REPO" && python scripts/v16_stageA_analysis.py "$OUT/v16a" results/v15_h10/c43dd3e/h10/v15_h10_verdict.json) || true
   ;;
+v17r)
+  # V17 Stage R-dev (docs/PROJECT_STATE.md, "Pre-registration V17"): GRP-R and K-prune masks + drift-corrected refit.
+  pip install -q -r "$REPO/requirements-ci.txt" && pip install -q -e "$REPO" --no-deps
+  pip uninstall -y -q torchvision torchaudio || true
+  python "$REPO/scripts/preflight.py" check
+  mkdir -p "$OUT/v17r"
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/step23_v16_stageA.py --parts grp_r,d2i_r --output-dir "$OUT/v17r" 2>&1     | grep -v -i warn | tail -60)
+  (cd "$REPO" && python scripts/v17_rdev_analysis.py "$OUT/v17r" results/v15_h10/c43dd3e/h10/v15_h10_verdict.json) || true
+  ;;
 *) echo "unknown stage $STAGE"; exit 1 ;;
 esac

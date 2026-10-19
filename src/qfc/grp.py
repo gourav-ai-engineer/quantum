@@ -43,13 +43,24 @@ def _dense(model, l: int, kind: str) -> nn.Linear:
     return layer.attention.output.dense if kind == "att" else layer.output.dense
 
 
+def _sub(model, l: int, kind: str) -> nn.Module:
+    """The Add & LayerNorm sublayer (BertSelfOutput / BertOutput): forward(hidden_states, input_tensor)."""
+    layer = _layers(model)[l]
+    return layer.attention.output if kind == "att" else layer.output
+
+
 @contextmanager
 def _hooks(model, specs):
-    """specs: list of (layer, kind, 'in'|'out', store_key). Stores the dense layer's input or output (with bias)."""
+    """specs: list of (layer, kind, 'in'|'out'|'res', store_key). Stores the dense layer's input or output (with
+    bias), or ('res') the residual input_tensor that the sublayer adds before its LayerNorm."""
     store, handles = {}, []
     for l, kind, where, key in specs:
         dense = _dense(model, l, kind)
-        if where == "in":
+        if where == "res":
+            handles.append(_sub(model, l, kind).register_forward_pre_hook(
+                lambda m, a, kw, key=key: store.__setitem__(key, a[1] if len(a) > 1 else kw["input_tensor"]),
+                with_kwargs=True))
+        elif where == "in":
             handles.append(dense.register_forward_pre_hook(lambda m, a, key=key: store.__setitem__(key, a[0])))
         else:
             handles.append(dense.register_forward_hook(lambda m, a, o, key=key: store.__setitem__(key, o)))
@@ -329,10 +340,14 @@ def _solve_set(dense: nn.Linear, G: torch.Tensor, C: torch.Tensor, ridge_rel: fl
 
 
 @torch.no_grad()
-def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 1e-4) -> None:
+def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 1e-4,
+                     drift_correct: bool = False) -> None:
     """Layer by layer from first to last: refit the student's attention output projection, then its FFN output
     projection (weights and bias), so each matches the unpruned teacher's module output, using inputs from the
-    already-refit student. Hidden states entering each layer are cached per batch (teacher and student)."""
+    already-refit student. Hidden states entering each layer are cached per batch (teacher and student).
+
+    drift_correct (V17, GRP-R): the target becomes y_t + h_t - h_s (h = residual input to the Add & LayerNorm), so
+    the refit matches the teacher's pre-LayerNorm sum and also cancels residual drift from earlier sublayers."""
     student.eval()
     teacher.eval()
     base_s, base_t = getattr(student, student.base_model_prefix), getattr(teacher, teacher.base_model_prefix)
@@ -345,12 +360,18 @@ def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 
         ls, lt = _layers(student)[l], _layers(teacher)[l]
         for kind in ("att", "ffn"):
             G = C = None
-            with _hooks(student, [(l, kind, "in", "x")]) as s_st, _hooks(teacher, [(l, kind, "out", "y")]) as t_st:
+            s_spec, t_spec = [(l, kind, "in", "x")], [(l, kind, "out", "y")]
+            if drift_correct:
+                s_spec.append((l, kind, "res", "h"))
+                t_spec.append((l, kind, "res", "h"))
+            with _hooks(student, s_spec) as s_st, _hooks(teacher, t_spec) as t_st:
                 for i in range(len(bs)):
                     ls(hs[i], attention_mask=ext[i])
                     lt(ht[i], attention_mask=ext[i])
                     x = _aug(s_st["x"][masks[i]].double())
                     y = t_st["y"][masks[i]].double()
+                    if drift_correct:
+                        y = y + (t_st["h"][masks[i]] - s_st["h"][masks[i]]).double()
                     g, c = (x.T @ x).cpu(), (x.T @ y).cpu()
                     G, C = (g, c) if G is None else (G + g, C + c)
             _solve_set(_dense(student, l, kind), G, C, ridge_rel)
@@ -368,8 +389,10 @@ def teacher_stats(teacher, batches, device: str, seed: int = 0) -> dict:
 
 
 def grp_prune(teacher, batches, device: str, seq_len: float, constraint: float, ridge_rel: float = 1e-4,
-              use_sensitivity: bool = True, refit: bool = True, seed: int = 0, stats: dict | None = None):
-    """Full GRP: statistics -> global greedy selection -> physical pruning -> joint sequential refit."""
+              use_sensitivity: bool = True, refit: bool = True, seed: int = 0, stats: dict | None = None,
+              drift_correct: bool = False):
+    """Full GRP: statistics -> global greedy selection -> physical pruning -> joint sequential refit
+    (drift_correct=True gives GRP-R, V17)."""
     L, H = len(_layers(teacher)), teacher.config.num_attention_heads
     stats = stats or teacher_stats(teacher, batches, device, seed)
     G, weights = stats["G"], stats["W"]
@@ -378,6 +401,6 @@ def grp_prune(teacher, batches, device: str, seq_len: float, constraint: float, 
                                       ridge_rel)
     student = prune_model(copy.deepcopy(teacher), heads, neurons)
     if refit:
-        sequential_refit(student, teacher, batches, device, ridge_rel)
+        sequential_refit(student, teacher, batches, device, ridge_rel, drift_correct)
     info["sensitivity"] = {f"{l}:{k}": v for (l, k), v in sens.items()} if sens else None
     return student, heads, neurons, info
