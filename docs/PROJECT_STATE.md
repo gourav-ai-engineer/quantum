@@ -933,3 +933,9 @@ Repo hygiene items found while writing this file (added by the assistant, not by
 ## Paper outline (fill only with produced evidence)
 Method, theory (objective-level only), corrected baselines, objective-alignment audit, budget
 curves, ablations (fidelity vs HS vs cosine), limitations.
+
+## Analysis paper v1 status (2026-10-27, branch paper/analysis-v1)
+- Draft `paper/main.tex` complete (no `\todo`); abstract, contributions, disclosure (V17 registered after V15/V16 dev data), limitations, Figs 3-4 from verdict JSONs (`paper/figs/fig_kl.py`). Four 2024-2026 related-work entries added after reading arXiv/ACL abstract pages; DP-Prune could not be found and is not cited.
+- Rule 11 PREPARED not signed: `docs/RULE11_CHECKLIST.md`; independent subagent review round 1 found 10 issues (wrong B(S) identity, "five selectors indistinguishable" contradicted by Table 1, over-claimed Prop 1, "exactly" for post-hoc mechanism, etc.), all fixed in the paper (bc71508). Open: Phase 1 K-prune/Kwon raw outputs not committed; drift-target vs K-prune source check; supervisor proof check.
+- PDF not compiled: no LaTeX on this machine.
+- Phase 2 (V18): screened, no idea written up. Candidate "choose allocation rule per task by calibration KL" is model selection over two known pruners (not a principle); "drift-aware allocation" is GRP-R (gate failed); "absorption/repairability" allocation is published (2606.15161, 2605.25508). Honest option needing owner decision: a descriptive confirmatory replication of the selection x compensation table on QNLI/MNLI-m/QQP with official baselines (not a new method).
