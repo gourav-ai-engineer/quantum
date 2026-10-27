@@ -34,7 +34,23 @@ Before any comparison: unpruned accuracy of the same checkpoint must agree betwe
 baseline, not a claim.
 
 ## Entries
-(none yet)
+**E0 | 2026-10-27 | reference points, code 15a6009 (kernel beat-explore-a)** GRP-R and d2i-R (K-prune masks + drift-corrected
+refit, the V17 mechanism) scored on validation accuracy for MRPC/SST-2 at c in {0.5, 0.4}, 5 seeds, through
+`scripts/beat_run.py`. Bar: official Kwon/K-prune accuracy from `results/beat_explore/baselines_v15.json` (K-prune c0.5:
+MRPC .8623, SST-2 .9149; c0.4: .8637, .8986; Kwon c0.5: .8534, .8938; c0.4: .8020, .8603; teachers .8775/.9243).
+Eval parity verified (max logit diff 1.2e-5, `scripts/beat_eval_parity.py`). Result: pending.
+
+**E1 | 2026-10-27 | input-side alignment ("full-chain" closed-form reconstruction), code `src/qfc/align.py`, methods
+`d2i_ri`, `grp_ri`.** Hypothesis (mechanism, not numbers): K-prune's/GRP-R's gain comes from cancelling residual drift in
+the OUTPUT projections only; kept units' own input weights (q/k/v rows of kept heads, FFN up rows of kept neurons) still
+read drifted inputs. Ridge-LS refit of those rows to the teacher's unit features (q/k/v of the kept heads; pre-activations
+of the kept neurons), given student inputs, layer by layer, then the drift-corrected output refit. Unit tests:
+`tests/test_align.py` (no-align == drift refit; unpruned student recovered; empty-head layer finite). Novelty search
+(2026-10-27, web): no BERT head+FFN retraining-free paper found that refits input-side weights; closest are CORP (ViT,
+affine compensation, arXiv 2602.05243), Olica (LLM, SVD calibration), LIAR; layer-wise sequential reconstruction of
+every linear layer is standard in GPTQ/OBC-style post-training compression, so this is a combination, not a new
+principle. K-prune is already sublayer-wise iterative (knowledge measurement -> mask search -> weight tuning per
+sublayer, bottom-up), so "drift-aware iterative selection" is K-prune and is NOT pursued. Result: pending (kernel B).
 
 ## Amendment 1 (2026-10-27, before any exploration accuracy data): which exploration tasks count
 Official Kwon et al. (806ac5a6) and K-prune (9ca629a1) accept only MRPC, SST-2, STS-B, QNLI, MNLI, QQP (+SQuAD) as

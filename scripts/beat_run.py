@@ -18,6 +18,7 @@ import numpy as np
 import torch
 from datasets import load_dataset
 
+from qfc.align import sequential_refit_io
 from qfc.grp import AVG_SEQ_LEN, grp_prune, prune_model, sequential_refit, teacher_stats
 from step22_grp import SPECS, kl_and_agreement, load_model, logits_of, make_batches
 
@@ -70,6 +71,14 @@ def build(method, teacher, cb, n_seq, c, a, task, seed, stats):
         s = prune_model(copy.deepcopy(teacher), h, n)
         sequential_refit(s, teacher, cb, a.device, a.ridge_rel, True)
         return s, h, n
+    if method in ("grp_ri", "d2i_ri"):  # idea 1 (EXPLORATION_LOG): + input-side alignment (qkv rows, FFN up rows)
+        if method == "grp_ri":
+            s, h, n, _ = grp_prune(teacher, cb, a.device, n_seq, c, a.ridge_rel, seed=seed, stats=stats, refit=False)
+        else:
+            h, n = kprune_masks(a.kprune_masks, task, seed, c)
+            s = prune_model(copy.deepcopy(teacher), h, n)
+        sequential_refit_io(s, teacher, cb, a.device, h, n, a.ridge_rel)
+        return s, h, n
     raise SystemExit(f"unknown method {method}")
 
 
@@ -112,7 +121,8 @@ def main():
             hb = make_batches(shuf.select(range(n, n + (64 if a.smoke else a.heldout_size))), tok, spec["text_fields"],
                               a.batch_size, a.max_length)
             lt_held = logits_of(teacher, hb, a.device)
-            stats = teacher_stats(teacher, cb, a.device, seed) if "grp_r" in a.methods.split(",") else None
+            stats = teacher_stats(teacher, cb, a.device, seed) if any(
+                m.startswith("grp") for m in a.methods.split(",")) else None
             for c in [float(x) for x in a.constraints.split(",")]:
                 for method in a.methods.split(","):
                     path = os.path.join(a.output_dir, f"{method}_{task}_seed{seed}_c{c}.json")
