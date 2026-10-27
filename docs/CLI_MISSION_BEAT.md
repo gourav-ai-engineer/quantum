@@ -48,10 +48,11 @@ measured and reported (rule 8); a speed claim needs that measurement.
   if it runs on BERT-base unmodified.
 
 ## Compute: Kaggle, fully automated through the official Kaggle API
-- One-time owner step (the only one): create an API token at kaggle.com → Settings → API → "Create New Token"
-  and save it as `C:\Users\CS 08\.kaggle\kaggle.json`. Never type, print, log or commit the token yourself; if the
-  file is missing, ask me once and wait.
-- Then `pip install kaggle` (official package) in a separate tool venv, and drive everything with
+- One-time owner step (done 2026-10-27): new-style API token saved by the owner at
+  `C:\Users\CS 08\.kaggle\access_token` (legacy `kaggle.json` also accepted). Never type, print, log or commit the
+  token yourself; if neither file exists, ask me once and wait.
+- Then `pip install "kaggle>=1.8"` (official package; new tokens need >= 1.8) in a separate tool venv, verify with
+  `kaggle kernels list --mine`, and drive everything with
   `kaggle kernels push -p <dir>` (kernel-metadata.json: `enable_gpu: true`, `enable_internet: true`, private),
   `kaggle kernels status`, and `kaggle kernels output <user>/<slug> -p <new empty dir>`.
 - Quota: about 30 GPU-h per week (check the remaining hours before each push), 12 h per run, 20 GB per run in
