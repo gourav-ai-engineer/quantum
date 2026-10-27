@@ -19,7 +19,7 @@ import torch
 from datasets import load_dataset
 
 from qfc.align import sequential_refit_io
-from qfc.grp import AVG_SEQ_LEN, grp_prune, prune_model, sequential_refit, teacher_stats
+from qfc.grp import AVG_SEQ_LEN, grp_prune, permute_classifier, prune_model, sequential_refit, teacher_stats
 from step22_grp import SPECS, kl_and_agreement, load_model, logits_of, make_batches
 
 
@@ -103,8 +103,10 @@ def main():
         spec = SPECS[task]
         ds = load_dataset(*spec["dataset"])
         teacher, tok = load_model(spec, a.device)
+        if "label_order" in spec:  # MNLI: same permuted checkpoint as the official-baseline runs (V15 Phase 0)
+            permute_classifier(teacher, spec["label_order"])
         cfg, n_seq = teacher.config, AVG_SEQ_LEN[task]
-        valid = ds["validation"]
+        valid = ds[spec.get("valid_split", "validation")]
         if a.smoke:
             valid = valid.select(range(64))
         vb = make_batches(valid, tok, spec["text_fields"], a.batch_size, a.max_length)

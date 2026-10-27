@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/beat-conf-qqp",
+ "title": "beat conf qqp",
+ "code_file": "beat_conf_qqp.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}
