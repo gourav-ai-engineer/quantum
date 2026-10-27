@@ -151,7 +151,7 @@ bl)
   # Official Kwon / K-prune baselines on a NEW task with our pinned checkpoint and calibration rows (EXPLORATION_LOG,
   # Amendment 1: STS-B). BL_TASKS (default stsb), BL_CONS (default "0.5 0.4"). Same patched unmodified algorithms as h10.
   # Results are published after every (task, seed) so a Kaggle time-out keeps what finished.
-  SKIP_KP_CKPT=1 bash "$0" setup "$W" "$OUT"
+  SKIP_KP_CKPT=1 bash "$REPO/scripts/v15_kaggle.sh" setup "$W" "$OUT"  # $0 is relative and we cd "$W" above
   BT=${BL_TASKS:-stsb}; BC=${BL_CONS:-"0.5 0.4"}
   (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks "$(echo $BT | tr ' ' ,)" --out "$W/inputs")
   mkdir -p bl
