@@ -55,3 +55,15 @@ Environment: `.venv-ci` (Python 3.12, torch 2.6.0, transformers 4.51.3). Analysi
 
 - Independent code/number reviewer: ______  date: ______
 - Supervisor proof check (Prop 1, Prop 2, Thm 1): ______  date: ______
+
+## E. Review round 1 (2026-10-27, read-only subagent; NOT a sign-off)
+
+Fixed in paper/main.tex after the review: (1) remark after Thm 1 now defines f over all heads and states B(S)=sum_all w_j - f(S);
+(2) abstract/intro/contribution (iii) no longer say all five selectors are indistinguishable (attention coverage is clearly worse
+after LS; H9b/H9c test only BCM vs Fisher and vs greedy LS); (3,4) V16/V17 mechanism stated as "reproduced within 3%", post-hoc, on
+development tasks (no "exactly"/"fully"); (5) Prop 1 no longer claims arbitrary outputs for general orthogonal Q; (6) output-fidelity
+range 0.08-0.68; H10 MRPC sentence adds the 0.6 budget; (8) Disclosure says teachers were trained on the training rows, so KL is not
+generalization evidence; (9) H9a explanation marked untested; (10) R_j=s_jU_j, fidelity of the N x N Gram operators.
+Still open (owner/reviewer): confirm drift-corrected target against K-prune source (item 4); commit Phase 1 raw outputs; GRP
+empty-layer note vs Standing Rule 1; ICML venue and Global-Pruner pages for refs.bib unverified; uncited bib keys
+(das2011submodular, liu2019roberta, sanh2019distilbert).

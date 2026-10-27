@@ -20,10 +20,10 @@ repair the rest (compensation) are usually evaluated together. We separate them 
 experiments on BERT-base, and most of our hypotheses are not supported. (i) Attention-pattern similarity, the natural
 redundancy signal for heads, is blind to how a head mixes values; on four of five GLUE tasks most head pairs that it
 calls near-identical have dissimilar outputs. (ii) At 50\% of heads per layer, once the kept heads are refit by LS,
-five selectors are statistically indistinguishable; compensation, not selection, carries the recovery. (iii) A global,
+four selectors (output coverage, Fisher, magnitude, greedy LS) are statistically indistinguishable, while attention-pattern coverage stays clearly worse; compensation, not selection, carries the recovery. (iii) A global,
 refit-aware allocation over heads and neurons (GRP) lowers the logit KL to the teacher well below official K-prune on
 SST-2 but not on MRPC, so its pre-registered calibration gate fails and no accuracy comparison was run. (iv) K-prune's
-advantage over a module-output refit is fully explained by a drift-corrected least-squares target; with that
+advantage over a module-output refit is reproduced to within 3\% by a drift-corrected least-squares target (a post-hoc finding on development tasks); with that
 compensation held equal, which selection rule wins depends on the task. We make no claim of improved accuracy or speed
 over the state of the art, and no latency was measured.
 \end{abstract}
@@ -41,8 +41,8 @@ blind to how a head mixes values (Proposition~\ref{prop:blind}), and on BERT-bas
 head pairs that it calls near-identical produce dissimilar outputs (Section~\ref{sec:diag}). Moving the similarity to the head's output operator
 gives a coverage bound on the merge error that ranks subsets well (Theorem~\ref{thm:bound}), yet in a pre-registered
 factorial over five GLUE tasks and five calibration seeds, once the remaining heads are refit by least squares the
-choice of selector barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). We then asked whether a global,
-refit-aware allocation over heads and FFN neurons (GRP) improves on the two official retraining-free baselines
+choice among four of the five selectors barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). We then asked whether a global,
+refit-aware allocation over heads and FFN neurons (GRP) lowers the held-out logit KL relative to the two official retraining-free baselines
 (Section~\ref{sec:v15}). It does so on SST-2 but not on MRPC, and a transplant analysis shows that K-prune's own
 advantage over a module-output refit is a drift-corrected least-squares target (Section~\ref{sec:v16}); after
 equalizing compensation the remaining effect of selection is task-dependent. All of this is negative or descriptive
@@ -52,9 +52,9 @@ evidence, and the paper is framed accordingly.
 a proposition and a measurement on BERT-base. (ii) An output-space coverage bound for merging pruned heads into kept
 heads, with its tightness measured. (iii) A pre-registered selector $\times$ compensation factorial showing that, at
 moderate sparsity, closed-form compensation explains most of the retraining-free recovery and selectors are
-statistically indistinguishable after it. (iv) A pre-registered calibration gate for a global refit-aware allocation (GRP) against reproduced official Kwon et
+statistically indistinguishable after it (attention-pattern coverage excepted). (iv) A pre-registered calibration gate for a global refit-aware allocation (GRP) against reproduced official Kwon et
 al.\ and K-prune code, with the task-dependent outcome; (v) a decomposition showing that K-prune's compensation is
-exactly a drift-corrected LS refit, and a selection $\times$ compensation table that holds compensation fixed.
+reproduced to within 3\% by a drift-corrected LS refit (post-hoc, on development tasks), and a selection $\times$ compensation table that holds compensation fixed.
 Hypotheses, thresholds and analysis code were fixed before the corresponding data were seen, with one exception stated
 in Section~\ref{sec:prereg}; negative results are reported as such.
 
@@ -91,14 +91,16 @@ through the Gram matrix $G=Z^\top Z$. Keeping a set $S$ of heads, the least-squa
 $\widehat W_S=\arg\min_{V}\|Y-Z_SV\|_F^2$ (with a small ridge in practice).
 
 \paragraph{Output fidelity.} For heads $i,j$ define
-$F_{ij}=\big(\|Z_i^\top Z_j\|_*/(\|Z_i\|_F\|Z_j\|_F)\big)^2\in[0,1]$, the squared Uhlmann fidelity between the head
-operators. The attention-pattern alternative represents head $h$ by $\rho_h=A_hA_h^\top/\mathrm{tr}(A_hA_h^\top)$ for
+$F_{ij}=\big(\|Z_i^\top Z_j\|_*/(\|Z_i\|_F\|Z_j\|_F)\big)^2\in[0,1]$, the squared Uhlmann fidelity between the (normalized, $N\times N$) head Gram operators $Z_iZ_i^\top/\mathrm{tr}(Z_iZ_i^\top)$ and $Z_jZ_j^\top/\mathrm{tr}(Z_jZ_j^\top)$. The attention-pattern alternative represents head $h$ by $\rho_h=A_hA_h^\top/\mathrm{tr}(A_hA_h^\top)$ for
 its attention matrix $A_h$.
 
 \section{Theory}
 \begin{proposition}[Attention-pattern fidelity is blind to value mixing]\label{prop:blind}
 If $A_j=A_iQ$ with $QQ^\top=I$ (for example, a permutation of keys), then $\rho_j=\rho_i$, so the attention-pattern
-fidelity of heads $i$ and $j$ is 1, while their outputs $A_iV_i$ and $A_jV_j=A_iQV_j$ can be arbitrary.
+fidelity of heads $i$ and $j$ is 1, while their outputs $A_iV_i$ and $A_jV_j=A_iQV_j$ differ whenever $V_j\ne V_i$
+(for a key permutation $Q$ and full-rank $A_i$ they can be arbitrary within the column space of $A_i$). A row-stochastic
+$A_iQ$ requires $Q$ to be a permutation (or $A_i$ rank-deficient); the case $Q=I$, $A_j=A_i$ with different values, is the
+one that matters for BERT.
 \end{proposition}
 \begin{proof}
 $(A_iQ)(A_iQ)^\top=A_iQQ^\top A_i^\top=A_iA_i^\top$. The outputs depend on $QV_j$, which $\rho$ does not constrain.
@@ -115,7 +117,7 @@ factor of $Z_i^\top Z_j$, where it equals $\|Z_i^\top Z_j\|_*$ (von Neumann's tr
 
 \begin{theorem}[Output-space coverage bound]\label{thm:bound}
 Let $S$ be the kept heads and assign each pruned head $j$ to $\pi(j)=\arg\min_{i\in S}\sqrt{1-F_{ji}}$. Merging
-$W_{\pi(j)}\leftarrow W_{\pi(j)}+R_jW_j$ with the Procrustes map $R_j$ of Proposition~\ref{prop:proc} gives
+$W_{\pi(j)}\leftarrow W_{\pi(j)}+R_jW_j$ with $R_j=s_jU_j$, the scaled-orthogonal Procrustes map of Proposition~\ref{prop:proc}, gives
 \[\|Y-\widehat Y_{\mathrm{merge}}\|_F\le B(S)=\sum_{j\notin S}w_j\min_{i\in S}\sqrt{1-F_{ji}},\qquad
 w_j=\|W_j\|_2\,\|Z_j\|_F,\]
 and the (unregularized) LS-refit error is at most the merge error.
@@ -125,7 +127,7 @@ $Y-\widehat Y_{\mathrm{merge}}=\sum_{j\notin S}(Z_j-Z_{\pi(j)}R_j)W_j$; apply th
 $\|MW_j\|_F\le\|M\|_F\|W_j\|_2$ and Proposition~\ref{prop:proc}. The merged weights are feasible for the LS problem
 over $Z_S$, so the LS optimum is no larger.
 \end{proof}
-Since $B(S)=\sum_{j\notin S}w_j-f(S)$ with $f$ a weighted facility-location function, greedy maximization of $f$ carries
+Let $f(S)=\sum_{j}w_j\big(1-\min_{i\in S}\sqrt{1-F_{ji}}\big)$ (sum over all heads; $j\in S$ contributes $w_j$), a weighted facility-location function. Then $B(S)=\sum_{j}w_j-f(S)$, so greedy maximization of $f$ carries
 the usual $(1-1/e)$ guarantee on $f$; this is an additive statement, not a guarantee on $B$ or on accuracy.
 
 \section{Methods compared}
@@ -154,7 +156,10 @@ Decision rules and thresholds were committed before any data (repository file \t
 development data on MRPC and SST-2 had been seen, under the author's standing autonomy grant and without a separate
 confirmation step. MRPC and SST-2 are therefore development tasks for GRP, and V17 is not an independent confirmation.
 No confirmatory data (QNLI, MNLI-m, QQP validation splits) were used for any GRP or GRP-R result. The gate metric in
-V15--V17 is the logit KL to the teacher on 512 held-out \emph{training} rows, not validation accuracy.
+V15--V17 is the logit KL to the teacher on 512 held-out \emph{training} rows, not validation accuracy. The rows are
+held out from calibration only: the fine-tuned teachers were trained on the training split, so this KL is not evidence of
+generalization. The V16 and V17 studies are pre-registered in the repository but, as stated above, after development data
+were seen; the drift-corrected mechanism was found by reading K-prune's code after V16 and checked on the same development rows.
 
 \section{Results}
 \subsection{Attention similarity versus output similarity}\label{sec:diag}
@@ -166,7 +171,7 @@ per-layer Spearman 0.929 and 0.959) but is loose (median ratio 3.26 and 3.12). A
 0.334 / 0.304) is close to the exhaustive optimum (0.320 / 0.296) and to greedy exact LS (0.321 / 0.297), better than
 Fisher (0.359 / 0.402) and attention coverage (0.417 / 0.391), but tied by magnitude top-$k$ (0.334 / 0.307).
 Figure~\ref{fig:pairs} shows every head pair: the pairs that attention-pattern similarity calls near-identical are
-spread over output fidelities from about 0.1 to 0.5.
+spread over output fidelities from about 0.08 to 0.68.
 \begin{figure}[t]\centering
 \includegraphics[width=\linewidth]{figs/fig_pairs.pdf}
 \caption{Attention-pattern fidelity versus output fidelity for all 792 within-layer head pairs of BERT-base
@@ -215,7 +220,7 @@ coverage-assigned head beats merging into a random kept head only on QNLI (+1.11
 Attention-pattern coverage without compensation is at the Random mean on SST-2, MRPC and RTE and below it on QNLI and
 CoLA. A calibration-side check confirms that the refit lowers the per-layer output error and the logit KL in every
 layer, seed, selector and task examined, on held-out training data too (\texttt{results/v14\_h9a\_check/fdd808d}); the
-pre-registered H9a failure for BCM and Fisher on SST-2 and MRPC reflects ceiling and sample size, not an
+pre-registered H9a failure for BCM and Fisher on SST-2 and MRPC is, in our reading (not separately tested), a ceiling and sample-size effect rather than an
 implementation error.
 
 \subsection{Global allocation over heads and neurons (V15, pre-registered)}\label{sec:v15}
@@ -229,7 +234,7 @@ more than one point at most budgets only on MRPC, where the validation set has 4
 \paragraph{Calibration gate (H10).} Before any accuracy run, GRP had to lower the logit KL to the teacher on 512
 held-out training rows by at least 10\% relative to \emph{both} baselines at the same budget, at two or more of four
 budgets, on both development tasks. Table~\ref{tab:h10} shows that it does so at every budget on SST-2, with KL 40--75\%
-below K-prune, but at no budget on MRPC, where K-prune is lower at 50\% and 40\% of MACs. H10 is therefore not
+below K-prune, but at no budget on MRPC, where K-prune is lower at 50\% and 40\% of MACs and within 1\% at 60\%. H10 is therefore not
 supported, and following the pre-registration no accuracy comparison (H11) was run: GRP is not claimed to improve on
 K-prune. The task dependence motivates the diagnosis in Section~\ref{sec:v16}.
 \begin{figure}[t]\centering
@@ -267,7 +272,7 @@ module output alone.
 % results/v17_rdev/195c18f ; v17_rdev_verdict.json
 A third pre-registered study tested that difference directly. Refitting K-prune's selected units with the
 drift-corrected target reproduces K-prune's own KL within 3\% on both tasks and both budgets, so this target accounts
-fully for K-prune's compensation advantage. Giving GRP the same compensation (GRP-R) does not remove its MRPC deficit:
+to within 3\% for K-prune's compensation advantage (a post-hoc finding on development tasks; the K-prune source was read after V16). Giving GRP the same compensation (GRP-R) does not remove its MRPC deficit:
 its KL is 1.19 and 1.29 times K-prune's at 50\% and 40\% of MACs, against 0.31 and 0.50 on SST-2. The pre-registered gate
 failed, and no confirmatory run was made. Table~\ref{tab:factorial} holds compensation fixed: the remaining
 difference is selection, and which selection rule wins depends on the task (Figure~\ref{fig:factorial}).
