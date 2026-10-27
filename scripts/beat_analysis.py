@@ -22,7 +22,8 @@ beat = defaultdict(dict)
 for task in tasks:
     for c in (0.5, 0.4):
         kp, kw = base[f"kprune|{task}|{c}"], base[f"kwon|{task}|{c}"]
-        teacher = next(r for k, v in rec.items() if k[1] == task for r in v.values())["unpruned_valid"]["accuracy"]
+        metric = "pearson" if task == "stsb" else "accuracy"  # stsb: Pearson, distance = MSE (lower is better)
+        teacher = next(r for k, v in rec.items() if k[1] == task for r in v.values())["unpruned_valid"][metric]
         print(f"\n== {task} c={c}   teacher acc {teacher:.4f}")
         print(f"{'method':10s} {'n':>2s} {'acc':>7s} {'dAcc/kprune':>11s} {'seedwins':>8s} {'KL':>8s} {'KL/kprune':>9s}")
         print(f"{'kprune':10s} {len(kp['acc']):2d} {kp['mean']:7.4f} {'':>11s} {'':>8s} {kp['heldout_kl_mean']:8.4f} {1:9.2f}")
@@ -32,7 +33,7 @@ for task in tasks:
             if t != task or cc != c:
                 continue
             seeds = sorted(runs)
-            acc = [runs[s]["valid"]["accuracy"] for s in seeds]
+            acc = [runs[s]["valid"][metric] for s in seeds]
             kl = [runs[s]["heldout_dist"] for s in seeds]
             kacc = {s: a for s, a in zip(kp["seeds"], kp["acc"])}
             wins = sum(a > kacc[s] for s, a in zip(seeds, acc))

@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/beat-explore-d",
+ "title": "beat explore d",
+ "code_file": "beat_d.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}
