@@ -953,10 +953,10 @@ MRPC, SST-2 and STS-B at 0.5 and 0.4 MACs, on held-out-train KL/MSE AND dev metr
 candidate, d2i-RI (results: E1 `results/beat_explore/E1_align/e0063df/`, E2 `results/beat_explore/D_stsb/ed9f196/`, baselines
 `results/beat_explore/baselines_v15.json`). GRP-R, GRP-RI and d2i-R do not meet it on all three.
 
-**Frozen code.** Commit `8af4262efb9f49047bf801ccfa5b24e3d5167b4a` on `research/beat-explore`; tag `v18-freeze` is placed on
-the commit that adds this text, and `git diff 8af4262 v18-freeze` touches docs/PROJECT_STATE.md only. Method = `d2i_ri` in
+**Frozen code.** Commit `ead3fc8005a98af2e4ec965f90d50cc964cacdab` on `research/beat-explore`; tag `v18-freeze` is placed on
+the commit that adds this text, and `git diff ead3fc8 v18-freeze` touches docs/PROJECT_STATE.md only. Method = `d2i_ri` in
 `scripts/beat_run.py` + `src/qfc/align.py` + `src/qfc/grp.py` (`sequential_refit`, ridge_rel 1e-4). Analysis =
-`scripts/beat_confirm_analysis.py` (tested in `tests/test_beat_confirm.py`). No code, hyper-parameter, seed, task or threshold
+`scripts/beat_confirm_analysis.py` (tested in `tests/test_beat_confirm.py`; full suite and compileall green at this commit). It first runs an integrity gate per (task, seed): evaluation size and labels equal the official dump's, our accuracy recomputed against the dump labels equals our own (row-order check), our teacher accuracy matches the official teacher within 2 rows, and d2i-RI's kept heads/neurons equal the K-prune masks; a failure aborts with "pipeline mismatch" and yields no verdict. No code, hyper-parameter, seed, task or threshold
 changes after this point (rule 12). The kernels check out the tag.
 
 **Method (fixed).** Masks: the official K-prune run's head/neuron masks for the same task, seed and budget (K-prune with
@@ -982,6 +982,10 @@ seeds, then d2i-RI for the 5 seeds from those K-prune masks. Results are publish
 (time-out, preemption) interrupts a kernel, resuming the same frozen code on the missing (task, seed) items is NOT a rerun; a
 rerun of an item that finished, or any code change, is forbidden. Then one latency kernel, then the analysis. Estimated cost 6-10
 GPU-hours (kernel D, 4 methods x 2 budgets x 5 seeds on STS-B, took 2.1 h; the official baselines add to it).
+
+**Engineering failures (the only permitted fix path).** The official codes have not been run end to end here on QNLI, MNLI or QQP, and the MNLI branch of `beat_run.py` (matched split + label permutation) has not been executed before the kernel. A crash, or a failed integrity gate, found BEFORE any d2i-RI-vs-baseline statistic is computed, is an engineering failure, not a result. The fix may not touch the method, the hyper-parameters, the seeds, the budget, the tasks or the thresholds; it gets a dated note here, a new tag `v18-freeze-fix1` (and `-fix2`, ...), and only the affected (task, seed) items are run again. Any change after a statistic has been seen is forbidden (rule 12).
+
+**Data-use disclosure.** The QNLI validation split was used in earlier rounds (round 2 / V14) by head-only QFC selectors; it is not loaded by any pruning method of this mission before the kernels above. MNLI-m and QQP validation were not loaded before.
 
 **Do-not-claim list (whatever the outcome).**
 - No claim that d2i-RI is faster than K-prune (identical shapes; latency is reported, not a result).
