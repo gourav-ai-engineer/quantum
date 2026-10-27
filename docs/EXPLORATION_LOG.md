@@ -88,3 +88,13 @@ rule cannot be met otherwise). RTE and CoLA may still be run with our own pipeli
 teacher and versus GRP-R/random). STS-B uses held-out-train MSE to the teacher output and validation Pearson/Spearman.
 Official baselines are run unmodified except the V15 add-on (calibration-index and logit-dump patch; no change to the
 pruning algorithms). STS-B checkpoint pin: textattack/bert-base-uncased-STS-B (revision recorded in step22 SPECS).
+
+**E2 | 2026-10-27 | STS-B with our methods (kernel D, code ed9f196; `results/beat_explore/D_stsb/ed9f196/`, 40 JSONs).**
+Pearson mean of 5 seeds, c0.5 / c0.4 (K-prune .8804/.8783, Kwon .8636/.8475, teacher .8805). d2i-RI .8809/.8789
+(seed wins vs K-prune 5/5, 4/5); held-out MSE ratio vs K-prune .90/.87. d2i-R .8804/.8786 (MSE ratio 1.00/.99).
+GRP-R .8773/.8748 and GRP-RI .8782/.8763 lose (MSE ratio 1.15/1.17 and 1.02/1.05). Rule check: d2i-RI TRUE on STS-B
+(all four cells); d2i-R also TRUE but only by ~1e-4 (margin noise); GRP-R/GRP-RI FALSE.
+**Freeze rule (Amendment 1: beat both on MRPC, SST-2 and STS-B at 0.5 and 0.4): d2i-RI is the only method meeting it
+on all three tasks.** Caveats carried into the pre-registration: the MRPC margin (+.0029/+.0010 acc) and the Pearson
+margins (+.0005/+.0006) are tiny; the clear effect is the held-out distance (KL/MSE -5..-13% vs K-prune). d2i-RI uses
+K-prune's masks, so its pruned shapes and latency equal K-prune's.
