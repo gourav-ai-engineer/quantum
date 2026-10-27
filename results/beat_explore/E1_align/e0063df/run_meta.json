@@ -1,0 +1,1 @@
+{"kernel":"gouravcseai/beat-explore-b","version":1,"gpu":"Tesla T4","head_mask_check":"effective (preflight OK)","code_commit_in_kernel":"e0063df","methods":["d2i_ri","grp_ri"],"tasks":["mrpc","sst2"],"seeds":[7,42,77,123,2024],"constraints":[0.5,0.4],"analysis_cmd":"python -I scripts/beat_analysis.py results/beat_explore/E1_align/e0063df","downloaded":"2026-10-27"}

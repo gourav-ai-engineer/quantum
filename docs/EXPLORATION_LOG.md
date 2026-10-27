@@ -57,7 +57,16 @@ of the kept neurons), given student inputs, layer by layer, then the drift-corre
 affine compensation, arXiv 2602.05243), Olica (LLM, SVD calibration), LIAR; layer-wise sequential reconstruction of
 every linear layer is standard in GPTQ/OBC-style post-training compression, so this is a combination, not a new
 principle. K-prune is already sublayer-wise iterative (knowledge measurement -> mask search -> weight tuning per
-sublayer, bottom-up), so "drift-aware iterative selection" is K-prune and is NOT pursued. Result: pending (kernel B).
+sublayer, bottom-up), so "drift-aware iterative selection" is K-prune and is NOT pursued.
+**Result (kernel B, Tesla T4, head_mask effective; `results/beat_explore/E1_align/e0063df/`, 40 files):** accuracy mean of
+5 seeds, c0.5 / c0.4 (K-prune in brackets). d2i-RI: MRPC .8652/.8647 (.8623/.8637), SST-2 .9158/.9032 (.9149/.8986);
+held-out KL ratio vs K-prune MRPC .93/.92, SST-2 .99/.95. GRP-RI: MRPC .8539/.8569, SST-2 .9206/.9112, KL ratio MRPC
+.98/1.08, SST-2 .32/.45. Versus E0 (no alignment): d2i-R -> d2i-RI +.0025/+.0010 MRPC, +.0007/+.0060 SST-2 acc; GRP-R ->
+GRP-RI KL improves on MRPC (1.19->.98, 1.29->1.08), acc +.0 / +.008 MRPC, +.003 / -.002 SST-2.
+Rule check (strict mean win over both baselines, acc and KL, both c): d2i-RI TRUE on MRPC and SST-2; GRP-RI TRUE on
+SST-2 only. Caveat: the d2i-RI MRPC margin (+.0029/+.0010 acc, 2/5 and 3/5 seed wins) is far inside the noise of a
+408-row dev set; it satisfies the written rule but is not evidence of a real gain by itself. STS-B (third counting
+task) pending kernel C (official baselines), then d2i_ri/grp_ri on STS-B.
 
 ## Amendment 1 (2026-10-27, before any exploration accuracy data): which exploration tasks count
 Official Kwon et al. (806ac5a6) and K-prune (9ca629a1) accept only MRPC, SST-2, STS-B, QNLI, MNLI, QQP (+SQuAD) as
