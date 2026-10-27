@@ -945,3 +945,50 @@ Owner mission: docs/CLI_MISSION_BEAT.md (no paper work until a method beats Kwon
 included, are logged in docs/EXPLORATION_LOG.md, whose "Fixed rules" section (metrics, meaning of "beats both", freeze
 rule, eval parity) was written before any exploration data. No V18 pre-registration exists yet; confirmatory tasks
 (QNLI, MNLI-m, QQP validation) are untouched.
+
+## Pre-registration V18: d2i-RI (K-prune masks + input-side alignment + drift-corrected refit) vs Kwon et al. and K-prune (written 2026-10-27, BEFORE any confirmatory data; registered under the owner's standing autonomy grant of 2026-10-19, so there was no separate confirmation; the paper must disclose that the method was developed on MRPC, SST-2 and STS-B dev data after V15-V17 and that all ideas tried are in docs/EXPLORATION_LOG.md)
+
+**Why this is registered now.** The written freeze rule (docs/EXPLORATION_LOG.md, Amendment 1: beat BOTH official baselines on
+MRPC, SST-2 and STS-B at 0.5 and 0.4 MACs, on held-out-train KL/MSE AND dev metric, mean of the 5 seeds) is met by exactly one
+candidate, d2i-RI (results: E1 `results/beat_explore/E1_align/e0063df/`, E2 `results/beat_explore/D_stsb/ed9f196/`, baselines
+`results/beat_explore/baselines_v15.json`). GRP-R, GRP-RI and d2i-R do not meet it on all three.
+
+**Frozen code.** Commit `8af4262efb9f49047bf801ccfa5b24e3d5167b4a` on `research/beat-explore`; tag `v18-freeze` is placed on
+the commit that adds this text, and `git diff 8af4262 v18-freeze` touches docs/PROJECT_STATE.md only. Method = `d2i_ri` in
+`scripts/beat_run.py` + `src/qfc/align.py` + `src/qfc/grp.py` (`sequential_refit`, ridge_rel 1e-4). Analysis =
+`scripts/beat_confirm_analysis.py` (tested in `tests/test_beat_confirm.py`). No code, hyper-parameter, seed, task or threshold
+changes after this point (rule 12). The kernels check out the tag.
+
+**Method (fixed).** Masks: the official K-prune run's head/neuron masks for the same task, seed and budget (K-prune with
+calibration indices `train.shuffle(seed)[:2048]`, official code 9ca629a1 + V15 add-on). Then, layer by layer bottom-up: ridge-LS
+refit of the kept q/k/v rows and kept FFN up rows to the teacher's features given student inputs, then the drift-corrected
+output refits (attention output, FFN output). Same 2048 calibration rows, same MAC budget (0.5), same checkpoints (SPECS in
+`scripts/step22_grp.py`; MNLI uses the V15 Phase 0 label permutation). Seeds 7, 42, 77, 123, 2024.
+
+**Hypotheses (all at MAC budget 0.5, validation accuracy).**
+- H18a (primary): on QNLI, MNLI-m and QQP, d2i-RI accuracy exceeds the better of {Kwon et al., K-prune}. "Better" is fixed from
+  the exploration baselines (mean of MRPC and SST-2 accuracy at 0.5, `better_baseline()`), before confirmatory data; that is K-prune.
+  Supported if Holm-adjusted (3 tasks) one-sided p < 0.05 and the 95% CI lower bound of the paired difference > 0 on >= 2 of 3
+  tasks, AND no Holm-significant loss against EITHER baseline on any task. Test: paired cluster bootstrap over (seed x example),
+  10,000 resamples, seed 1234 (+i per task), exactly as H17b / `qfc.metrics.cluster_bootstrap_delta`.
+- H18b (secondary, descriptive): measured GPU latency of the physically pruned models (d2i-RI, K-prune, Kwon, unpruned), FP16,
+  batch 1 and 32, seq 128, median of 100 runs, `scripts/v15_latency.py` (rule 8). d2i-RI keeps K-prune's masks, so its pruned
+  shapes and latency equal K-prune's by construction.
+- Official Kwon and K-prune baselines are run unmodified (V15 add-on only) on the same three tasks, seeds and budget, AFTER this
+  text is committed, because both official `main.py` scripts evaluate on dev data.
+
+**Execution plan.** One Kaggle kernel per task (`kaggle/beat_conf_{qnli,mnli,qqp}`, T4): official Kwon + K-prune at 0.5 for the 5
+seeds, then d2i-RI for the 5 seeds from those K-prune masks. Results are published after every task/seed. If a platform failure
+(time-out, preemption) interrupts a kernel, resuming the same frozen code on the missing (task, seed) items is NOT a rerun; a
+rerun of an item that finished, or any code change, is forbidden. Then one latency kernel, then the analysis. Estimated cost 6-10
+GPU-hours (kernel D, 4 methods x 2 budgets x 5 seeds on STS-B, took 2.1 h; the official baselines add to it).
+
+**Do-not-claim list (whatever the outcome).**
+- No claim that d2i-RI is faster than K-prune (identical shapes; latency is reported, not a result).
+- No claim of "state of the art" beyond the three tasks, BERT-base, 0.5 MACs, 5 calibration seeds, retraining-free.
+- No claim of an effect at 0.4 MACs, on MRPC/SST-2/STS-B, or on other models: those are development data.
+- The dev margins were small (MRPC +.0029/+.0010 acc, STS-B Pearson +.0005/+.0006, SST-2 +.0009/+.0046); the consistent
+  development effect is the held-out distance (KL/MSE -1..-13% vs K-prune). A confirmatory accuracy win is not implied by it.
+- No claim that input-side alignment is a new principle (layer-wise reconstruction is standard in GPTQ/OBC; closest related:
+  CORP arXiv 2602.05243, Olica, LIAR); the claim is limited to this combination on BERT-base heads + FFN neurons.
+- A not-supported verdict is reported as such; no re-run, no subset, no change of tasks or budget (rule 12).
