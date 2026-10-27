@@ -38,7 +38,14 @@ baseline, not a claim.
 refit, the V17 mechanism) scored on validation accuracy for MRPC/SST-2 at c in {0.5, 0.4}, 5 seeds, through
 `scripts/beat_run.py`. Bar: official Kwon/K-prune accuracy from `results/beat_explore/baselines_v15.json` (K-prune c0.5:
 MRPC .8623, SST-2 .9149; c0.4: .8637, .8986; Kwon c0.5: .8534, .8938; c0.4: .8020, .8603; teachers .8775/.9243).
-Eval parity verified (max logit diff 1.2e-5, `scripts/beat_eval_parity.py`). Result: pending.
+Eval parity verified (max logit diff 1.2e-5, `scripts/beat_eval_parity.py`).
+**Result (kernel A, Tesla T4, head_mask check effective; JSONs in `results/beat_explore/E0_grp_d2i/6aa8e04/`, 40 files):**
+accuracy, mean of 5 seeds (K-prune / GRP-R / d2i-R): MRPC c0.5 .8623/.8544/.8627, c0.4 .8637/.8490/.8637;
+SST-2 c0.5 .9149/.9174/.9151, c0.4 .8986/.9135/.8972. Held-out KL ratio vs K-prune: GRP-R MRPC 1.19/1.29, SST-2 0.31/0.50;
+d2i-R 0.97-1.00 everywhere. Seed wins of GRP-R vs K-prune on accuracy: MRPC 0/5, 0/5; SST-2 3/5, 5/5.
+Verdict: GRP-R beats both baselines on SST-2 (acc and KL, both c) and loses on MRPC; d2i-R equals K-prune. The SST-2
+KL win does carry into accuracy (+0.0025 at c0.5, +0.0149 at c0.4). Nothing frozen. The kernel cloned the branch head at
+push time; the results folder name is the local HEAD at download.
 
 **E1 | 2026-10-27 | input-side alignment ("full-chain" closed-form reconstruction), code `src/qfc/align.py`, methods
 `d2i_ri`, `grp_ri`.** Hypothesis (mechanism, not numbers): K-prune's/GRP-R's gain comes from cancelling residual drift in

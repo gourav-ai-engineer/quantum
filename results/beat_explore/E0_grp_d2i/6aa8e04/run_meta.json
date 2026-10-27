@@ -1,0 +1,1 @@
+{"kernel":"gouravcseai/beat-explore-a","version":1,"gpu":"Tesla T4","head_mask_check":"effective (preflight OK)","code_branch":"research/beat-explore","methods":["grp_r","d2i_r"],"tasks":["mrpc","sst2"],"seeds":[7,42,77,123,2024],"constraints":[0.5,0.4],"analysis_cmd":"python -I scripts/beat_analysis.py results/beat_explore/E0_grp_d2i/6aa8e04","downloaded":"2026-10-27"}
