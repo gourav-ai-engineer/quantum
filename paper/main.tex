@@ -1,6 +1,6 @@
-% DRAFT (2026-10-15). Outcome-independent sections only. Every number is copied from a results file in this repo
-% (path given in a comment next to it). V15 results are placeholders until the pre-registered gates are run.
-% Not paper-ready: rule 11 (independent check of code, numbers and the proofs) has not been done.
+% DRAFT analysis-paper v1 (2026-10-27). Every number is copied from a results file in this repo (path in a comment or
+% caption). Not paper-ready: rule 11 (independent check of code, numbers and the proofs; docs/RULE11_CHECKLIST.md)
+% has not been signed off.
 \documentclass[11pt]{article}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath,amssymb,amsthm,booktabs,natbib,hyperref,graphicx}
@@ -14,7 +14,18 @@
 \maketitle
 
 \begin{abstract}
-\todo{write last, after the pre-registered V15 gates (H10, H11) are decided; it must state the V14 negative results and whichever V15 outcome occurs.}
+Retraining-free pruning of fine-tuned encoders removes attention heads and feed-forward neurons using a small
+calibration set and repairs the damage with a closed-form least-squares (LS) update. Which units to remove (selection) and how to
+repair the rest (compensation) are usually evaluated together. We separate them in a sequence of pre-registered
+experiments on BERT-base, and most of our hypotheses are not supported. (i) Attention-pattern similarity, the natural
+redundancy signal for heads, is blind to how a head mixes values; on four of five GLUE tasks most head pairs that it
+calls near-identical have dissimilar outputs. (ii) At 50\% of heads per layer, once the kept heads are refit by LS,
+five selectors are statistically indistinguishable; compensation, not selection, carries the recovery. (iii) A global,
+refit-aware allocation over heads and neurons (GRP) lowers the logit KL to the teacher well below official K-prune on
+SST-2 but not on MRPC, so its pre-registered calibration gate fails and no accuracy comparison was run. (iv) K-prune's
+advantage over a module-output refit is fully explained by a drift-corrected least-squares target; with that
+compensation held equal, which selection rule wins depends on the task. We make no claim of improved accuracy or speed
+over the state of the art, and no latency was measured.
 \end{abstract}
 
 \section{Introduction}
@@ -30,15 +41,22 @@ blind to how a head mixes values (Proposition~\ref{prop:blind}), and on BERT-bas
 head pairs that it calls near-identical produce dissimilar outputs (Section~\ref{sec:diag}). Moving the similarity to the head's output operator
 gives a coverage bound on the merge error that ranks subsets well (Theorem~\ref{thm:bound}), yet in a pre-registered
 factorial over five GLUE tasks and five calibration seeds, once the remaining heads are refit by least squares the
-choice of selector barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). \todo{one paragraph on V15 (GRP:
-global allocation over heads and FFN neurons with refit-aware costs) once H10/H11 are decided.}
+choice of selector barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). We then asked whether a global,
+refit-aware allocation over heads and FFN neurons (GRP) improves on the two official retraining-free baselines
+(Section~\ref{sec:v15}). It does so on SST-2 but not on MRPC, and a transplant analysis shows that K-prune's own
+advantage over a module-output refit is a drift-corrected least-squares target (Section~\ref{sec:v16}); after
+equalizing compensation the remaining effect of selection is task-dependent. All of this is negative or descriptive
+evidence, and the paper is framed accordingly.
 
 \paragraph{Contributions.} (i) A characterization of when attention-pattern similarity fails as a redundancy proxy, with
 a proposition and a measurement on BERT-base. (ii) An output-space coverage bound for merging pruned heads into kept
 heads, with its tightness measured. (iii) A pre-registered selector $\times$ compensation factorial showing that, at
 moderate sparsity, closed-form compensation explains most of the retraining-free recovery and selectors are
-statistically indistinguishable after it. (iv) \todo{V15 contribution, conditional on its gates.} All hypotheses,
-thresholds and analysis code were fixed before the corresponding data were seen; negative results are reported as such.
+statistically indistinguishable after it. (iv) A pre-registered calibration gate for a global refit-aware allocation (GRP) against reproduced official Kwon et
+al.\ and K-prune code, with the task-dependent outcome; (v) a decomposition showing that K-prune's compensation is
+exactly a drift-corrected LS refit, and a selection $\times$ compensation table that holds compensation fixed.
+Hypotheses, thresholds and analysis code were fixed before the corresponding data were seen, with one exception stated
+in Section~\ref{sec:prereg}; negative results are reported as such.
 
 \section{Related work}
 \paragraph{Head and structured pruning.} Many heads can be removed with little loss~\citep{michel2019sixteen,voita2019analyzing};
@@ -47,14 +65,23 @@ recovers accuracy by fine-tuning~\citep{sanh2020movement,xia2022cofi}.
 \paragraph{Retraining-free pruning of encoders.} \citet{kwon2022fast} search Fisher-based masks over heads and FFN
 filters under a FLOPs constraint and rescale the kept units by layer-wise least squares. KCM prunes with unlabeled data and
 no gradients~\citep{nova2023kcm}. K-prune scores units by predictive and representational knowledge per FLOP and tunes the
-weights of each pruned sublayer by least squares~\citep{park2024kprune}. OSSCAR solves a layer-wise combinatorial
+weights of each pruned sublayer by least squares~\citep{park2024kprune}. LIAR~\citep{wang2024liar} reconstructs pruned outputs by linear interpolation over the preserved weights, and
+Global-Pruner~\citep{yao2024globalpruner} searches masks globally with reinforcement learning before a mask-tuning step.
+OSSCAR solves a layer-wise combinatorial
 reconstruction problem with local search~\citep{meng2024osscar}; CORP folds closed-form ridge compensation into the
-weights~\citep{zhang2026corp}; Neuron Merging folds removed neurons into kept ones~\citep{kim2020neuron}.
+weights~\citep{zhang2026corp}; Neuron Merging folds removed neurons into kept ones~\citep{kim2020neuron}. Olica applies closed-form linear
+calibration after structured pruning of large language models~\citep{he2025olica}.
+\paragraph{Allocation and repairability.} The idea that sparsity should be allocated by how much damage later layers
+absorb or a repair removes is recent: \citet{jing2026absorption} correct layer-wise rates by an inter-layer
+perturbation-absorption ratio (decoder LLMs, unstructured), and \citet{zhan2026repairability} use the fraction of
+damage left after a channelwise repair as an allocation diagnostic (CNNs). Our setting is structured pruning of encoders
+with an exact refit.
 \paragraph{One-shot pruning of large models.} SparseGPT, Wanda, LLM-Pruner, SliceGPT and ZipLM prune large decoders with
 little or no retraining~\citep{frantar2023sparsegpt,sun2024wanda,ma2023llmpruner,ashkboos2024slicegpt,kurtic2023ziplm}.
 \paragraph{Positioning.} Removal costs from least-squares downdates and closed-form compensation are each known. Our
 claims are (a) an analysis of which redundancy notion matters, (b) controlled, pre-registered evidence on the relative
-roles of selection and compensation, and \todo{(c) whatever V15 supports}.
+roles of selection and compensation, and (c) a negative result for a global refit-aware allocation, together with the identification of K-prune's
+compensation mechanism. None of these is a new pruning principle.
 
 \section{Setup and notation}
 For one layer, let $Z_h\in\mathbb{R}^{N\times d}$ be the context vectors of head $h$ over the $N$ non-padding calibration
@@ -100,7 +127,6 @@ over $Z_S$, so the LS optimum is no larger.
 \end{proof}
 Since $B(S)=\sum_{j\notin S}w_j-f(S)$ with $f$ a weighted facility-location function, greedy maximization of $f$ carries
 the usual $(1-1/e)$ guarantee on $f$; this is an additive statement, not a guarantee on $B$ or on accuracy.
-\todo{independent check of all three proofs (rule 11).}
 
 \section{Methods compared}
 \paragraph{V14 factorial (heads only, $k=6$ of 12 per layer).} Selectors: output-space coverage (BCM, greedy on $f$),
@@ -117,13 +143,18 @@ physically and refits $W_O$ and $W_2$ (with biases) layer by layer. K-prune~\cit
 method; GRP differs in the refit-aware cost (error \emph{after} the optimal refit rather than the output norm), the
 module-output sensitivity, and a single global greedy instead of a per-sublayer threshold.
 
-\section{Pre-registered protocol}
+\section{Pre-registered protocol}\label{sec:prereg}
 Models: fine-tuned BERT-base~\citep{devlin2019bert} checkpoints with pinned revisions; tasks from
 GLUE~\citep{wang2018glue} (SST-2, MRPC development; RTE, QNLI, CoLA confirmatory for V14) and, for V15,
 SQuAD~v1.1~\citep{rajpurkar2016squad}. Calibration: train only (512 examples for V14, 2048 for V15), five seeds
 (7, 42, 77, 123, 2024); evaluation on the full validation split. Statistics: paired cluster bootstrap over
 (seed $\times$ example), 10{,}000 resamples, Holm across confirmatory tasks; Random is a distribution of 100 masks.
 Decision rules and thresholds were committed before any data (repository file \texttt{docs/PROJECT\_STATE.md}).
+\paragraph{Disclosure.} The V17 hypothesis (drift-corrected compensation for GRP) was registered after the V15 and V16
+development data on MRPC and SST-2 had been seen, under the author's standing autonomy grant and without a separate
+confirmation step. MRPC and SST-2 are therefore development tasks for GRP, and V17 is not an independent confirmation.
+No confirmatory data (QNLI, MNLI-m, QQP validation splits) were used for any GRP or GRP-R result. The gate metric in
+V15--V17 is the logit KL to the teacher on 512 held-out \emph{training} rows, not validation accuracy.
 
 \section{Results}
 \subsection{Attention similarity versus output similarity}\label{sec:diag}
@@ -187,7 +218,7 @@ layer, seed, selector and task examined, on held-out training data too (\texttt{
 pre-registered H9a failure for BCM and Fisher on SST-2 and MRPC reflects ceiling and sample size, not an
 implementation error.
 
-\subsection{Global allocation over heads and neurons (V15, pre-registered)}
+\subsection{Global allocation over heads and neurons (V15, pre-registered)}\label{sec:v15}
 % Phase 1: docs/PROJECT_STATE.md (Kaggle Versions 2-4); H10: results/v15_h10/c43dd3e/h10/v15_h10_verdict.json
 \paragraph{Reproduction gate.} Both official codes reproduce. K-prune on its own BERT-base checkpoints at 80\% MAC
 reduction gives 84.85 on MRPC (published 84.80) and 74.20 SQuAD~v1.1 F1 (published 74.16), means over five seeds.
@@ -201,6 +232,11 @@ budgets, on both development tasks. Table~\ref{tab:h10} shows that it does so at
 below K-prune, but at no budget on MRPC, where K-prune is lower at 50\% and 40\% of MACs. H10 is therefore not
 supported, and following the pre-registration no accuracy comparison (H11) was run: GRP is not claimed to improve on
 K-prune. The task dependence motivates the diagnosis in Section~\ref{sec:v16}.
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figs/fig_h10.pdf}
+\caption{H10 gate: mean logit KL to the teacher (log scale) versus the fraction of MACs kept, five seeds.
+Source: \texttt{results/v15\_h10/c43dd3e/h10/v15\_h10\_verdict.json}.}\label{fig:h10}
+\end{figure}
 \begin{table}[t]\centering\small
 \caption{Mean logit KL(teacher $\|$ pruned) on 512 held-out training rows, five calibration seeds, BERT-base, by
 fraction of MACs kept. Kwon et al.\ and K-prune: official code on the same checkpoints and calibration rows. Source:
@@ -234,7 +270,7 @@ drift-corrected target reproduces K-prune's own KL within 3\% on both tasks and 
 fully for K-prune's compensation advantage. Giving GRP the same compensation (GRP-R) does not remove its MRPC deficit:
 its KL is 1.19 and 1.29 times K-prune's at 50\% and 40\% of MACs, against 0.31 and 0.50 on SST-2. The pre-registered gate
 failed, and no confirmatory run was made. Table~\ref{tab:factorial} holds compensation fixed: the remaining
-difference is selection, and which selection rule wins depends on the task.
+difference is selection, and which selection rule wins depends on the task (Figure~\ref{fig:factorial}).
 \begin{table}[t]\centering\small
 \caption{Selection $\times$ compensation on held-out training rows: mean KL as a ratio to official K-prune at the same
 budget (five seeds; lower is better). Sources: \texttt{results/v16\_stageA/b2b444e}, \texttt{results/v17\_rdev/195c18f},
@@ -246,11 +282,25 @@ K-prune & drift-corrected LS & 0.98 & 0.97 & 1.00 & 1.00\\
 GRP & module-output LS & 1.10 & 1.35 & 0.38 & 0.60\\
 GRP & drift-corrected LS & 1.19 & 1.29 & 0.31 & 0.50\\\bottomrule
 \end{tabular}\end{table}
+\begin{figure}[t]\centering
+\includegraphics[width=\linewidth]{figs/fig_factorial.pdf}
+\caption{Table~\ref{tab:factorial} as a plot (log scale; the dashed line is official K-prune). Open markers: module-output
+refit; filled: drift-corrected refit. Source: \texttt{results/v16\_stageA/b2b444e}, \texttt{results/v17\_rdev/195c18f},
+\texttt{results/v15\_h10/c43dd3e}.}\label{fig:factorial}
+\end{figure}
 
 \section{Limitations}
-One model family so far (BERT-base); V14 uses a single, uniform sparsity level; masking results do not measure speed
-(V15 measures latency on physically pruned models); the V14 Kaggle run did not record exact package version strings;
-\todo{complete after V15}.
+\begin{itemize}\setlength\itemsep{0pt}
+\item One model family (BERT-base) and two development tasks for GRP; no RoBERTa, no decoder, no larger model.
+\item The V15--V17 gate metric is the logit KL on held-out training rows. It is a calibration-side quantity; we
+did not run the accuracy comparison (H11), so no accuracy conclusion about GRP or GRP-R is drawn.
+\item No latency or speed was measured. V14 results are functional masks; V15--V17 refit physically pruned matrices, but
+no wall-clock or FLOP claims are made.
+\item MRPC has 408 validation examples, so accuracy differences of one to two points are within noise there.
+\item V14 uses a single, uniform sparsity level (6 of 12 heads); its Kaggle run did not record exact package version
+strings. The V17 hypothesis was registered after the V15/V16 development data were seen (Section~\ref{sec:prereg}).
+\item The three proofs have not yet been checked by an independent reader (\texttt{docs/RULE11\_CHECKLIST.md}).
+\end{itemize}
 
 \appendix
 \section{Reproducibility details for the baselines (V15)}\label{app:repro}
