@@ -47,9 +47,11 @@ setup)
   [ -d env_kprune ] || { uv venv -q -p 3.10 env_kprune && uv pip install -q -p env_kprune/bin/python torch==1.12.1 \
       transformers==4.25.1 datasets==2.14.7 numpy==1.23.4 scipy==1.10.0 scikit-learn==1.2.1 tqdm colorama; }
   # (newer gdown dropped --remaining-ok; the folder has < 50 files, so it is not needed)
+  if [ "${SKIP_KP_CKPT:-0}" != 1 ]; then  # the 'bl' stage uses only our pinned textattack checkpoints
   [ -d ck_kprune ] || gdown -q --folder https://drive.google.com/drive/folders/1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt -O ck_kprune
   ls ck_kprune/bert-base-uncased
   for t in mrpc sst2; do [ -f ck_kprune/bert-base-uncased/$t/config.json ] || { echo "missing K-prune ckpt $t"; exit 1; }; done
+  fi
   publish patch_kwon.diff patch_kprune.diff
   df -h /tmp /kaggle/working || true
   ;;
@@ -144,6 +146,33 @@ v17r)
   mkdir -p "$OUT/v17r"
   (cd "$REPO" && PYTHONPATH=scripts python scripts/step23_v16_stageA.py --parts grp_r,d2i_r --output-dir "$OUT/v17r" 2>&1     | grep -v -i warn | tail -60)
   (cd "$REPO" && python scripts/v17_rdev_analysis.py "$OUT/v17r" results/v15_h10/c43dd3e/h10/v15_h10_verdict.json) || true
+  ;;
+bl)
+  # Official Kwon / K-prune baselines on a NEW task with our pinned checkpoint and calibration rows (EXPLORATION_LOG,
+  # Amendment 1: STS-B). BL_TASKS (default stsb), BL_CONS (default "0.5 0.4"). Same patched unmodified algorithms as h10.
+  # Results are published after every (task, seed) so a Kaggle time-out keeps what finished.
+  SKIP_KP_CKPT=1 bash "$0" setup "$W" "$OUT"
+  BT=${BL_TASKS:-stsb}; BC=${BL_CONS:-"0.5 0.4"}
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks "$(echo $BT | tr ' ' ,)" --out "$W/inputs")
+  mkdir -p bl
+  for t in $BT; do for s in $SEEDS; do
+    export V15_INDEX_FILE=$W/inputs/indices/${t}_seed${s}.json
+    for c in $BC; do
+      o=$W/bl/kwon_${t}_seed${s}_c${c}
+      [ -f $o/v15_student_heldout.pt ] || { mkdir -p $o; kwon --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
+        --constraint $c --seed 0 --output_dir $o > $o.log 2>&1 || echo "FAIL $o"; }
+      r=$(python -c "print(round(1-$c,4))")
+      e=bl/kprune_${t}_seed${s}_c${c}
+      [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { kprune --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
+        --exp_name $e --seed 0 --constraint $r > "$W/bl/kprune_${t}_seed${s}_c${c}.log" 2>&1 || echo "FAIL $e"; }
+      rm -f "$KP_OUT/$e/model.ckpt"
+    done
+    unset V15_INDEX_FILE
+    mkdir -p "$W/bl/kprune_out" && cp -r "$KP_OUT/bl/." "$W/bl/kprune_out/" 2>/dev/null || true
+    find "$W/bl/kprune_out" -name model.ckpt -delete || true
+    publish bl inputs/indices
+  done; done
+  python "$REPO/scripts/beat_masks.py" "$W/bl/kprune_out" "$OUT/bl/kprune_masks.npz" || true
   ;;
 beat)
   # Beat-the-baselines exploration (docs/EXPLORATION_LOG.md): our env only. BEAT_ARGS = scripts/beat_run.py arguments

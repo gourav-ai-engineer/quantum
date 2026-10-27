@@ -118,6 +118,9 @@ def module_sensitivity(model, batches, device: str, seed: int = 0) -> dict:
                  out.end_logits.masked_fill(b["attention_mask"] == 0, -1e4)]
             logp = 0.0
             for logits in heads:
+                if logits.shape[-1] == 1:  # regression (STS-B): y ~ N(f(x), 1), score = (y - f) df/dY, E|.|^2 = |df/dY|^2
+                    logp = logp + logits.sum()
+                    continue
                 probs = logits.detach().float().softmax(-1).cpu()
                 lab = torch.multinomial(probs, 1, generator=gen).squeeze(1).to(logits.device)
                 logp = logp + logits.log_softmax(-1).gather(1, lab[:, None]).sum()

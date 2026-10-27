@@ -37,6 +37,9 @@ SPECS["mnli"] = {"model_id": "textattack/bert-base-uncased-MNLI", "revision": "3
 # identity 0.970, swapped 0.030, so no permutation.
 SPECS["qqp"] = {"model_id": "textattack/bert-base-uncased-QQP", "revision": "226962dced5a914fa7d486b5f91307f2aee5f37e",
                 "dataset": ("glue", "qqp"), "text_fields": ("question1", "question2"), "metric": "accuracy"}
+# Pinned 2026-10-27 for the beat-baselines mission (docs/EXPLORATION_LOG.md); regression head (1 output), Pearson.
+SPECS["stsb"] = {"model_id": "textattack/bert-base-uncased-STS-B", "revision": "8a1d8f1cc0523b7af746daf104ddd0c1ce5911c1",
+                 "dataset": ("glue", "stsb"), "text_fields": ("sentence1", "sentence2"), "metric": "pearson"}
 # Pinned in V15 Phase 0. SQuAD v1.1, extractive QA: features of length 384 with doc stride 128 (as both official codes).
 SPECS["squad"] = {"model_id": "csarron/bert-base-uncased-squad-v1", "revision": "c0773ca28abf86a669cd1cccc9104c7f829f2be0",
                   "dataset": ("squad", None), "metric": "f1", "qa": True}

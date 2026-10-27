@@ -39,3 +39,17 @@ def test_align_runs_with_empty_head_layer_and_is_finite():
     s = prune_model(copy.deepcopy(t), heads, neurons)
     sequential_refit_io(s, t, bs, "cpu", heads, neurons)
     assert torch.isfinite(_logits(s, bs)).all()
+
+
+def test_sensitivity_regression_head_is_finite_and_positive():
+    import math
+
+    from transformers import BertConfig, BertForSequenceClassification
+
+    from qfc.grp import module_sensitivity
+    cfg = BertConfig(vocab_size=50, hidden_size=32, num_hidden_layers=2, num_attention_heads=4,
+                     intermediate_size=64, max_position_embeddings=32, num_labels=1)
+    cfg._attn_implementation = "eager"
+    torch.manual_seed(0)
+    s = module_sensitivity(BertForSequenceClassification(cfg).eval(), _batches(), "cpu", seed=0)
+    assert len(s) == 4 and all(math.isfinite(v) and v > 0 for v in s.values())

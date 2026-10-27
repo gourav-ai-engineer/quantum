@@ -22,9 +22,6 @@ from qfc.align import sequential_refit_io
 from qfc.grp import AVG_SEQ_LEN, grp_prune, prune_model, sequential_refit, teacher_stats
 from step22_grp import SPECS, kl_and_agreement, load_model, logits_of, make_batches
 
-SPECS["stsb"] = {"model_id": "textattack/bert-base-uncased-STS-B", "revision": "8a1d8f1cc0523b7af746daf104ddd0c1ce5911c1",
-                 "dataset": ("glue", "stsb"), "text_fields": ("sentence1", "sentence2"), "metric": "pearson"}
-
 
 def kprune_masks(npz, task, seed, c):
     z = np.load(npz)
