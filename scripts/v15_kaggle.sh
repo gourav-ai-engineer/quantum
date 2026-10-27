@@ -145,5 +145,15 @@ v17r)
   (cd "$REPO" && PYTHONPATH=scripts python scripts/step23_v16_stageA.py --parts grp_r,d2i_r --output-dir "$OUT/v17r" 2>&1     | grep -v -i warn | tail -60)
   (cd "$REPO" && python scripts/v17_rdev_analysis.py "$OUT/v17r" results/v15_h10/c43dd3e/h10/v15_h10_verdict.json) || true
   ;;
+beat)
+  # Beat-the-baselines exploration (docs/EXPLORATION_LOG.md): our env only. BEAT_ARGS = scripts/beat_run.py arguments
+  # (kernel cell sets it); preflight failure aborts (set -e) so a wrong environment never produces numbers.
+  nvidia-smi --query-gpu=name,memory.total --format=csv,noheader || true
+  pip install -q -r "$REPO/requirements-ci.txt" && pip install -q -e "$REPO" --no-deps
+  pip uninstall -y -q torchvision torchaudio || true
+  python "$REPO/scripts/preflight.py" check
+  mkdir -p "$OUT/beat"
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/beat_run.py $BEAT_ARGS --output-dir "$OUT/beat" 2>&1 | grep -v -i warn | tail -150)
+  ;;
 *) echo "unknown stage $STAGE"; exit 1 ;;
 esac

@@ -35,3 +35,13 @@ baseline, not a claim.
 
 ## Entries
 (none yet)
+
+## Amendment 1 (2026-10-27, before any exploration accuracy data): which exploration tasks count
+Official Kwon et al. (806ac5a6) and K-prune (9ca629a1) accept only MRPC, SST-2, STS-B, QNLI, MNLI, QQP (+SQuAD) as
+`--task_name` (their READMEs). They do NOT support CoLA or RTE, so no unmodified official baseline exists there. Rule:
+only MRPC, SST-2, STS-B count toward the freeze rule, and the freeze rule becomes "beats both on all three" (the 3-of-5
+rule cannot be met otherwise). RTE and CoLA may still be run with our own pipeline as a secondary, non-counting signal
+(against our own K-prune-mask re-implementation is impossible without K-prune masks, so only versus the unpruned
+teacher and versus GRP-R/random). STS-B uses held-out-train MSE to the teacher output and validation Pearson/Spearman.
+Official baselines are run unmodified except the V15 add-on (calibration-index and logit-dump patch; no change to the
+pruning algorithms). STS-B checkpoint pin: textattack/bert-base-uncased-STS-B (revision recorded in step22 SPECS).
