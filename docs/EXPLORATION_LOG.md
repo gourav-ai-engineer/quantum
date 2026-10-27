@@ -68,6 +68,17 @@ SST-2 only. Caveat: the d2i-RI MRPC margin (+.0029/+.0010 acc, 2/5 and 3/5 seed 
 408-row dev set; it satisfies the written rule but is not evidence of a real gain by itself. STS-B (third counting
 task) pending kernel C (official baselines), then d2i_ri/grp_ri on STS-B.
 
+**C | 2026-10-27 | official baselines on STS-B (kernel C v2, commit 036e44c; v1 died at 17 s on a relative `$0` self-call after
+`cd`, fixed in 036e44c).** Unmodified Kwon and K-prune, pinned checkpoint, our calibration rows, c in {0.5, 0.4}, 5 seeds.
+Dumps and masks: `results/beat_explore/C_stsb_baselines/036e44c/`; bar in `results/beat_explore/baselines_v15.json` (acc
+field = Pearson, heldout_kl field = MSE for stsb). Pearson mean over 5 seeds (teacher .8805): K-prune c0.5 .8804, c0.4
+.8783; Kwon c0.5 .8636, c0.4 .8475. K-prune at c0.5 already equals the teacher, so a strict "better than K-prune on Pearson
+at c0.5" is a bar of about +0.0001 above the teacher; the MSE half of the rule is the informative one there. The rule
+is NOT changed (fixed before data); if STS-B cannot be beaten at c0.5 the freeze does not happen, that is the result.
+Parity (CPU, `scripts/beat_heldout_parity.py`, seed 7): our held-out rows train.shuffle(7)[2048:2560] reproduce the official
+teacher_heldout dumps (max |dlogit| MRPC 2.5e-5, SST-2 5.0e-6, STS-B 4.8e-6, labels equal); STS-B validation (1500 rows)
+max |dlogit| 1.0e-5, labels equal. So the KL/MSE half of the rule compares like with like.
+
 ## Amendment 1 (2026-10-27, before any exploration accuracy data): which exploration tasks count
 Official Kwon et al. (806ac5a6) and K-prune (9ca629a1) accept only MRPC, SST-2, STS-B, QNLI, MNLI, QQP (+SQuAD) as
 `--task_name` (their READMEs). They do NOT support CoLA or RTE, so no unmodified official baseline exists there. Rule:
