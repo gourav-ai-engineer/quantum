@@ -996,3 +996,11 @@ GPU-hours (kernel D, 4 methods x 2 budgets x 5 seeds on STS-B, took 2.1 h; the o
 - No claim that input-side alignment is a new principle (layer-wise reconstruction is standard in GPTQ/OBC; closest related:
   CORP arXiv 2602.05243, Olica, LIAR); the claim is limited to this combination on BERT-base heads + FFN neurons.
 - A not-supported verdict is reported as such; no re-run, no subset, no change of tasks or budget (rule 12).
+
+### V18 engineering failure 1 (2026-11-12, before any d2i-RI-vs-baseline statistic)
+MNLI and QQP kernels (tag `v18-freeze`, commit f104155) ran to completion for K-prune and d2i-RI (5 seeds each), but official Kwon crashed
+at import for every seed: `ImportError: libcublas.so.12` (cupy-cuda12x; the Kaggle image no longer ships CUDA 12 system libs). Integrity gate
+therefore aborts ("missing Kwon dump"); no statistic computed. QNLI (kernel run 2026-10-27, same commit) passes the gate for 5 seeds.
+Fix (environment only): pip nvidia-*-cu12 wheels in env_kwon + LD_LIBRARY_PATH in `kwon()`, import self-check, and `BL_SKIP_KPRUNE=1` so the
+fix run reruns ONLY Kwon. Tag `v18-freeze-fix1`; kernels `kaggle/beat_confk_{mnli,qqp}`. Method, seeds, budget, tasks, thresholds unchanged.
+K-prune masks and d2i-RI outputs come from the original kernels and are not rerun; the Kwon dumps from fix1 are merged into the same task roots for the analysis.

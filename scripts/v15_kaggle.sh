@@ -22,7 +22,9 @@ KP_OUT=$W/kprune/src/outputs/bert-base-uncased
 SEEDS="7 42 77 123 2024"
 CONS="0.7 0.6 0.5 0.4"
 
-kwon()   { (cd "$W/kwon" && "$W/env_kwon/bin/python" main.py --model_name bert-base-uncased "$@"); }
+# cupy-cuda12x needs libcublas.so.12 etc.; the Kaggle image no longer ships CUDA 12 system libs, so use the pip nvidia-*-cu12 wheels
+kwon_ld() { for d in "$W"/env_kwon/lib/python3.9/site-packages/nvidia/*/lib; do printf '%s:' "$d"; done; }
+kwon()   { (cd "$W/kwon" && LD_LIBRARY_PATH="$(kwon_ld)${LD_LIBRARY_PATH:-}" "$W/env_kwon/bin/python" main.py --model_name bert-base-uncased "$@"); }
 publish() { mkdir -p "$OUT"; for d in "$@"; do [ -e "$W/$d" ] && { mkdir -p "$OUT/$(dirname "$d")"; cp -r "$W/$d" "$OUT/$(dirname "$d")/"; }; done; du -sh "$OUT"; }
 kprune() { (cd "$W/kprune/src" && "$W/env_kprune/bin/python" main.py --model_name bert-base-uncased --gpu 0 \
             --lam_pred 1. --lam_rep 2.5e-4 --T 2 --mu 64 --sublayerwise_tuning "$@"); }
@@ -43,6 +45,8 @@ setup)
   git -C kwon diff > patch_kwon.diff; git -C kprune diff > patch_kprune.diff
   [ -d env_kwon ] || { uv venv -q -p 3.9 env_kwon && uv pip install -q -p env_kwon/bin/python torch==1.13.1 \
       transformers==4.12.0 datasets==2.14.7 numpy==1.23.5 scipy scikit-learn==1.2.2 tqdm cupy-cuda12x; }
+  uv pip install -q -p env_kwon/bin/python nvidia-cublas-cu12 nvidia-cuda-runtime-cu12 nvidia-cusparse-cu12 nvidia-cusolver-cu12 nvidia-curand-cu12 nvidia-cufft-cu12 nvidia-cuda-nvrtc-cu12 nvidia-nvjitlink-cu12
+  LD_LIBRARY_PATH="$(kwon_ld)${LD_LIBRARY_PATH:-}" "$W/env_kwon/bin/python" -c "from cupyx.scipy.sparse.linalg import lsmr" || { echo "CUPY_IMPORT_FAILED"; exit 1; }
   "$W/env_kwon/bin/python" -c "import sklearn" 2>/dev/null || uv pip install -q -p env_kwon/bin/python scikit-learn==1.2.2  # load_metric('glue') needs it
   [ -d env_kprune ] || { uv venv -q -p 3.10 env_kprune && uv pip install -q -p env_kprune/bin/python torch==1.12.1 \
       transformers==4.25.1 datasets==2.14.7 numpy==1.23.4 scipy==1.10.0 scikit-learn==1.2.1 tqdm colorama; }
@@ -163,7 +167,8 @@ bl)
         --constraint $c --seed 0 --output_dir $o > $o.log 2>&1 || echo "FAIL $o"; }
       r=$(python -c "print(round(1-$c,4))")
       e=bl/kprune_${t}_seed${s}_c${c}
-      [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { kprune --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
+      # BL_SKIP_KPRUNE=1: Kwon-only rerun (V18 fix1); the finished K-prune items must not be rerun
+      [ -n "${BL_SKIP_KPRUNE:-}" ] || [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { kprune --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
         --exp_name $e --seed 0 --constraint $r > "$W/bl/kprune_${t}_seed${s}_c${c}.log" 2>&1 || echo "FAIL $e"; }
       rm -f "$KP_OUT/$e/model.ckpt"
     done
