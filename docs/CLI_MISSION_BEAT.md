@@ -7,6 +7,25 @@ the paper comes after. Work fully autonomously: I am busy and want minimal invol
 result checks, web research and code. You may create a new code base for this mission. Report to me only when
 (a) a confirmatory result exists, or (b) you are blocked on something only I can do.
 
+## North star and stopping rule (owner update 2026-11-12)
+The target is a genuine, Q1-journal-grade contribution: retraining-free attention-head (+ FFN) pruning of BERT that
+keeps accuracy while cutting real compute, so the model runs on a smaller machine with the same capability. Work end
+to end and keep iterating through idea families; do not stop at the first failure. Each failed idea narrows the search
+— log it and move to the next, informed by what failed and by fresh literature.
+
+Stop and report ONLY when one of these is true, and say plainly which one:
+1. A frozen candidate has passed the confirmatory test below (a real win). Prepare the Q1 paper.
+2. You have genuinely exhausted the principled idea families (each tried, logged, and either beaten by a baseline or
+   already published) and have no mechanism-driven idea left to try. Then the honest outcome is the analysis paper,
+   and you say so instead of inventing a weak variant.
+3. You are blocked on something only the owner can do (Kaggle quota/token, a decision).
+
+Hard integrity line (overrides any urge to "reach Q1"): never tune a method on the confirmatory tasks, never move a
+threshold after seeing data, never present a KL or dev-set edge as the accuracy/speed win, never fabricate or smooth a
+number. A result that does not beat SOTA is reported as such. "Enough novelty for Q1" is judged by the confirmatory
+accuracy + measured-latency win, not by a story. If the research does not get there, that is an allowed outcome and
+you tell the owner, rather than overclaiming.
+
 ## Read first
 `CLAUDE.md` (binding), `docs/PROJECT_STATE.md` (V14–V17 sections and results), memory `qfc-research-state.md`,
 `git log --oneline -20`. Earlier work: GRP and GRP-R failed their gates. K-prune's compensation is reproduced by our
