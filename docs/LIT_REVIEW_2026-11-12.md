@@ -10,11 +10,13 @@ reviewer will reject a win measured only against those two. Newer retraining-fre
 reconstruction** that must be positioned against (and ideally run as baselines):
 
 - **LIAR** — "Reconstruct the Pruned Model without Any Retraining", arXiv 2407.13331, IEEE JSTSP 2025 (venue
-  unconfirmed). **[full]** Layer-wise least-squares recovery: pruned-channel output approximated as a linear
-  interpolation of kept channels; kept weight becomes (I+QP)W_u, bias absorbs the mean term. Sequential, recollects
-  inputs from already-updated earlier layers (same family as our drift-corrected refit). **BERT-base GLUE avg: Dense
-  87.53; LIAR 85.71 at 50% params** (~98% of dense); beats Mask-Tuning/Kwon reconstruction (83.94) and KCM. This is
-  the concrete SOTA number to beat. Code existence not verified.
+  unconfirmed). **[summary — via WebFetch summarizer, not full text]** Layer-wise least-squares recovery: pruned-channel
+  output approximated as a linear interpolation of kept channels; kept weight becomes (I+QP)W_u, bias absorbs the mean
+  term. Sequential, recollects inputs from already-updated earlier layers (same family as our refit). Reported BERT-base
+  GLUE avg: Dense 87.53, LIAR 85.71 at **50% params** (~98% of dense), on LIAR's own checkpoints/protocol.
+  **CAUTION: 85.71 is a cross-protocol number (their checkpoints, param ratio, GLUE average) — it is context, NOT a bar
+  we can compare to directly.** A real bar needs LIAR's code run on OUR checkpoints, calibration rows and MAC budget.
+  Code existence not verified.
 - **STAT** — "Shrinking Transformers After Training", arXiv 2406.00061. **[binary]** (PDF unreadable; earlier snippet:
   prunes heads+neurons, compensates by **updating subsequent layers** — directly adjacent to our mechanism). MUST be
   read in full before any novelty claim.
@@ -83,32 +85,35 @@ OSSCAR applicability to BERT-base. (STAT now read in full — see Part 2.)
 
 # Part 2 (deeper pass): gap analysis + what gets pruning papers rejected
 
-## 6. STAT already publishes our V17 "mechanism" — [full read, decisive]
-STAT (arXiv 2406.00061, 2024) prunes heads+neurons retraining-free and compensates by **folding an interpolation
-correction into the next layer**; for deeper models it **re-runs the pruning data through the already-pruned network
-and solves least squares, so the correction accounts for errors earlier pruned layers introduced into the inputs.**
-That is exactly our drift-corrected refit (V17). **Our drift correction is therefore NOT novel — STAT precedes it.**
-The paper must cite STAT and must not claim next-layer/residual-drift compensation as a contribution. (It does not use
-the name "K-prune"; its baseline is Kwon et al. 2022; it reports BERT GLUE as a FLOPs–accuracy curve 20–90%, matching
-dense within error bars at modest pruning and beating Kwon at high compression — no single 50% number given.)
+## 6. STAT is close prior art for compensation — [summary via WebFetch, NOT full text; attribution UNVERIFIED]
+STAT (arXiv 2406.00061, 2024) prunes heads+neurons retraining-free and compensates by folding an interpolation
+correction into the next layer; the summarizer says for deeper models it re-runs the pruning data through the pruned
+network and solves least squares. **Correction needed vs my earlier claim:** student-input LS on the pruned network is
+GRP's *plain* refit (the one that LOST 34–60% in V16/V17), not necessarily our drift-corrected target (which carries the
+h_t − h_s term we found in K-prune's code). **Whether STAT's target includes the drift term is UNVERIFIED — read STAT's
+actual equations before attributing our mechanism to it.** Either way, drift correction is not ours (it is K-prune's);
+the point is only to cite the right source. STAT's baseline is Kwon et al. 2022 (not "K-prune"); it reports BERT GLUE as
+a FLOPs–accuracy curve 20–90%, no single 50% number.
 
-## 7. STAT's own stated limitations ARE the open gaps (this is the answer to "what new thing can we try")
-Quoted from STAT's limitations/future-work:
-- **No multi-downstream-layer correction.** "The paper does not describe a separate mechanism that corrects errors
-  across multiple downstream layers." → **Global multi-layer reconstruction for structured head/FFN encoder pruning is
-  open** (SNOWS does it but unstructured/vision; two-stage ESWA may — verify).
-- **One-shot only.** "Pruning is one-shot. An iterative approach could perform better, but would cost more." →
-  **Iterative prune→refit→re-score for structured heads/FFN is open.** Our V14/V17 evidence (refit washes out the
-  selector) makes iterative selection-under-compensation the natural, mechanism-driven idea: re-score what to prune
-  *after* each compensation step, not before.
-- **Architecture-dependent error metric.** "The per-layer error metric must be adapted to each architecture, since
-  layer-norm placement changes how errors propagate... a systematic study is future work." → open.
+## 7. Candidate gaps — [all summarizer-reported, NOT verbatim STAT quotes; verify before relying]
+The WebFetch summary of STAT *reported* these as limitations (its wording, not STAT's verbatim text):
+- possibly no mechanism correcting errors across *multiple* downstream layers;
+- one-shot, "an iterative approach could perform better";
+- per-layer error metric is architecture-dependent (LayerNorm placement).
 
-**Best V19 candidate (mechanism-driven, targets stated open problems):** iterative, multi-downstream-layer
-reconstruction for structured head+FFN pruning of BERT, i.e. at each round prune a small slice, refit against a target
-that spans several downstream sublayers (SNOWS-style), then re-score the next slice from the compensated model.
-Baselines: Kwon, K-prune, STAT, LIAR. Win shown on measured CPU/edge latency across the whole accuracy–FLOPs curve.
-Novelty must still be checked against the two-stage ESWA paper (closest) before committing.
+**Correction — "iterative is open" is FALSE here.** K-prune already prunes sublayer-by-sublayer, re-scoring on the
+partially pruned+tuned model (verified in its code during V16), and our own GRP greedy re-scores after every removal.
+So iterative prune→refit→re-score is NOT novel. **The ONLY candidate open axis is the reconstruction *target* spanning
+several downstream sublayers for STRUCTURED encoder heads/FFN** (SNOWS does multi-layer but unstructured/vision). Even
+that is unverified against the two-stage ESWA paper, "Prune, Update and Trim" (2605.18331) and LLM-BIP, all unread.
+
+**Two hard caveats for any such V19:**
+1. A target through LayerNorm/GELU/softmax has **no closed form** → needs Newton/gradient optimization on the
+   calibration rows (SNOWS-style). That invites a reviewer to ask "why not a light fine-tune / distillation on the same
+   2048 rows at matched compute?" (the "Free Lunch" point, 2510.14444). Pre-register that baseline, or keep it
+   closed-form.
+2. **No evidence multi-layer reconstruction even helps structured BERT** (SNOWS evidence is unstructured vision). It is
+   a research bet, not a sure win.
 
 ## 8. What gets pruning/compression papers rejected (reviewer criteria to pre-empt)
 From Blalock et al. "What is the State of Neural Network Pruning?" (MLSys 2020) **[abstract/summary]** and Wang et al.
@@ -134,10 +139,25 @@ this. Even if a raw SOTA win is thin, a **rigorous, pre-registered, reproducible
 analysis of what actually matters (selection vs compensation vs allocation)** is itself a defensible contribution for a
 methods-and-reproducibility-friendly Q1 venue. Pair it with the iterative/multi-layer idea for the method claim.
 
-## 10. Revised path to Q1 (ordered, honest)
-1. Add STAT + LIAR as baselines (dated amendment) — non-negotiable; without them a win is not Q1-credible.
-2. Verify the two-stage ESWA paper does NOT already do iterative multi-layer structured reconstruction (full read).
-3. Build the V19 candidate only if step 2 leaves it open; freeze + pre-register; confirm on QNLI/MNLI-m/QQP once.
-4. Measure CPU latency across the full accuracy–FLOPs curve; never claim speed from FLOPs alone.
-5. If no accuracy win survives, pivot the paper to the rigorous selection-vs-compensation analysis (strength in §9),
-   which is still publishable. No Q1 *method* claim is promised; this is the credible route, not a guarantee.
+## 10. Go/no-go for the NEXT implementation (corrected 2026-11-12 after reading V18 freeze)
+**V18 (d2i-RI) is frozen and is the real next step, not V19.** It beats both baselines on the three exploration tasks
+(MRPC, SST-2, STS-B) at 0.5/0.4 — but the accuracy margins are inside dev-set noise (MRPC +0.0029/+0.0010, Pearson
++0.0005); the only clear effect is held-out KL/MSE −5..−13% vs K-prune. Its confirmatory run on QNLI, MNLI-m, QQP has
+NOT happened yet. **Implications:**
+- **V18 claims the three confirmatory tasks.** V19 cannot reuse them. V19 needs its OWN untouched confirmatory set,
+  fixed before any V19 code: **SQuAD v1.1 validation is clean** (only `_smoke` touched it) — or RoBERTa-base GLUE.
+- **V18 keeps K-prune's masks → identical shapes → identical latency.** It CANNOT deliver the owner's "runs on a smaller
+  machine" goal. Best case it is an *accuracy-at-equal-compute* win, and that margin is noise. The owner must know this.
+- The honest "low-machine over SOTA" target is **match K-prune's accuracy at a LOWER budget** (e.g. K-prune@0.5 reached
+  at 0.4), not a raw latency number. Latency-aware head/FFN allocation is already published (ZipLM).
+
+**Ordered path (do NOT start V19 implementation yet):**
+1. Let V18's confirmatory run finish on QNLI/MNLI-m/QQP. Record the verdict. That result reshapes everything.
+2. Owner decision: add STAT + LIAR as baselines via a dated amendment IF their code runs on BERT-base (check first);
+   without newer baselines a win is not Q1-credible. Raising the bar before confirmatory data is allowed.
+3. Only then consider V19 (multi-layer-target structured pruning at a lower budget), after reading two-stage ESWA +
+   2605.18331 + LLM-BIP in full, reserving SQuAD/RoBERTa as its confirmatory set, and pre-registering a fine-tune
+   baseline (§7 caveat 1).
+4. Always measure CPU latency across the full accuracy–FLOPs curve; never claim speed from FLOPs alone.
+5. If no accuracy win survives, pivot to the rigorous selection-vs-compensation analysis (§9) — still publishable.
+No Q1 *method* claim is promised; this is the credible route, not a guarantee.
