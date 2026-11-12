@@ -76,5 +76,68 @@ exactly where the newest strong work clusters (SNOWS, two-stage, STAT, LIAR, OSS
 No Q1 result is promised; the evidence does not yet support one.
 
 ## Open full-text reads still needed (in priority order)
-STAT (2406.00061) · two-stage ESWA (ResearchGate 393443189) · G-Pruner (2024.conll-1.5) · SNOWS (2411.18376) ·
-OSSCAR applicability to BERT-base.
+two-stage ESWA (ResearchGate 393443189) · G-Pruner (2024.conll-1.5) · SNOWS (2411.18376) ·
+OSSCAR applicability to BERT-base. (STAT now read in full — see Part 2.)
+
+---
+
+# Part 2 (deeper pass): gap analysis + what gets pruning papers rejected
+
+## 6. STAT already publishes our V17 "mechanism" — [full read, decisive]
+STAT (arXiv 2406.00061, 2024) prunes heads+neurons retraining-free and compensates by **folding an interpolation
+correction into the next layer**; for deeper models it **re-runs the pruning data through the already-pruned network
+and solves least squares, so the correction accounts for errors earlier pruned layers introduced into the inputs.**
+That is exactly our drift-corrected refit (V17). **Our drift correction is therefore NOT novel — STAT precedes it.**
+The paper must cite STAT and must not claim next-layer/residual-drift compensation as a contribution. (It does not use
+the name "K-prune"; its baseline is Kwon et al. 2022; it reports BERT GLUE as a FLOPs–accuracy curve 20–90%, matching
+dense within error bars at modest pruning and beating Kwon at high compression — no single 50% number given.)
+
+## 7. STAT's own stated limitations ARE the open gaps (this is the answer to "what new thing can we try")
+Quoted from STAT's limitations/future-work:
+- **No multi-downstream-layer correction.** "The paper does not describe a separate mechanism that corrects errors
+  across multiple downstream layers." → **Global multi-layer reconstruction for structured head/FFN encoder pruning is
+  open** (SNOWS does it but unstructured/vision; two-stage ESWA may — verify).
+- **One-shot only.** "Pruning is one-shot. An iterative approach could perform better, but would cost more." →
+  **Iterative prune→refit→re-score for structured heads/FFN is open.** Our V14/V17 evidence (refit washes out the
+  selector) makes iterative selection-under-compensation the natural, mechanism-driven idea: re-score what to prune
+  *after* each compensation step, not before.
+- **Architecture-dependent error metric.** "The per-layer error metric must be adapted to each architecture, since
+  layer-norm placement changes how errors propagate... a systematic study is future work." → open.
+
+**Best V19 candidate (mechanism-driven, targets stated open problems):** iterative, multi-downstream-layer
+reconstruction for structured head+FFN pruning of BERT, i.e. at each round prune a small slice, refit against a target
+that spans several downstream sublayers (SNOWS-style), then re-score the next slice from the compensated model.
+Baselines: Kwon, K-prune, STAT, LIAR. Win shown on measured CPU/edge latency across the whole accuracy–FLOPs curve.
+Novelty must still be checked against the two-stage ESWA paper (closest) before committing.
+
+## 8. What gets pruning/compression papers rejected (reviewer criteria to pre-empt)
+From Blalock et al. "What is the State of Neural Network Pruning?" (MLSys 2020) **[abstract/summary]** and Wang et al.
+"Why is the State of NN Pruning so Confusing?" (arXiv 2301.05219) **[full text extracted locally]**:
+- **Too few / weak baselines.** Meta-analysis of 81 papers: most are compared against by very few others; many compare
+  against few baselines. Reviewers penalize this. Always include **random** and **magnitude** baselines, plus the
+  current SOTA (here: STAT, LIAR), not just the 1–2 you can beat.
+- **Confounded comparison — the single biggest rejection cause.** Wang et al. fairness principle: *the performance
+  advantage must be attributable to the pruning stage, not to outside factors.* They revive a 6-year-old L1 baseline to
+  match recent top venues **just by using a better fine-tuning LR schedule.** Lesson for us: hold the base model,
+  calibration set, FLOPs budget, and evaluation protocol identical across all methods; report all settings.
+- **FLOPs ≠ latency.** A MAC-ratio win is not a speed win; measure real hardware (ideally CPU/edge for the
+  "low-machine" goal).
+- **Single operating point.** Report the full accuracy–FLOPs curve, not one cherry-picked sparsity.
+- **No standardized / reproducible eval.** They call for ShrinkBench-style standardized evaluation and full release of
+  settings and code.
+
+## 9. Our rigor is already a Q1-grade strength — lean on it
+The pre-registration discipline we already follow directly answers the above rejection causes: hypotheses and
+thresholds fixed before data; selection on held-out train only; paired cluster bootstrap with Holm; identical
+checkpoints/calibration/budget for every method; physical pruning + per-task latency (V18). Few pruning papers do
+this. Even if a raw SOTA win is thin, a **rigorous, pre-registered, reproducible comparison with an honest
+analysis of what actually matters (selection vs compensation vs allocation)** is itself a defensible contribution for a
+methods-and-reproducibility-friendly Q1 venue. Pair it with the iterative/multi-layer idea for the method claim.
+
+## 10. Revised path to Q1 (ordered, honest)
+1. Add STAT + LIAR as baselines (dated amendment) — non-negotiable; without them a win is not Q1-credible.
+2. Verify the two-stage ESWA paper does NOT already do iterative multi-layer structured reconstruction (full read).
+3. Build the V19 candidate only if step 2 leaves it open; freeze + pre-register; confirm on QNLI/MNLI-m/QQP once.
+4. Measure CPU latency across the full accuracy–FLOPs curve; never claim speed from FLOPs alone.
+5. If no accuracy win survives, pivot the paper to the rigorous selection-vs-compensation analysis (strength in §9),
+   which is still publishable. No Q1 *method* claim is promised; this is the credible route, not a guarantee.
