@@ -27,13 +27,13 @@ def shape_from_grp(path):
 
 
 def shape_from_masks(head_path, neuron_path):
-    hm = torch.load(head_path, weights_only=True)
-    nm = torch.load(neuron_path, weights_only=True)
+    hm = torch.load(head_path, weights_only=True, map_location="cpu")
+    nm = torch.load(neuron_path, weights_only=True, map_location="cpu")
     return (hm != 0).sum(1).tolist(), (nm != 0).sum(1).tolist()
 
 
 @torch.no_grad()
-def time_shape(heads, neurons, batch, seq_len, warmup=20, runs=100):
+def time_shape(heads, neurons, batch, seq_len, warmup=20, runs=100, device="cuda"):
     """Median ms of one forward pass of a BERT-base classifier keeping heads[l] heads and neurons[l] neurons."""
     from transformers import BertConfig, BertForSequenceClassification
     cfg = BertConfig()  # BERT-base dimensions; weights are random (they do not affect latency)
@@ -41,20 +41,28 @@ def time_shape(heads, neurons, batch, seq_len, warmup=20, runs=100):
     model = BertForSequenceClassification(cfg)
     prune_model(model, {l: list(range(h)) for l, h in enumerate(heads)},
                 {l: list(range(n)) for l, n in enumerate(neurons)})
-    model = model.half().cuda().eval()
-    ids = torch.randint(1000, 2000, (batch, seq_len), device="cuda")
+    # GPU: FP16 (rule 8 protocol). CPU (descriptive, separate): FP32.
+    model = (model.half() if device == "cuda" else model).to(device).eval()
+    ids = torch.randint(1000, 2000, (batch, seq_len), device=device)
     mask = torch.ones_like(ids)
     for _ in range(warmup):
         model(input_ids=ids, attention_mask=mask)
-    torch.cuda.synchronize()
     ts = []
-    for _ in range(runs):
-        s, e = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
-        s.record()
-        model(input_ids=ids, attention_mask=mask)
-        e.record()
+    if device == "cuda":
         torch.cuda.synchronize()
-        ts.append(s.elapsed_time(e))
+        for _ in range(runs):
+            s, e = torch.cuda.Event(enable_timing=True), torch.cuda.Event(enable_timing=True)
+            s.record()
+            model(input_ids=ids, attention_mask=mask)
+            e.record()
+            torch.cuda.synchronize()
+            ts.append(s.elapsed_time(e))
+    else:
+        import time
+        for _ in range(runs):
+            t0 = time.perf_counter()
+            model(input_ids=ids, attention_mask=mask)
+            ts.append((time.perf_counter() - t0) * 1000)
     params = sum(p.numel() for n, p in model.named_parameters() if ".encoder." in n)
     return statistics.median(ts), params
 
@@ -64,11 +72,17 @@ def main():
     ap.add_argument("--grp", nargs="*", default=[], help="glob(s) of step22 JSONs")
     ap.add_argument("--kwon", nargs="*", default=[], help="dirs with head_mask.pt and neuron_mask.pt")
     ap.add_argument("--kprune", nargs="*", default=[], help="dirs with head_masks.pkl and neuron_masks.pkl")
+    ap.add_argument("--shapes", help="JSON {name: [heads, neurons]} (from --dump-shapes); replaces --grp/--kwon/--kprune")
+    ap.add_argument("--dump-shapes", help="write the shapes read from --kwon/--kprune/--grp to this JSON and exit")
+    ap.add_argument("--device", choices=["cuda", "cpu"], default="cuda")
+    ap.add_argument("--runs", type=int, default=100)
+    ap.add_argument("--warmup", type=int, default=20)
+    ap.add_argument("--batches", type=int, nargs="*", default=[1, 32])
     ap.add_argument("--seq-len", type=int, default=128)
-    ap.add_argument("--out", required=True)
+    ap.add_argument("--out")
     a = ap.parse_args()
-    if not torch.cuda.is_available():
-        raise SystemExit("H12 latency must be measured on a GPU (rule 8)")
+    if a.device == "cuda" and not a.dump_shapes and not torch.cuda.is_available():
+        raise SystemExit("H12 latency must be measured on a GPU (rule 8); use --device cpu for the separate CPU measurement")
     shapes = {"unpruned": ([12] * 12, [3072] * 12)}
     for p in [q for g in a.grp for q in sorted(glob.glob(g))]:
         shapes["grp:" + os.path.basename(p)] = shape_from_grp(p)
@@ -76,15 +90,25 @@ def main():
         shapes["kwon:" + d] = shape_from_masks(os.path.join(d, "head_mask.pt"), os.path.join(d, "neuron_mask.pt"))
     for d in a.kprune:
         shapes["kprune:" + d] = shape_from_masks(os.path.join(d, "head_masks.pkl"), os.path.join(d, "neuron_masks.pkl"))
-    out = {"device": torch.cuda.get_device_name(0), "torch": torch.__version__, "seq_len": a.seq_len, "dtype": "fp16",
-           "results": {}}
+    if a.dump_shapes:
+        json.dump({k: list(v) for k, v in shapes.items()}, open(a.dump_shapes, "w"), indent=1)
+        return
+    if a.shapes:
+        shapes = {k: tuple(v) for k, v in json.load(open(a.shapes)).items()}
+    if a.device == "cpu":
+        import platform
+        dev = f"cpu: {platform.processor()}, torch threads {torch.get_num_threads()}"
+    else:
+        dev = torch.cuda.get_device_name(0)
+    out = {"device": dev, "torch": torch.__version__, "seq_len": a.seq_len,
+           "dtype": "fp16" if a.device == "cuda" else "fp32", "runs": a.runs, "warmup": a.warmup, "results": {}}
     for name, (h, n) in shapes.items():
         rec = {"heads": h, "neurons": n}
-        for b in (1, 32):
-            ms, params = time_shape(h, n, b, a.seq_len)
+        for b in a.batches:
+            ms, params = time_shape(h, n, b, a.seq_len, a.warmup, a.runs, a.device)
             rec[f"median_ms_b{b}"], rec["params_encoder"] = ms, params
         out["results"][name] = rec
-        print(name, round(rec["median_ms_b1"], 3), round(rec["median_ms_b32"], 3), rec["params_encoder"], flush=True)
+        print(name, {k: round(v, 3) for k, v in rec.items() if k.startswith("median")}, rec["params_encoder"], flush=True)
     json.dump(out, open(a.out, "w"), indent=2)
 
 
