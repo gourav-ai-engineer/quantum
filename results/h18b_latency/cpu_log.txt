@@ -1,0 +1,7 @@
+unpruned {'median_ms_b1': 79.678, 'median_ms_b32': 1682.722} 85054464
+kwon:results/beat_confirm/raw_qnli/conf_qnli/bl/kwon_qnli_seed7_c0.5 {'median_ms_b1': 57.628, 'median_ms_b32': 943.117} 42236783
+kwon:results/beat_confirm/merged/conf_mnli/bl/kwon_mnli_seed7_c0.5 {'median_ms_b1': 54.898, 'median_ms_b32': 1019.622} 42346999
+kwon:results/beat_confirm/merged/conf_qqp/bl/kwon_qqp_seed7_c0.5 {'median_ms_b1': 52.597, 'median_ms_b32': 877.768} 42381005
+kprune:results/beat_confirm/raw_qnli/conf_qnli/bl/kprune_out/kprune_qnli_seed7_c0.5 {'median_ms_b1': 47.664, 'median_ms_b32': 815.096} 42431599
+kprune:results/beat_confirm/merged/conf_mnli/bl/kprune_out/kprune_mnli_seed7_c0.5 {'median_ms_b1': 48.278, 'median_ms_b32': 813.658} 42494168
+kprune:results/beat_confirm/merged/conf_qqp/bl/kprune_out/kprune_qqp_seed7_c0.5 {'median_ms_b1': 48.424, 'median_ms_b32': 820.435} 42495897

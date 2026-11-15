@@ -1,0 +1,22 @@
+Traceback (most recent call last):
+  File "/kaggle/working/quantum/scripts/v15_latency.py", line 116, in <module>
+    main()
+    ~~~~^^
+  File "/kaggle/working/quantum/scripts/v15_latency.py", line 108, in main
+    ms, params = time_shape(h, n, b, a.seq_len, a.warmup, a.runs, a.device)
+                 ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/utils/_contextlib.py", line 124, in decorate_context
+    return func(*args, **kwargs)
+  File "/kaggle/working/quantum/scripts/v15_latency.py", line 42, in time_shape
+    prune_model(model, {l: list(range(h)) for l, h in enumerate(heads)},
+    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                {l: list(range(n)) for l, n in enumerate(neurons)})
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/kaggle/working/quantum/src/qfc/grp.py", line 318, in prune_model
+    model.prune_heads({l: hs for l, hs in to_prune.items() if hs})
+    ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py", line 1968, in __getattr__
+    raise AttributeError(
+        f"'{type(self).__name__}' object has no attribute '{name}'"
+    )
+AttributeError: 'BertForSequenceClassification' object has no attribute 'prune_heads'

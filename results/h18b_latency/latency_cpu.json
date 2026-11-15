@@ -1,0 +1,241 @@
+{
+  "device": "cpu: Intel64 Family 6 Model 183 Stepping 1, GenuineIntel, torch threads 16",
+  "torch": "2.6.0+cpu",
+  "seq_len": 128,
+  "dtype": "fp32",
+  "runs": 30,
+  "warmup": 5,
+  "results": {
+    "unpruned": {
+      "heads": [
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12,
+        12
+      ],
+      "neurons": [
+        3072,
+        3072,
+        3072,
+        3072,
+        3072,
+        3072,
+        3072,
+        3072,
+        3072,
+        3072,
+        3072,
+        3072
+      ],
+      "median_ms_b1": 79.67830000001186,
+      "params_encoder": 85054464,
+      "median_ms_b32": 1682.7218500000072
+    },
+    "kwon:results/beat_confirm/raw_qnli/conf_qnli/bl/kwon_qnli_seed7_c0.5": {
+      "heads": [
+        10,
+        8,
+        12,
+        11,
+        10,
+        12,
+        10,
+        7,
+        12,
+        9,
+        9,
+        11
+      ],
+      "neurons": [
+        740,
+        829,
+        901,
+        1110,
+        1395,
+        1636,
+        1749,
+        1610,
+        1269,
+        556,
+        136,
+        20
+      ],
+      "median_ms_b1": 57.6279500000112,
+      "params_encoder": 42236783,
+      "median_ms_b32": 943.1170500000121
+    },
+    "kwon:results/beat_confirm/merged/conf_mnli/bl/kwon_mnli_seed7_c0.5": {
+      "heads": [
+        10,
+        6,
+        9,
+        11,
+        12,
+        10,
+        10,
+        8,
+        12,
+        10,
+        8,
+        8
+      ],
+      "neurons": [
+        885,
+        1001,
+        1360,
+        1563,
+        1639,
+        1685,
+        1643,
+        1398,
+        1078,
+        477,
+        127,
+        63
+      ],
+      "median_ms_b1": 54.89830000001916,
+      "params_encoder": 42346999,
+      "median_ms_b32": 1019.6218500000214
+    },
+    "kwon:results/beat_confirm/merged/conf_qqp/bl/kwon_qqp_seed7_c0.5": {
+      "heads": [
+        12,
+        8,
+        9,
+        10,
+        10,
+        10,
+        10,
+        8,
+        10,
+        11,
+        8,
+        11
+      ],
+      "neurons": [
+        1050,
+        1142,
+        1294,
+        1452,
+        1498,
+        1520,
+        1562,
+        1357,
+        1030,
+        484,
+        151,
+        17
+      ],
+      "median_ms_b1": 52.596899999997504,
+      "params_encoder": 42381005,
+      "median_ms_b32": 877.7681999999913
+    },
+    "kprune:results/beat_confirm/raw_qnli/conf_qnli/bl/kprune_out/kprune_qnli_seed7_c0.5": {
+      "heads": [
+        3,
+        4,
+        7,
+        8,
+        7,
+        9,
+        11,
+        7,
+        10,
+        8,
+        8,
+        9
+      ],
+      "neurons": [
+        1692,
+        1307,
+        1583,
+        1551,
+        1499,
+        1695,
+        1735,
+        1597,
+        1259,
+        731,
+        743,
+        527
+      ],
+      "median_ms_b1": 47.66399999994064,
+      "params_encoder": 42431599,
+      "median_ms_b32": 815.0963000000502
+    },
+    "kprune:results/beat_confirm/merged/conf_mnli/bl/kprune_out/kprune_mnli_seed7_c0.5": {
+      "heads": [
+        2,
+        3,
+        6,
+        6,
+        7,
+        9,
+        10,
+        7,
+        11,
+        9,
+        7,
+        7
+      ],
+      "neurons": [
+        1361,
+        1180,
+        1639,
+        1843,
+        1592,
+        1788,
+        1667,
+        1620,
+        1420,
+        903,
+        814,
+        1029
+      ],
+      "median_ms_b1": 48.27829999999267,
+      "params_encoder": 42494168,
+      "median_ms_b32": 813.6584499999913
+    },
+    "kprune:results/beat_confirm/merged/conf_qqp/bl/kprune_out/kprune_qqp_seed7_c0.5": {
+      "heads": [
+        3,
+        4,
+        6,
+        5,
+        7,
+        10,
+        9,
+        8,
+        9,
+        10,
+        7,
+        9
+      ],
+      "neurons": [
+        1464,
+        1277,
+        1476,
+        1607,
+        1541,
+        1699,
+        1761,
+        1573,
+        1280,
+        903,
+        1059,
+        833
+      ],
+      "median_ms_b1": 48.42409999997699,
+      "params_encoder": 42495897,
+      "median_ms_b32": 820.4350000000318
+    }
+  }
+}

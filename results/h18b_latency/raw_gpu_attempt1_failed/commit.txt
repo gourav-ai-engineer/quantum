@@ -1,0 +1,1 @@
+751bfc8 H18b: latency script gains --shapes/--device cpu/--dump-shapes; shapes of Kwon/K-prune masks (3 tasks x 5 seeds, c=0.5); kernel
