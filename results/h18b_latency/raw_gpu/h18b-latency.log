@@ -1,0 +1,49 @@
+[{"stream_name":"stderr","time":7.536467998,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.536529656,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.536536577,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.536540918,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.158911902,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.158940605,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.158945566,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.158949708,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":54.916908882,"data":"751bfc8 H18b: latency script gains --shapes/--device cpu/--dump-shapes; shapes of Kwon/K-prune masks (3 tasks x 5 seeds, c=0.5); kernel\n"}
+,{"stream_name":"stdout","time":54.916942783,"data":"2.11.0+cu130 5.20.2 Tesla T4\n"}
+,{"stream_name":"stdout","time":54.916949459,"data":"Traceback (most recent call last):\n"}
+,{"stream_name":"stdout","time":54.916954311,"data":"  File \"/kaggle/working/quantum/scripts/v15_latency.py\", line 116, in \u003cmodule\u003e\n"}
+,{"stream_name":"stdout","time":54.916960022,"data":"    main()\n"}
+,{"stream_name":"stdout","time":54.916964906,"data":"    ~~~~^^\n"}
+,{"stream_name":"stdout","time":54.916969683,"data":"  File \"/kaggle/working/quantum/scripts/v15_latency.py\", line 108, in main\n"}
+,{"stream_name":"stdout","time":54.916974349,"data":"    ms, params = time_shape(h, n, b, a.seq_len, a.warmup, a.runs, a.device)\n"}
+,{"stream_name":"stdout","time":54.916979916,"data":"                 ~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stdout","time":54.916985398,"data":"  File \"/usr/local/lib/python3.13/dist-packages/torch/utils/_contextlib.py\", line 124, in decorate_context\n"}
+,{"stream_name":"stdout","time":54.916991103,"data":"    return func(*args, **kwargs)\n"}
+,{"stream_name":"stdout","time":54.916996635,"data":"  File \"/kaggle/working/quantum/scripts/v15_latency.py\", line 42, in time_shape\n"}
+,{"stream_name":"stdout","time":54.917001656,"data":"    prune_model(model, {l: list(range(h)) for l, h in enumerate(heads)},\n"}
+,{"stream_name":"stdout","time":54.917006918,"data":"    ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stdout","time":54.917012221,"data":"                {l: list(range(n)) for l, n in enumerate(neurons)})\n"}
+,{"stream_name":"stdout","time":54.917017545,"data":"                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stdout","time":54.917022905,"data":"  File \"/kaggle/working/quantum/src/qfc/grp.py\", line 318, in prune_model\n"}
+,{"stream_name":"stdout","time":54.917028496,"data":"    model.prune_heads({l: hs for l, hs in to_prune.items() if hs})\n"}
+,{"stream_name":"stdout","time":54.917033565,"data":"    ^^^^^^^^^^^^^^^^^\n"}
+,{"stream_name":"stdout","time":54.917038301,"data":"  File \"/usr/local/lib/python3.13/dist-packages/torch/nn/modules/module.py\", line 1968, in __getattr__\n"}
+,{"stream_name":"stdout","time":54.917043388,"data":"    raise AttributeError(\n"}
+,{"stream_name":"stdout","time":54.917048086,"data":"        f\"'{type(self).__name__}' object has no attribute '{name}'\"\n"}
+,{"stream_name":"stdout","time":54.917062314,"data":"    )\n"}
+,{"stream_name":"stdout","time":54.917066148,"data":"AttributeError: 'BertForSequenceClassification' object has no attribute 'prune_heads'\n"}
+,{"stream_name":"stdout","time":54.91707022,"data":"total 28\n"}
+,{"stream_name":"stdout","time":54.917073814,"data":"drwxr-xr-x  3 root root 4096 Nov 15 16:02 .\n"}
+,{"stream_name":"stdout","time":54.917077529,"data":"drwxr-xr-x  8 root root 4096 Nov 15 16:01 ..\n"}
+,{"stream_name":"stdout","time":54.917081285,"data":"-rw-r--r--  1 root root  136 Nov 15 16:02 commit.txt\n"}
+,{"stream_name":"stdout","time":54.917084998,"data":"-rw-r--r--  1 root root   29 Nov 15 16:02 env.txt\n"}
+,{"stream_name":"stdout","time":54.917089015,"data":"-rw-r--r--  1 root root 1317 Nov 15 16:02 log.txt\n"}
+,{"stream_name":"stdout","time":54.917118669,"data":"-rw-r--r--  1 root root 1991 Nov 15 16:01 __notebook__.ipynb\n"}
+,{"stream_name":"stdout","time":54.917123465,"data":"drwxr-xr-x 12 root root 4096 Nov 15 16:02 quantum\n"}
+,{"stream_name":"stderr","time":57.315023323,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":57.31506053,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":57.481507244,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":57.48153523,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":58.258873106,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":58.332119359000004,"data":"[NbConvertApp] Writing 4887 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":60.926618607,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":61.099038475,"data":"[NbConvertApp] Writing 277534 bytes to __results__.html\n"}
+]

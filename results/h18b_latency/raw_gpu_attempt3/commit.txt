@@ -1,0 +1,1 @@
+3fff257 H18b kernel attempt 3: clone branch head, assert transformers==4.51.3 before any model call

@@ -1,0 +1,33 @@
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1794794944.042378     134 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+unpruned {'median_ms_b1': 8.959, 'median_ms_b32': 45.722} 85054464
+kwon:results/beat_confirm/raw_qnli/conf_qnli/bl/kwon_qnli_seed7_c0.5 {'median_ms_b1': 9.421, 'median_ms_b32': 34.492} 42236783
+kwon:results/beat_confirm/raw_qnli/conf_qnli/bl/kwon_qnli_seed42_c0.5 {'median_ms_b1': 9.529, 'median_ms_b32': 35.253} 42230699
+kwon:results/beat_confirm/raw_qnli/conf_qnli/bl/kwon_qnli_seed77_c0.5 {'median_ms_b1': 9.286, 'median_ms_b32': 36.021} 42244404
+kwon:results/beat_confirm/raw_qnli/conf_qnli/bl/kwon_qnli_seed123_c0.5 {'median_ms_b1': 9.192, 'median_ms_b32': 34.405} 42244404
+kwon:results/beat_confirm/raw_qnli/conf_qnli/bl/kwon_qnli_seed2024_c0.5 {'median_ms_b1': 9.776, 'median_ms_b32': 36.368} 42224615
+kwon:results/beat_confirm/merged/conf_mnli/bl/kwon_mnli_seed7_c0.5 {'median_ms_b1': 9.473, 'median_ms_b32': 35.847} 42346999
+kwon:results/beat_confirm/merged/conf_mnli/bl/kwon_mnli_seed42_c0.5 {'median_ms_b1': 9.541, 'median_ms_b32': 36.073} 42346999
+kwon:results/beat_confirm/merged/conf_mnli/bl/kwon_mnli_seed77_c0.5 {'median_ms_b1': 9.303, 'median_ms_b32': 35.115} 42342452
+kwon:results/beat_confirm/merged/conf_mnli/bl/kwon_mnli_seed123_c0.5 {'median_ms_b1': 9.517, 'median_ms_b32': 34.939} 42346999
+kwon:results/beat_confirm/merged/conf_mnli/bl/kwon_mnli_seed2024_c0.5 {'median_ms_b1': 9.548, 'median_ms_b32': 36.042} 42346999
+kwon:results/beat_confirm/merged/conf_qqp/bl/kwon_qqp_seed7_c0.5 {'median_ms_b1': 9.321, 'median_ms_b32': 34.735} 42381005
+kwon:results/beat_confirm/merged/conf_qqp/bl/kwon_qqp_seed42_c0.5 {'median_ms_b1': 9.42, 'median_ms_b32': 37.268} 42361344
+kwon:results/beat_confirm/merged/conf_qqp/bl/kwon_qqp_seed77_c0.5 {'median_ms_b1': 9.734, 'median_ms_b32': 38.132} 42373448
+kwon:results/beat_confirm/merged/conf_qqp/bl/kwon_qqp_seed123_c0.5 {'median_ms_b1': 9.413, 'median_ms_b32': 37.445} 42384015
+kwon:results/beat_confirm/merged/conf_qqp/bl/kwon_qqp_seed2024_c0.5 {'median_ms_b1': 9.229, 'median_ms_b32': 36.558} 42368901
+kprune:results/beat_confirm/raw_qnli/conf_qnli/bl/kprune_out/kprune_qnli_seed7_c0.5 {'median_ms_b1': 9.447, 'median_ms_b32': 39.953} 42431599
+kprune:results/beat_confirm/raw_qnli/conf_qnli/bl/kprune_out/kprune_qnli_seed42_c0.5 {'median_ms_b1': 9.419, 'median_ms_b32': 36.769} 42417894
+kprune:results/beat_confirm/raw_qnli/conf_qnli/bl/kprune_out/kprune_qnli_seed77_c0.5 {'median_ms_b1': 9.434, 'median_ms_b32': 37.94} 42437683
+kprune:results/beat_confirm/raw_qnli/conf_qnli/bl/kprune_out/kprune_qnli_seed123_c0.5 {'median_ms_b1': 9.475, 'median_ms_b32': 38.704} 42431599
+kprune:results/beat_confirm/raw_qnli/conf_qnli/bl/kprune_out/kprune_qnli_seed2024_c0.5 {'median_ms_b1': 9.393, 'median_ms_b32': 37.086} 42431599
+kprune:results/beat_confirm/merged/conf_mnli/bl/kprune_out/kprune_mnli_seed7_c0.5 {'median_ms_b1': 9.398, 'median_ms_b32': 37.281} 42494168
+kprune:results/beat_confirm/merged/conf_mnli/bl/kprune_out/kprune_mnli_seed42_c0.5 {'median_ms_b1': 9.252, 'median_ms_b32': 38.045} 42485074
+kprune:results/beat_confirm/merged/conf_mnli/bl/kprune_out/kprune_mnli_seed77_c0.5 {'median_ms_b1': 9.564, 'median_ms_b32': 36.108} 42485074
+kprune:results/beat_confirm/merged/conf_mnli/bl/kprune_out/kprune_mnli_seed123_c0.5 {'median_ms_b1': 9.426, 'median_ms_b32': 37.822} 42489621
+kprune:results/beat_confirm/merged/conf_mnli/bl/kprune_out/kprune_mnli_seed2024_c0.5 {'median_ms_b1': 9.426, 'median_ms_b32': 37.377} 42500252
+kprune:results/beat_confirm/merged/conf_qqp/bl/kprune_out/kprune_qqp_seed7_c0.5 {'median_ms_b1': 9.52, 'median_ms_b32': 38.708} 42495897
+kprune:results/beat_confirm/merged/conf_qqp/bl/kprune_out/kprune_qqp_seed42_c0.5 {'median_ms_b1': 9.414, 'median_ms_b32': 37.035} 42500444
+kprune:results/beat_confirm/merged/conf_qqp/bl/kprune_out/kprune_qqp_seed77_c0.5 {'median_ms_b1': 9.335, 'median_ms_b32': 38.385} 42495897
+kprune:results/beat_confirm/merged/conf_qqp/bl/kprune_out/kprune_qqp_seed123_c0.5 {'median_ms_b1': 9.355, 'median_ms_b32': 39.315} 42492887
+kprune:results/beat_confirm/merged/conf_qqp/bl/kprune_out/kprune_qqp_seed2024_c0.5 {'median_ms_b1': 9.41, 'median_ms_b32': 38.7} 42488340

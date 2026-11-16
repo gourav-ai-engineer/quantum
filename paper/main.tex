@@ -67,7 +67,7 @@ clear win over Kwon et al., together with a descriptive latency table of the phy
 Hypotheses, thresholds and analysis code were fixed before the corresponding data were seen, with one exception stated
 in Section~\ref{sec:prereg}; negative results are reported as such.
 
-\section{Related work}
+\section{Related work}\label{sec:rw}
 \paragraph{Head and structured pruning.} Many heads can be removed with little loss~\citep{michel2019sixteen,voita2019analyzing};
 head pruning has also been cast as differentiable subset selection~\citep{li2021dsp}. Training-based structured pruning
 recovers accuracy by fine-tuning~\citep{sanh2020movement,xia2022cofi}.
@@ -81,13 +81,17 @@ reconstruction problem with local search~\citep{meng2024osscar}; CORP folds clos
 weights~\citep{zhang2026corp}; Neuron Merging folds removed neurons into kept ones~\citep{kim2020neuron}. Olica applies closed-form linear
 calibration after structured pruning of large language models~\citep{he2025olica}.
 \paragraph{Concurrent work, checked in full text (2026-11-15).} We looked for any 2025--26 retraining-free method for BERT-base that
-beats K-prune on GLUE under a protocol comparable to ours (heads and FFN neurons, MAC/FLOPs budget). We found none, with the following scope. ASF-S~\citep{illeperuma2026asfs} evaluates BERT-base on AG News by pruning FFN neurons of three blocks with
+beats K-prune on GLUE under a protocol comparable to ours (heads and FFN neurons, MAC/FLOPs budget). Among the 2026 papers we read, none reports such a comparison; the one published claim we found is G-Pruner's (2024, below). ASF-S~\citep{illeperuma2026asfs} evaluates BERT-base on AG News by pruning FFN neurons of three blocks with
 classifier-head fine-tuning, and compares with L1/L2 and random only. CAHP~\citep{livertovsky2026cahp} prunes heads only, fine-tunes briefly after pruning, and uses SST-5 and MNLI
 against differentiable-subset-pruning-type baselines. Greedy-Gnorm~\citep{guo2026gnorm} is head-only and compares with attention-entropy baselines on one task per model.
 Magnitude Profile pruning~\citep{mpg2026} reports OPT-6.7B and RoBERTa-large, not BERT-base. LIAR~\citep{wang2024liar} reports BERT-base GLUE and SQuAD at 50\% of \emph{parameters}
 against KCM and Mask-Tuning, not K-prune, so it is not comparable. STAT~\citep{stat2024} compares with Kwon et al.\ on BERT in figures only and SNOWS~\citep{snows2024} evaluates vision models.
-For Global-Pruner~\citep{yao2024globalpruner} we could read only the abstract and search summaries, which claim gains over retraining-free baselines at matched FLOPs; its result tables could not be read, so whether it beats K-prune is \textbf{unverified}.
-We therefore state only that no verified method beats K-prune in a comparable setting; we do not claim that none exists. Each method keeps its own pruning unit, and we do not merge them into one table.
+Global-Pruner (G-Pruner)~\citep{yao2024globalpruner} (CoNLL 2024) \emph{does} name K-prune as a baseline: its Figure~2 plots accuracy degradation against relative FLOPs (about 0.50--0.75) for BERT-base on QQP, MNLI, SST-2 and QNLI,
+and Section~5.2 claims the least degradation in most cases; Table~1 reports 60/65/70\% FLOPs and a $+6.02$ F1 gain on SQuAD~v2.0 at 60\% FLOPs.
+It is a published claim of lower accuracy degradation than K-prune on BERT-base GLUE in a FLOPs range that overlaps ours. We have not reproduced it, and it is not directly commensurable with our results: relative FLOPs versus our MACs,
+2{,}000 versus 2{,}048 calibration rows, 10 versus 5 seeds, accuracy degradation versus absolute accuracy, and a different software stack (transformers 4.12.0, PyTorch 1.9.1). We therefore make no claim that d2i-RI is at or above G-Pruner, and our
+statement that d2i-RI ties K-prune does not imply that it is at the level of the best published retraining-free method.
+Each method is reported in its own pruning unit, and we do not merge them into one table.
 \paragraph{Allocation and repairability.} The idea that sparsity should be allocated by how much damage later layers
 absorb or a repair removes is recent: \citet{jing2026absorption} correct layer-wise rates by an inter-layer
 perturbation-absorption ratio (decoder LLMs, unstructured), and \citet{zhan2026repairability} use the fraction of
@@ -98,7 +102,7 @@ little or no retraining~\citep{frantar2023sparsegpt,sun2024wanda,ma2023llmpruner
 \paragraph{Positioning.} Removal costs from least-squares downdates and closed-form compensation are each known. Our
 claims are (a) an analysis of which redundancy notion matters, (b) controlled, pre-registered evidence on the relative
 roles of selection and compensation, (c) a negative result for a global refit-aware allocation, together with the identification of K-prune's
-compensation mechanism, and (d) a pre-registered confirmation that a strong combination reaches the level of the strongest retraining-free baseline we could verify (K-prune) on three held-out tasks without beating it.
+compensation mechanism, and (d) a pre-registered confirmation that a strong combination ties K-prune, the strongest baseline we reproduced, on three held-out tasks without beating it (a published, un-reproduced G-Pruner claim of lower degradation than K-prune is discussed in Section~\ref{sec:rw}).
 None of these is a new pruning principle, and layer-wise input-side reconstruction is standard in one-shot pruning~\citep{frantar2023sparsegpt,zhang2026corp,he2025olica,wang2024liar}.
 
 \section{Setup and notation}
@@ -343,7 +347,23 @@ calibration-side quantity, not generalization evidence, and it carries no multip
 classifiers with the per-layer kept heads and neurons physically removed, sequence length 128, median of repeated forward passes (\texttt{scripts/v15\_latency.py}).
 \emph{CPU (separate, descriptive, low-resource setting):} one Intel Core i7-13700 (16 threads), FP32, median of 30 runs after 5 warm-up runs, seed-7 shapes only, measured while the machine was otherwise lightly used.
 Table~\ref{tab:lat} shows that both retraining-free methods reduce encoder parameters from 85.1M to about 42.2--42.5M and CPU latency by a factor of 1.4--1.5 (Kwon et al.) and 1.65 (K-prune) at batch 1, and 1.7--1.9 and 2.05 at batch 32.
-GPU_LATENCY_PENDING
+\emph{GPU (protocol of rule 8):} one Tesla T4, FP16, torch 2.11.0+cu130, transformers 4.51.3, median of 100 runs after 20 warm-up runs, all 15 shapes per method (3 tasks $\times$ 5 seeds).
+At batch 1 pruning gives no speed-up: the unpruned model takes 8.96 ms and the pruned shapes 9.2--9.8 ms (we did not profile; a launch-bound forward pass at this size is a plausible but untested explanation).
+At batch 32 the unpruned model takes 45.7 ms; Kwon et al.\ shapes 34.4--38.1 ms and K-prune shapes 36.1--40.0 ms (Table~\ref{tab:latgpu}), i.e.\ 1.2--1.3$\times$ faster at about half the encoder parameters.
+At batch 32 Kwon et al.'s shapes are faster than K-prune's by 4--7\% (medians) on every task even though K-prune's accuracy is higher (Table~\ref{tab:v18}); we report this as measured, with no claim of significance. The CPU run above shows the opposite ordering,
+so the ordering between the two shapes depends on the hardware.
+\begin{table}[t]\centering\small
+\caption{GPU latency (ms; T4, FP16, seq.\ 128, median of 100 runs per shape) at 50\% of MACs: median over the five seeds' shapes [min, max]. d2i-RI shapes equal K-prune's. Unpruned: 8.96 ms (batch 1), 45.7 ms (batch 32). Source:
+\texttt{results/h18b\_latency/raw\_gpu\_attempt3/latency\_gpu.json}.}\label{tab:latgpu}
+\begin{tabular}{llcc}\toprule
+Task & Shape & batch 1 & batch 32\\\midrule
+QNLI & Kwon et al. & 9.42 [9.19, 9.78] & 35.3 [34.4, 36.4]\\
+ & K-prune (= d2i-RI) & 9.43 [9.39, 9.47] & 37.9 [36.8, 40.0]\\
+MNLI-m & Kwon et al. & 9.52 [9.30, 9.55] & 35.9 [34.9, 36.1]\\
+ & K-prune (= d2i-RI) & 9.43 [9.25, 9.56] & 37.4 [36.1, 38.0]\\
+QQP & Kwon et al. & 9.41 [9.23, 9.73] & 37.3 [34.7, 38.1]\\
+ & K-prune (= d2i-RI) & 9.41 [9.34, 9.52] & 38.7 [37.0, 39.3]\\\bottomrule
+\end{tabular}\end{table}
 \begin{table}[t]\centering\small
 \caption{CPU latency (ms, FP32, seq.\ 128, median of 30 runs) of physically pruned BERT-base shapes at 50\% of MACs, seed 7, and encoder parameters. d2i-RI shapes equal K-prune's. Source:
 \texttt{results/h18b\_latency/latency\_cpu.json}.}\label{tab:lat}
@@ -362,7 +382,7 @@ did not run the accuracy comparison (H11), so no accuracy conclusion about GRP o
 \item Latency (Section~\ref{sec:v18}) is measured on random-weight BERT-base models of the pruned shapes, one GPU type and one CPU, at sequence length 128; it is descriptive and no speed claim is made
 for d2i-RI relative to K-prune (identical shapes). V14 results are functional masks.
 \item The confirmatory claim covers BERT-base, three tasks, 50\% of MACs, five calibration seeds and retraining-free pruning only; no claim at 40\% MACs, on MRPC/SST-2/STS-B (development data) or on other models.
-d2i-RI was developed on the development tasks after V15--V17, and not all competing 2025--26 methods could be verified (Global-Pruner's tables were not read).
+d2i-RI was developed on the development tasks after V15--V17, and the published G-Pruner claim of lower degradation than K-prune was not reproduced, so d2i-RI is not claimed to be at the level of the best published method.
 \item MRPC has 408 validation examples, so accuracy differences of one to two points are within noise there.
 \item V14 uses a single, uniform sparsity level (6 of 12 heads); its Kaggle run did not record exact package version
 strings. The V17 hypothesis was registered after the V15/V16 development data were seen (Section~\ref{sec:prereg}).
