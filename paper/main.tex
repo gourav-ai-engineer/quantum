@@ -7,7 +7,7 @@
 \newtheorem{proposition}{Proposition}
 \newtheorem{theorem}{Theorem}
 \newcommand{\todo}[1]{\textbf{[TODO: #1]}}
-\title{When Does Head Selection Matter? Output-Space Redundancy, Closed-Form Compensation, and Global Allocation in Retraining-Free Transformer Pruning}
+\title{When Does Head Selection Matter? A Quantum-Information View of Attention-Head Redundancy in Retraining-Free Transformer Pruning}
 \author{Anonymous}
 \date{}
 \begin{document}
@@ -16,10 +16,15 @@
 \begin{abstract}
 Retraining-free pruning of fine-tuned encoders removes attention heads and feed-forward neurons using a small
 calibration set and repairs the damage with a closed-form least-squares (LS) update. Which units to remove (selection) and how to
-repair the rest (compensation) are usually evaluated together. We separate them in a sequence of pre-registered
-experiments on BERT-base, and most of our hypotheses are not supported. (i) Attention-pattern similarity, the natural
-redundancy signal for heads, is blind to how a head mixes values; on four of five GLUE tasks most head pairs that it
-calls near-identical have dissimilar outputs. (ii) At 50\% of heads per layer, once the kept heads are refit by LS,
+repair the rest (compensation) are usually evaluated together. We study head redundancy through the formalism of quantum
+information: each head is represented by a density operator (its trace-normalized Gram operator), similarity between heads is the
+squared Uhlmann fidelity, and distance is the purified distance. We then separate selection from compensation in a sequence of pre-registered
+experiments on BERT-base, and most of our hypotheses are not supported. (i) Fidelity between attention-pattern density operators, the natural
+redundancy signal for heads, is provably blind to how a head mixes values; on four of five GLUE tasks most head pairs that it
+calls near-identical have dissimilar outputs. Moving the density operator to the head's output gives an identity between the
+Procrustes merge residual of two heads and their purified distance, and from it a coverage bound on the merge error that ranks
+subsets like the true merge error while overestimating it about threefold. The quantum-information view is diagnostic: it does not by
+itself yield a better selector. (ii) At 50\% of heads per layer, once the kept heads are refit by LS,
 four selectors (output coverage, Fisher, magnitude, greedy LS) are statistically indistinguishable, while attention-pattern coverage stays clearly worse; compensation, not selection, carries the recovery. (iii) A global,
 refit-aware allocation over heads and neurons (GRP) lowers the logit KL to the teacher well below official K-prune on
 SST-2 but not on MRPC, so its pre-registered calibration gate fails and no accuracy comparison was run. (iv) K-prune's
@@ -30,7 +35,8 @@ input-side alignment and the drift-corrected refit (d2i-RI) beats both official 
 supported: d2i-RI is statistically indistinguishable from K-prune on QNLI and MNLI-m and ahead by 0.13 points on QQP (not enough to meet the
 pre-registered bar of two of three tasks), and it beats the method of Kwon et al.\ by 2.8--8.1 points on all three. We make no claim of improved accuracy
 over the state of the art. Because d2i-RI keeps K-prune's masks, its pruned shapes, and so its latency, are K-prune's; latency is reported
-descriptively from physically pruned shapes.
+descriptively from physically pruned shapes. Results (iii)--(v) use no quantum quantity. The quantum-information quantities are
+mathematical representations computed classically; no quantum hardware is used and no quantum advantage is claimed.
 \end{abstract}
 
 \section{Introduction}
@@ -40,11 +46,15 @@ weight update instead of fine-tuning~\citep{kwon2022fast,park2024kprune,nova2023
 entangled in this setting: \emph{which} units to remove (selection), and \emph{how} to compensate for the removed units
 (reconstruction). This paper separates them with pre-registered experiments.
 
-Our starting point was a representation of each head by its normalized attention pattern and a fidelity-based coverage
-objective for choosing redundant heads. We show that attention-pattern similarity is a poor redundancy signal: it is
+Our lens is quantum information. Each head is represented by a density operator, the trace-normalized Gram operator of its
+attention pattern or of its output, so that similarity between heads is the squared Uhlmann
+fidelity~\citep{uhlmann1976transition,jozsa1994fidelity} and distance is the purified distance~\citep{tomamichel2010duality}.
+We started from a fidelity-based coverage objective over attention-pattern density operators for choosing redundant heads.
+We show that attention-pattern fidelity is a poor redundancy signal: it is
 blind to how a head mixes values (Proposition~\ref{prop:blind}), and on BERT-base, on four of five GLUE tasks, most
-head pairs that it calls near-identical produce dissimilar outputs (Section~\ref{sec:diag}). Moving the similarity to the head's output operator
-gives a coverage bound on the merge error that ranks subsets well (Theorem~\ref{thm:bound}), yet in a pre-registered
+head pairs that it calls near-identical produce dissimilar outputs (Section~\ref{sec:diag}). Moving the density operator to the head's output
+gives an exact identity between the scaled-orthogonal Procrustes merge residual and the purified distance
+(Proposition~\ref{prop:proc}), and from it a coverage bound on the merge error that ranks subsets well (Theorem~\ref{thm:bound}), yet in a pre-registered
 factorial over five GLUE tasks and five calibration seeds, once the remaining heads are refit by least squares the
 choice among four of the five selectors barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). We then asked whether a global,
 refit-aware allocation over heads and FFN neurons (GRP) lowers the held-out logit KL relative to the two official retraining-free baselines
@@ -53,11 +63,15 @@ advantage over a module-output refit is a drift-corrected least-squares target (
 equalizing compensation the remaining effect of selection is task-dependent. Finally we freeze one strong
 combination (K-prune masks, input-side alignment, drift-corrected refit; d2i-RI) and test it once, on tasks and splits never used in
 development, against both official baselines (Section~\ref{sec:v18}). It reaches the level of the stronger baseline, K-prune, but does not beat it.
-All of this is negative or descriptive evidence, and the paper is framed accordingly.
+All of this is negative or descriptive evidence, and the paper is framed accordingly. The quantum formalism serves as a
+mathematical representation for analysing redundancy: every quantity is computed classically,
+Sections~\ref{sec:v15}--\ref{sec:v18} use no quantum quantity, and we claim no quantum advantage.
 
-\paragraph{Contributions.} (i) A characterization of when attention-pattern similarity fails as a redundancy proxy, with
-a proposition and a measurement on BERT-base. (ii) An output-space coverage bound for merging pruned heads into kept
-heads, with its tightness measured. (iii) A pre-registered selector $\times$ compensation factorial showing that, at
+\paragraph{Contributions.} (i) A quantum-information formulation of attention-head redundancy (density operators, squared
+Uhlmann fidelity, purified distance) and a characterization of when attention-pattern fidelity fails as a redundancy proxy, with
+a proposition and a measurement on BERT-base. (ii) An identity linking the scaled-orthogonal Procrustes merge residual of two
+heads to the purified distance between their output density operators, and the resulting output-space coverage bound for merging
+pruned heads into kept heads, with its tightness measured. (iii) A pre-registered selector $\times$ compensation factorial showing that, at
 moderate sparsity, closed-form compensation explains most of the retraining-free recovery and selectors are
 statistically indistinguishable after it (attention-pattern coverage excepted). (iv) A pre-registered calibration gate for a global refit-aware allocation (GRP) against reproduced official Kwon et
 al.\ and K-prune code, with the task-dependent outcome; (v) a decomposition showing that K-prune's compensation is
@@ -99,6 +113,12 @@ damage left after a channelwise repair as an allocation diagnostic (CNNs). Our s
 with an exact refit.
 \paragraph{One-shot pruning of large models.} SparseGPT, Wanda, LLM-Pruner, SliceGPT and ZipLM prune large decoders with
 little or no retraining~\citep{frantar2023sparsegpt,sun2024wanda,ma2023llmpruner,ashkboos2024slicegpt,kurtic2023ziplm}.
+\paragraph{Quantum-information representations in machine learning.} Fidelity between mixed quantum states was defined
+through Uhlmann's transition probability~\citep{uhlmann1976transition,jozsa1994fidelity}, and the purified distance built on
+it is a metric on states~\citep{tomamichel2010duality}. Quantum-inspired methods have also been applied to model compression:
+CompactifAI decomposes the weight matrices of large language models into tensor networks (matrix product operators) from
+quantum many-body physics, followed by brief retraining~\citep{tomut2025compactifai}. We use the formalism differently, as an
+analysis tool for redundancy between heads rather than as a compression operator, and all computations are classical.
 \paragraph{Positioning.} Removal costs from least-squares downdates and closed-form compensation are each known. Our
 claims are (a) an analysis of which redundancy notion matters, (b) controlled, pre-registered evidence on the relative
 roles of selection and compensation, (c) a negative result for a global refit-aware allocation, together with the identification of K-prune's
@@ -114,9 +134,11 @@ $\widehat W_S=\arg\min_{V}\|Y-Z_SV\|_F^2$ (with a small ridge in practice).
 
 \paragraph{Output fidelity.} For heads $i,j$ define
 $F_{ij}=\big(\|Z_i^\top Z_j\|_*/(\|Z_i\|_F\|Z_j\|_F)\big)^2\in[0,1]$, the squared Uhlmann fidelity between the (normalized, $N\times N$) head Gram operators $Z_iZ_i^\top/\mathrm{tr}(Z_iZ_i^\top)$ and $Z_jZ_j^\top/\mathrm{tr}(Z_jZ_j^\top)$. The attention-pattern alternative represents head $h$ by $\rho_h=A_hA_h^\top/\mathrm{tr}(A_hA_h^\top)$ for
-its attention matrix $A_h$.
+its attention matrix $A_h$. Both are density operators (positive semidefinite, unit trace). $F$ is the squared fidelity
+$F(\rho,\sigma)=\|\sqrt\rho\sqrt\sigma\|_*^2$~\citep{uhlmann1976transition,jozsa1994fidelity}, and for such normalized operators
+$P_{ij}=\sqrt{1-F_{ij}}$ is the purified distance~\citep{tomamichel2010duality}.
 
-\section{Theory}
+\section{Theory: a quantum-information view of head redundancy}
 \begin{proposition}[Attention-pattern fidelity is blind to value mixing]\label{prop:blind}
 If $A_j=A_iQ$ with $QQ^\top=I$ (for example, a permutation of keys), then $\rho_j=\rho_i$, so the attention-pattern
 fidelity of heads $i$ and $j$ is 1, while their outputs $A_iV_i$ and $A_jV_j=A_iQV_j$ differ whenever $V_j\ne V_i$
@@ -136,6 +158,9 @@ For fixed $U$ the optimal $s=\mathrm{tr}(U^\top Z_i^\top Z_j)/\|Z_i\|_F^2$ and t
 $\|Z_j\|_F^2-\mathrm{tr}(U^\top Z_i^\top Z_j)^2/\|Z_i\|_F^2$. Over orthogonal $U$ the trace is maximized by the polar
 factor of $Z_i^\top Z_j$, where it equals $\|Z_i^\top Z_j\|_*$ (von Neumann's trace inequality).
 \end{proof}
+\noindent\emph{Remark.} Since $\sqrt{1-F_{ij}}=P_{ij}$, the residual equals $\|Z_j\|_F\,P_{ij}$: the best scaled rotation of
+head $i$ onto head $j$ misses by the purified distance between their output density operators, times the size of head $j$'s
+output. The coverage bound below is therefore a weighted purified-distance coverage.
 
 \begin{theorem}[Output-space coverage bound]\label{thm:bound}
 Let $S$ be the kept heads and assign each pruned head $j$ to $\pi(j)=\arg\min_{i\in S}\sqrt{1-F_{ji}}$. Merging
@@ -376,6 +401,10 @@ K-prune (= d2i-RI), QNLI / MNLI-m / QQP & 47.7 / 48.3 / 48.4 & 815 / 814 / 820 &
 
 \section{Limitations}
 \begin{itemize}\setlength\itemsep{0pt}
+\item The quantum-information quantities (density operators, fidelity, purified distance) are mathematical representations
+computed classically; no quantum hardware is used and no quantum advantage is claimed. The fidelity analysis explains redundancy
+and bounds the merge error, but it does not by itself yield a selector that beats classical ones after the LS refit
+(Section~\ref{sec:v14}).
 \item One model family (BERT-base) and two development tasks for GRP; no RoBERTa, no decoder, no larger model.
 \item The V15--V17 gate metric is the logit KL on held-out training rows. It is a calibration-side quantity; we
 did not run the accuracy comparison (H11), so no accuracy conclusion about GRP or GRP-R is drawn.
@@ -386,7 +415,7 @@ d2i-RI was developed on the development tasks after V15--V17, and the published 
 \item MRPC has 408 validation examples, so accuracy differences of one to two points are within noise there.
 \item V14 uses a single, uniform sparsity level (6 of 12 heads); its Kaggle run did not record exact package version
 strings. The V17 hypothesis was registered after the V15/V16 development data were seen (Section~\ref{sec:prereg}).
-\item The three proofs have not yet been checked by an independent reader (\texttt{docs/RULE11\_CHECKLIST.md}).
+\item The three proofs and the purified-distance identity have not yet been checked by an independent reader (\texttt{docs/RULE11\_CHECKLIST.md}).
 \end{itemize}
 
 \appendix

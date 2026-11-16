@@ -34,6 +34,7 @@ Environment: `.venv-ci` (Python 3.12, torch 2.6.0, transformers 4.51.3). Analysi
 |---|---|---|
 | Prop 1 (attention fidelity blind to value mixing) | Is `rho_h = A A^T / tr(A A^T)` invariant to `A -> A Q` with `Q Q^T = I`? Is `Q` square orthogonal over the key axis (so `A Q` is a valid, if not row-stochastic, pattern)? The paper says "arbitrary outputs"; check whether `A_j = A_i Q` can be row-stochastic, or restate as a permutation-of-keys case only. | `tests/test_output_coverage.py` (indirect) |
 | Prop 2 (scaled-orthogonal Procrustes residual = `||Z_j|| sqrt(1-F)`) | Trace step: max of `tr(U^T M)` over orthogonal `U` is `||M||_*`; the scale `s` is unconstrained in sign; `F = (||M||_*/(||Z_i|| ||Z_j||))^2`. | `test_scaled_procrustes_residual_identity` |
+| Remark: purified-distance identity (added 2026-11-16, quantum-information reframe) | With the squared-fidelity convention `F = (tr sqrt(sqrt(rho) sigma sqrt(rho)))^2` on trace-normalized operators, is `sqrt(1-F_ij)` exactly the purified distance `P = sqrt(1 - Fbar^2)` of Tomamichel, Colbeck and Renner (IEEE TIT 2010, Definition 4), where `Fbar = norm_1(sqrt(rho) sqrt(sigma))` is the unsquared fidelity? Is `F_ij = (nuclear(Z_i^T Z_j) / (norm(Z_i) norm(Z_j)))^2` the Uhlmann fidelity of `Z_i Z_i^T / tr` and `Z_j Z_j^T / tr` (Uhlmann theorem)? Supervisor to check. | definitional; `src/qfc/fidelity.py` implements the squared convention |
 | Thm 1 (coverage bound) | (a) `Y - Y_merge = sum_{j notin S} (Z_j - Z_pi(j) R_j) W_j`: shapes consistent, Procrustes scale `s` absorbed into `R_j`? (b) `||M W_j||_F <= ||M||_F ||W_j||_2` (true). (c) merged weights are feasible for the LS problem over `Z_S`, so LS error <= merge error. (d) `w_j = ||W_j||_2 ||Z_j||_F`; min over `i` uses `sqrt(1-F_ji)`. | `test_bound_merge_ls_ordering`, `test_bcm_select_objective_and_guarantee`, `test_merge_on_real_bert_layer_matches_gram_prediction` |
 | Remark `B(S) = sum w_j - f(S)` and greedy `(1-1/e)` | `f(S) = sum_j w_j (1 - min_{i in S} sqrt(1-F_ji))` is a weighted facility-location function (monotone submodular, nonneg weights, `f(emptyset)=0` convention); guarantee is on `f` only. | `tests/test_submodularity.py` |
 | GRP removal cost `Delta E_R = tr(V_R^T P_RR^{-1} V_R)` (Sec 4) | Schur-complement block downdate for the ridge refit. | `test_removal_cost_and_downdate_match_brute_force`, `test_block_cost_matches_brute_force_joint_removal` |
@@ -54,7 +55,7 @@ Environment: `.venv-ci` (Python 3.12, torch 2.6.0, transformers 4.51.3). Analysi
 ## D. Sign-off (not filled by the assistant)
 
 - Independent code/number reviewer: ______  date: ______
-- Supervisor proof check (Prop 1, Prop 2, Thm 1): ______  date: ______
+- Supervisor proof check (Prop 1, Prop 2, Thm 1, purified-distance remark): ______  date: ______
 
 ## E. Review round 1 (2026-10-27, read-only subagent; NOT a sign-off)
 

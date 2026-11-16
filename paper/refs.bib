@@ -56,3 +56,35 @@
 @inproceedings{mpg2026, author = {Dewage, Kasun and Pensky, Marianna and Rathnasekara, Heranga K. and De Silva, Suranadi}, title = {Magnitude Profile Pruning: Calibration-Free Structured Attention Head Removal for Transformer Compression}, booktitle = {IEEE International Conference on Machine Learning and Applications (ICMLA)}, year = {2026}, note = {arXiv:2609.26177; accepted, per arXiv comments field}}
 @misc{stat2024, author = {Flynn, Megan and Wang, Alexander and Alvarez, Dean Edward and De Sa, Christopher and Damle, Anil}, title = {{STAT}: Shrinking Transformers After Training}, year = {2024}, note = {arXiv:2406.00061}}
 @misc{snows2024, author = {Lucas, Ryan and Mazumder, Rahul}, title = {Preserving Deep Representations In One-Shot Pruning: A Hessian-Free Second-Order Optimization Framework}, year = {2024}, note = {arXiv:2411.18376; the method is called SNOWS}}
+
+% Added 2026-11-16 (quantum-information reframe). Each entry verified against a primary source the same day:
+% Uhlmann: INSPIRE / J. Operator Theory record (Rep. Math. Phys. 9(2) 273-279); Jozsa: DOI 10.1080/09500349414552171;
+% Tomamichel et al.: arXiv 0907.5238 journal-ref, purified distance = Definition 4, P = sqrt(1 - Fbar^2);
+% CompactifAI: arXiv 2401.14109 abstract page (authors, journal-ref ESANN 2025 pp. 531-537).
+@article{uhlmann1976transition,
+  author = {Uhlmann, Armin},
+  title = {The ``transition probability'' in the state space of a $^*$-algebra},
+  journal = {Reports on Mathematical Physics},
+  volume = {9}, number = {2}, pages = {273--279}, year = {1976}
+}
+@article{jozsa1994fidelity,
+  author = {Jozsa, Richard},
+  title = {Fidelity for mixed quantum states},
+  journal = {Journal of Modern Optics},
+  volume = {41}, number = {12}, pages = {2315--2323}, year = {1994},
+  doi = {10.1080/09500349414552171}
+}
+@article{tomamichel2010duality,
+  author = {Tomamichel, Marco and Colbeck, Roger and Renner, Renato},
+  title = {Duality between smooth min- and max-entropies},
+  journal = {IEEE Transactions on Information Theory},
+  volume = {56}, number = {9}, pages = {4674--4681}, year = {2010},
+  doi = {10.1109/TIT.2010.2054130}
+}
+@inproceedings{tomut2025compactifai,
+  author = {Tomut, Andrei and Jahromi, Saeed S. and Sarkar, Abhijoy and Kurt, Uygar and Singh, Sukhbinder and Ishtiaq, Faysal and Mu{\~n}oz, Cesar and Bajaj, Prabdeep Singh and Elborady, Ali and del Bimbo, Gianni and Alizadeh, Mehrazin and Montero, David and Martin-Ramiro, Pablo and Ibrahim, Muhammad and Alaoui, Oussama Tahiri and Malcolm, John and Mugel, Samuel and Orus, Roman},
+  title = {{CompactifAI}: Extreme Compression of Large Language Models using Quantum-Inspired Tensor Networks},
+  booktitle = {Proceedings of the 33rd European Symposium on Artificial Neural Networks, Computational Intelligence and Machine Learning (ESANN)},
+  pages = {531--537}, year = {2025},
+  note = {arXiv:2401.14109}
+}

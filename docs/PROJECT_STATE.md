@@ -1056,3 +1056,19 @@ Honest reading (bounded by the do-not-claim list): d2i-RI is at **accuracy parit
 ### H18b GPU latency OBTAINED (2026-11-16, attempt 3; descriptive, rule 8)
 Attempts 1-2 failed (transformers 5.x, no `prune_heads`; engineering failures, no result). Attempt 3 (kernel version 4; notebook clones branch `research/beat-explore` head `3fff257`, pip-installs transformers==4.51.3 and ASSERTS the version before any model call): env `2.11.0+cu130 4.51.3 Tesla T4`, FP16, seq 128, 100 runs after 20 warm-up, 31 shapes (unpruned + Kwon/K-prune x 3 tasks x 5 seeds, c=0.5). Output `results/h18b_latency/raw_gpu_attempt3/` (`latency_gpu.json`, `env.txt`, `commit.txt`, `log.txt`; the downloaded repo clone was deleted). Unpruned 8.96 ms (b1) / 45.7 ms (b32), 85.05M encoder params. Batch 1: pruned shapes 9.2-9.8 ms (NO speed-up). Batch 32 medians over seeds: Kwon 35.3/35.9/37.3 ms, K-prune 37.9/37.4/38.7 ms (QNLI/MNLI-m/QQP), i.e. 1.2-1.3x faster than unpruned; Kwon shapes are 4-7% faster than K-prune's on GPU, slower on CPU. d2i-RI shapes = K-prune's. Reported descriptively in the paper (tab:latgpu); no speed claim for d2i-RI. Torch is 2.11, not the 2.6.0 pin (latency only, no accuracy depends on it).
 Positioning fix applied in `paper/main.tex`: G-Pruner (CoNLL 2024) named K-prune as a baseline and claims lower degradation in an overlapping FLOPs range; reported in its own units as a published, un-reproduced, non-commensurable claim; the "no verified method beats K-prune" sentence is deleted. Task 4's earlier "none verified" line above is superseded.
+
+### Owner decision: quantum-information reframe of the paper (2026-11-16)
+The supervisor asked that the project carry quantum content. Of three options (A: reframe around the quantum-information analysis
+already in the paper; B: quantum-inspired tensor-network compression, new experiment; C: QUBO/QAOA head selection, thesis only)
+the owner chose **A**. Framing only: no new experiment, no new number, no method change. `paper/main.tex`: title now
+"When Does Head Selection Matter? A Quantum-Information View of Attention-Head Redundancy in Retraining-Free Transformer Pruning";
+abstract, introduction and contributions lead with heads as density operators, squared Uhlmann fidelity and the purified distance;
+a Remark after Proposition 2 names `sqrt(1-F_ij)` as the purified distance (definitional; convention checked against
+`docs/theory.md` "Fidelity convention" and Tomamichel et al. 2010, Definition 4); a related-work paragraph on quantum-information
+representations in ML; and two honesty statements (abstract and Limitations): all quantities computed classically, no quantum
+hardware, no quantum advantage, and the fidelity analysis is diagnostic and does not by itself yield a better selector; V15-V18 use
+no quantum quantity. Four references added to `paper/refs.bib`, each verified against a primary source on 2026-11-16 (Uhlmann 1976,
+Jozsa 1994, Tomamichel-Colbeck-Renner 2010, CompactifAI / ESANN 2025). Checks: no numeric token added outside citation keys,
+all cite keys resolve, braces and environments balance, no undefined refs. The purified-distance remark was added to the
+Rule 11 proof list for the supervisor. Option B (tensor networks) remains available if the supervisor wants quantum-inspired
+compression that does work in the pipeline; it would need its own pre-registration (rule 7).
