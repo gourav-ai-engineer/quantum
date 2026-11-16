@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/v19-stsb",
+ "title": "v19 stsb",
+ "code_file": "v19_stsb.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}

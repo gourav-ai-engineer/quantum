@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/v19-squad",
+ "title": "v19 squad",
+ "code_file": "v19_squad.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}
