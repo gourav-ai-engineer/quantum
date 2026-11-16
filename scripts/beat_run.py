@@ -19,7 +19,7 @@ import torch
 from datasets import load_dataset
 
 from qfc.align import sequential_refit_io
-from qfc.grp import AVG_SEQ_LEN, grp_prune, permute_classifier, prune_model, sequential_refit, teacher_stats
+from qfc.grp import AVG_SEQ_LEN, ffn_width, grp_prune, permute_classifier, prune_model, sequential_refit, teacher_stats
 from step22_grp import SPECS, kl_and_agreement, load_model, logits_of, make_batches
 
 
@@ -33,7 +33,7 @@ def kprune_masks(npz, task, seed, c):
 def mac_ratio(heads, neurons, cfg, n_seq):
     from qfc.grp import model_mac
     hs = cfg.hidden_size // cfg.num_attention_heads
-    full = model_mac([cfg.num_attention_heads] * cfg.num_hidden_layers, [cfg.intermediate_size] * cfg.num_hidden_layers,
+    full = model_mac([cfg.num_attention_heads] * cfg.num_hidden_layers, [ffn_width(cfg)] * cfg.num_hidden_layers,
                      n_seq, cfg.hidden_size, hs)
     return model_mac([len(heads[l]) for l in heads], [len(neurons[l]) for l in neurons], n_seq, cfg.hidden_size, hs) / full
 

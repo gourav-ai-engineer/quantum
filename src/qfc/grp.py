@@ -33,18 +33,77 @@ def model_mac(heads_per_layer, neurons_per_layer, seq_len: float, hidden_size: i
                for h, n in zip(heads_per_layer, neurons_per_layer))
 
 
-# ---- model plumbing (HF BERT, eager attention) -----------------------------------------------------------------
+# ---- model plumbing (HF BERT and DistilBERT, eager attention) --------------------------------------------------
+# V19 adapter: the method only ever touches (a) the layer list, (b) the attention output / FFN output linear layers,
+# (c) q/k/v and FFN-up linear layers, (d) the residual input of each Add & LayerNorm and (e) the layer call signature.
+# BERT: encoder.layer, attention.self.{query,key,value}, attention.output.dense, intermediate.dense, output.dense.
+# DistilBERT: transformer.layer, attention.{q_lin,k_lin,v_lin,out_lin}, ffn.{lin1,lin2}. BERT branches are unchanged.
+def is_distil(model) -> bool:
+    return model.base_model_prefix == "distilbert"
+
+
+def base_of(model):
+    return getattr(model, model.base_model_prefix)
+
+
 def _layers(model):
-    return getattr(model, model.base_model_prefix).encoder.layer
+    b = base_of(model)
+    return b.transformer.layer if is_distil(model) else b.encoder.layer
+
+
+def qkv_of(layer, distil: bool) -> dict:
+    a = layer.attention
+    if distil:
+        return {"query": a.q_lin, "key": a.k_lin, "value": a.v_lin}
+    return {"query": a.self.query, "key": a.self.key, "value": a.self.value}
+
+
+def ffn_in_of(layer, distil: bool) -> nn.Linear:
+    return layer.ffn.lin1 if distil else layer.intermediate.dense
+
+
+def ffn_out_of(layer, distil: bool) -> nn.Linear:
+    return layer.ffn.lin2 if distil else layer.output.dense
+
+
+def att_out_of(layer, distil: bool) -> nn.Linear:
+    return layer.attention.out_lin if distil else layer.attention.output.dense
+
+
+def ffn_width(cfg) -> int:
+    """FFN hidden width (BERT intermediate_size, DistilBERT hidden_dim)."""
+    return cfg.hidden_dim if hasattr(cfg, "hidden_dim") else cfg.intermediate_size
+
+
+def embed(model, batch):
+    """Embedding output (BERT uses token types, DistilBERT has none)."""
+    b = base_of(model)
+    if is_distil(model):
+        return b.embeddings(batch["input_ids"])
+    return b.embeddings(input_ids=batch["input_ids"], token_type_ids=batch.get("token_type_ids"))
+
+
+def layer_mask(model, attention_mask):
+    """What a transformer layer takes as its mask: BERT extended additive mask, DistilBERT the raw (bs, seq) mask."""
+    return attention_mask if is_distil(model) else model.get_extended_attention_mask(attention_mask,
+                                                                                    attention_mask.shape)
+
+
+def layer_forward(model, layer, h, mask):
+    """One transformer layer, returning the new hidden states."""
+    if is_distil(model):
+        return layer(h, attn_mask=mask)[0]
+    return layer(h, attention_mask=mask)[0]
 
 
 def _dense(model, l: int, kind: str) -> nn.Linear:
     layer = _layers(model)[l]
-    return layer.attention.output.dense if kind == "att" else layer.output.dense
+    d = is_distil(model)
+    return att_out_of(layer, d) if kind == "att" else ffn_out_of(layer, d)
 
 
 def _sub(model, l: int, kind: str) -> nn.Module:
-    """The Add & LayerNorm sublayer (BertSelfOutput / BertOutput): forward(hidden_states, input_tensor)."""
+    """BERT: the Add & LayerNorm sublayer (BertSelfOutput / BertOutput): forward(hidden_states, input_tensor)."""
     layer = _layers(model)[l]
     return layer.attention.output if kind == "att" else layer.output
 
@@ -56,7 +115,16 @@ def _hooks(model, specs):
     store, handles = {}, []
     for l, kind, where, key in specs:
         dense = _dense(model, l, kind)
-        if where == "res":
+        if where == "res" and is_distil(model):
+            # residual input of the attention Add&LN = block input x; of the FFN Add&LN = sa_layer_norm output
+            layer = _layers(model)[l]
+            if kind == "att":
+                handles.append(layer.register_forward_pre_hook(
+                    lambda m, a, kw, key=key: store.__setitem__(key, a[0] if a else kw["x"]), with_kwargs=True))
+            else:
+                handles.append(layer.sa_layer_norm.register_forward_hook(
+                    lambda m, a, o, key=key: store.__setitem__(key, o)))
+        elif where == "res":
             handles.append(_sub(model, l, kind).register_forward_pre_hook(
                 lambda m, a, kw, key=key: store.__setitem__(key, a[1] if len(a) > 1 else kw["input_tensor"]),
                 with_kwargs=True))
@@ -310,15 +378,36 @@ def permute_classifier(model, order) -> None:
     clf.bias.copy_(clf.bias[idx].clone())
 
 
+class _NoHeadAttention(nn.Module):
+    """DistilBERT attention with every head removed: the output is the out_lin bias (as in HF BERT with 0 heads)."""
+
+    def __init__(self, out_lin: nn.Linear):
+        super().__init__()
+        self.out_lin = out_lin
+
+    def forward(self, query, key, value, mask=None, head_mask=None, output_attentions=False):
+        out = self.out_lin(query.new_zeros(query.shape[0], query.shape[1], 0))
+        return (out, None) if output_attentions else (out,)
+
+
 # ---- physical pruning and joint sequential refit ---------------------------------------------------------------
 def prune_model(model, heads_kept: dict, neurons_kept: dict):
     """Physically remove heads (HF prune_heads) and FFN neurons (slice intermediate/output dense). In place."""
     H = model.config.num_attention_heads
     to_prune = {l: [h for h in range(H) if h not in set(k)] for l, k in heads_kept.items()}
+    d = is_distil(model)
+    if d:  # HF DistilBERT divides by n_heads, so a layer left with no head is replaced (BERT handles it natively)
+        for l in [l for l, hs in to_prune.items() if len(hs) == H]:
+            att = _layers(model)[l].attention
+            out = nn.Linear(0, att.out_lin.out_features).to(att.out_lin.weight.device, att.out_lin.weight.dtype)
+            with torch.no_grad():
+                out.bias.copy_(att.out_lin.bias)
+            _layers(model)[l].attention = _NoHeadAttention(out)
+            del to_prune[l]
     model.prune_heads({l: hs for l, hs in to_prune.items() if hs})
     for l, keep in neurons_kept.items():
         layer = _layers(model)[l]
-        old_in, old_out = layer.intermediate.dense, layer.output.dense
+        old_in, old_out = ffn_in_of(layer, d), ffn_out_of(layer, d)
         idx = torch.tensor(sorted(keep), dtype=torch.long, device=old_in.weight.device)
         new_in = nn.Linear(old_in.in_features, len(idx)).to(old_in.weight.device, old_in.weight.dtype)
         new_out = nn.Linear(len(idx), old_out.out_features).to(old_out.weight.device, old_out.weight.dtype)
@@ -327,7 +416,10 @@ def prune_model(model, heads_kept: dict, neurons_kept: dict):
             new_in.bias.copy_(old_in.bias[idx])
             new_out.weight.copy_(old_out.weight[:, idx])
             new_out.bias.copy_(old_out.bias)
-        layer.intermediate.dense, layer.output.dense = new_in, new_out
+        if d:
+            layer.ffn.lin1, layer.ffn.lin2 = new_in, new_out
+        else:
+            layer.intermediate.dense, layer.output.dense = new_in, new_out
     return model
 
 
@@ -353,12 +445,11 @@ def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 
     the refit matches the teacher's pre-LayerNorm sum and also cancels residual drift from earlier sublayers."""
     student.eval()
     teacher.eval()
-    base_s, base_t = getattr(student, student.base_model_prefix), getattr(teacher, teacher.base_model_prefix)
     bs = [_batch_inputs(b, device) for b in batches]
     masks = [b["attention_mask"].bool() for b in bs]
-    ext = [teacher.get_extended_attention_mask(b["attention_mask"], b["attention_mask"].shape) for b in bs]
-    hs = [base_s.embeddings(input_ids=b["input_ids"], token_type_ids=b.get("token_type_ids")) for b in bs]
-    ht = [base_t.embeddings(input_ids=b["input_ids"], token_type_ids=b.get("token_type_ids")) for b in bs]
+    ext = [layer_mask(teacher, b["attention_mask"]) for b in bs]
+    hs = [embed(student, b) for b in bs]
+    ht = [embed(teacher, b) for b in bs]
     for l in range(len(_layers(student))):
         ls, lt = _layers(student)[l], _layers(teacher)[l]
         for kind in ("att", "ffn"):
@@ -369,8 +460,8 @@ def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 
                 t_spec.append((l, kind, "res", "h"))
             with _hooks(student, s_spec) as s_st, _hooks(teacher, t_spec) as t_st:
                 for i in range(len(bs)):
-                    ls(hs[i], attention_mask=ext[i])
-                    lt(ht[i], attention_mask=ext[i])
+                    layer_forward(student, ls, hs[i], ext[i])
+                    layer_forward(teacher, lt, ht[i], ext[i])
                     x = _aug(s_st["x"][masks[i]].double())
                     y = t_st["y"][masks[i]].double()
                     if drift_correct:
@@ -379,8 +470,8 @@ def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 
                     G, C = (g, c) if G is None else (G + g, C + c)
             _solve_set(_dense(student, l, kind), G, C, ridge_rel)
         for i in range(len(bs)):
-            hs[i] = ls(hs[i], attention_mask=ext[i])[0]
-            ht[i] = lt(ht[i], attention_mask=ext[i])[0]
+            hs[i] = layer_forward(student, ls, hs[i], ext[i])
+            ht[i] = layer_forward(teacher, lt, ht[i], ext[i])
 
 
 def teacher_stats(teacher, batches, device: str, seed: int = 0) -> dict:

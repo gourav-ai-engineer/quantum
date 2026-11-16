@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/v19-ckpt-check",
+ "title": "v19 ckpt check",
+ "code_file": "v19_ckpt_check.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": false,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}

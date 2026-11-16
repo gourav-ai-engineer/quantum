@@ -13,7 +13,8 @@ from __future__ import annotations
 
 import torch
 
-from .grp import _aug, _batch_inputs, _dense, _hooks, _layers, _solve_set
+from .grp import (_aug, _batch_inputs, _dense, _hooks, _layers, _solve_set, embed, ffn_in_of, is_distil,
+                  layer_forward, layer_mask, qkv_of)
 
 
 class _Cap:
@@ -37,12 +38,12 @@ def sequential_refit_io(student, teacher, batches, device: str, heads_kept: dict
                         ridge_rel: float = 1e-4, qkv: bool = True, ffn_in: bool = True) -> None:
     student.eval()
     teacher.eval()
-    base_s, base_t = getattr(student, student.base_model_prefix), getattr(teacher, teacher.base_model_prefix)
+    d = is_distil(teacher)
     bs = [_batch_inputs(b, device) for b in batches]
     masks = [b["attention_mask"].bool() for b in bs]
-    ext = [teacher.get_extended_attention_mask(b["attention_mask"], b["attention_mask"].shape) for b in bs]
-    hs = [base_s.embeddings(input_ids=b["input_ids"], token_type_ids=b.get("token_type_ids")) for b in bs]
-    ht = [base_t.embeddings(input_ids=b["input_ids"], token_type_ids=b.get("token_type_ids")) for b in bs]
+    ext = [layer_mask(teacher, b["attention_mask"]) for b in bs]
+    hs = [embed(student, b) for b in bs]
+    ht = [embed(teacher, b) for b in bs]
     head_size = teacher.config.hidden_size // teacher.config.num_attention_heads
     for l in range(len(_layers(student))):
         ls, lt = _layers(student)[l], _layers(teacher)[l]
@@ -55,20 +56,20 @@ def sequential_refit_io(student, teacher, batches, device: str, heads_kept: dict
                 g = (x.T @ x).cpu()
                 G = g if G is None else G + g
                 for name in C:
-                    y = getattr(lt.attention.self, name)(ht[i])[masks[i]].double()[:, cols]
+                    y = qkv_of(lt, d)[name](ht[i])[masks[i]].double()[:, cols]
                     c = (x.T @ y).cpu()
                     C[name] = c if C[name] is None else C[name] + c
             for name in C:
-                _solve_set(getattr(ls.attention.self, name), G, C[name], ridge_rel)
+                _solve_set(qkv_of(ls, d)[name], G, C[name], ridge_rel)
         _refit_out(student, teacher, ls, lt, l, "att", bs, hs, ht, ext, masks, ridge_rel)
         if ffn_in:
             kn = torch.tensor(sorted(neurons_kept[l]), dtype=torch.long, device=device)
             G = C = None
-            cs, ct = _Cap(ls.intermediate.dense, "in"), _Cap(lt.intermediate.dense, "out")
+            cs, ct = _Cap(ffn_in_of(ls, d), "in"), _Cap(ffn_in_of(lt, d), "out")
             try:
                 for i in range(len(bs)):
-                    ls(hs[i], attention_mask=ext[i])
-                    lt(ht[i], attention_mask=ext[i])
+                    layer_forward(student, ls, hs[i], ext[i])
+                    layer_forward(teacher, lt, ht[i], ext[i])
                     x = _aug(cs.v[masks[i]].double())
                     y = ct.v[masks[i]].double()[:, kn]
                     g, c = (x.T @ x).cpu(), (x.T @ y).cpu()
@@ -76,11 +77,11 @@ def sequential_refit_io(student, teacher, batches, device: str, heads_kept: dict
             finally:
                 cs.close()
                 ct.close()
-            _solve_set(ls.intermediate.dense, G, C, ridge_rel)
+            _solve_set(ffn_in_of(ls, d), G, C, ridge_rel)
         _refit_out(student, teacher, ls, lt, l, "ffn", bs, hs, ht, ext, masks, ridge_rel)
         for i in range(len(bs)):
-            hs[i] = ls(hs[i], attention_mask=ext[i])[0]
-            ht[i] = lt(ht[i], attention_mask=ext[i])[0]
+            hs[i] = layer_forward(student, ls, hs[i], ext[i])
+            ht[i] = layer_forward(teacher, lt, ht[i], ext[i])
 
 
 def _refit_out(student, teacher, ls, lt, l, kind, bs, hs, ht, ext, masks, ridge_rel):
@@ -89,8 +90,8 @@ def _refit_out(student, teacher, ls, lt, l, kind, bs, hs, ht, ext, masks, ridge_
     t_spec = [(l, kind, "out", "y"), (l, kind, "res", "h")]
     with _hooks(student, s_spec) as s_st, _hooks(teacher, t_spec) as t_st:
         for i in range(len(bs)):
-            ls(hs[i], attention_mask=ext[i])
-            lt(ht[i], attention_mask=ext[i])
+            layer_forward(student, ls, hs[i], ext[i])
+            layer_forward(teacher, lt, ht[i], ext[i])
             x = _aug(s_st["x"][masks[i]].double())
             y = t_st["y"][masks[i]].double() + (t_st["h"][masks[i]] - s_st["h"][masks[i]]).double()
             g, c = (x.T @ x).cpu(), (x.T @ y).cpu()
