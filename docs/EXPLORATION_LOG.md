@@ -98,3 +98,15 @@ GRP-R .8773/.8748 and GRP-RI .8782/.8763 lose (MSE ratio 1.15/1.17 and 1.02/1.05
 on all three tasks.** Caveats carried into the pre-registration: the MRPC margin (+.0029/+.0010 acc) and the Pearson
 margins (+.0005/+.0006) are tiny; the clear effect is the held-out distance (KL/MSE -5..-13% vs K-prune). d2i-RI uses
 K-prune's masks, so its pruned shapes and latency equal K-prune's.
+
+**E3 | 2026-11-16 | portfolio pre-check on EXISTING dev JSONs (no new runs; `scripts/beat_portfolio_check.py`).** Idea: per
+(task, seed, c) pick d2i-RI or GRP-RI by lower held-out-TRAIN distance (KL; MSE for STS-B), the only candidate with a
+built-in "never worse than K-prune+repair on the calibration objective" property. Validation metric, mean of 5 seeds,
+delta vs official K-prune: MRPC c0.5 -0.0010 (seed W/L 2/3), c0.4 -0.0010 (3/2); SST-2 +0.0057 (4/1), +0.0126 (5/0);
+STS-B +0.0005 (5/0), +0.0006 (4/1). On MRPC the held-out-KL pick was the accuracy-worse mask in 2/5 seeds at both budgets
+(512 held-out rows do not rank these masks reliably). **Verdict: fails** — one real win (SST-2, where GRP selection already
+wins) plus a loss and a noise tie; same shape as V18 H18a. Not pursued; no pre-registration written.
+Headroom context (teacher minus K-prune accuracy at 0.5 MACs, mean of 5 seeds): MRPC 1.52, SST-2 0.94, STS-B 0.01 pp
+(dev, from baselines_v15.json); QNLI 1.27, MNLI-m 2.43, QQP 1.56 pp (from the V18 dumps, descriptive, after the verdict).
+At 0.5 MACs any retraining-free method can gain at most ~0-2.4 pp over K-prune, so "beats K-prune everywhere" at this
+budget is bounded by headroom, not by method quality.
