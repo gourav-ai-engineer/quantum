@@ -1030,3 +1030,25 @@ Honest reading (bounded by the do-not-claim list): d2i-RI is at **accuracy parit
 - Task 6: CORP title verified (arXiv 2602.05243v3: "CORP: Closed-Form One-shot Representation-Preserving Structured Pruning", NeurIPS 2026 accepted per arXiv comments). Six new refs added (metadata from arXiv abstract pages).
 - Task 7: Neurocomputing SJR quartile NOT verified (third-party aggregators say Q1, SJR ~1.465 for 2025; one reports JCR 2023 AI category as Q2). OWNER: check scimagojr.com directly.
 - Rule 11 / `make_ledger_row.py`: no `beat_confirm` handler; the verdict JSON + `v18_heldout_posthoc.py` output are the machine-generated records; a typed ledger row would be a stated deviation. Rule 11 NOT signed; Dr. Dutta proof check pending.
+
+### Verification update (2026-11-16, this session)
+- **G-Pruner (CoNLL 2024) result tables READ — resolves the "OWNER ACTION / UNVERIFIED" item above.** Full PDF
+  retrieved and read directly. **K-prune IS a named baseline.** Figure 2 compares G-Pruner against SLIP, EBERT,
+  Sajjad et al., KCM, FLOP, Fast, **K-prune** and DynaBERT on BERT_BASE for QQP / MNLI / SST-2 / QNLI, plotting
+  accuracy *degradation* against relative FLOPs over roughly 0.50-0.75; Sec. 5.2 claims G-Pruner "exhibits the least
+  accuracy degradation in most cases". Table 1 reports 60/65/70% FLOPs for BERT_BASE and DistilBERT; the headline is
+  +6.02% F1 on SQuAD2.0 at a 60% FLOPs constraint. Their setup: 2,000 calibration samples, 10 random seeds,
+  transformers 4.12.0, PyTorch 1.9.1, RTX 3090.
+  **CORRECTION to Task 4:** the paper must NOT state "no verified 2025-26 retraining-free BERT-base method beats
+  K-prune". G-Pruner publishes a claim of lower accuracy degradation than K-prune on BERT-base GLUE in a FLOPs range
+  that overlaps ours. We have not reproduced it, and it is not directly commensurable: relative FLOPs vs our MACs,
+  2,000 vs 2,048 calibration rows, 10 vs 5 seeds, accuracy-drop vs absolute accuracy, and CoNLL 2024 rather than
+  2025-26. Report it as a published, un-reproduced claim in its own units; do not merge it into our table.
+- **H18b GPU latency STILL NOT OBTAINED (engineering failure 2).** Kernel `gouravcseai/h18b-latency` reports
+  status COMPLETE, but the output now on Kaggle is from commit `751bfc8` with **transformers 5.20.2** (`env.txt`:
+  `2.11.0+cu130 5.20.2 Tesla T4`) and crashes identically:
+  `AttributeError: 'BertForSequenceClassification' object has no attribute 'prune_heads'` at `src/qfc/grp.py:318`.
+  The `transformers==4.51.3` pin did not take effect in the run that produced this output. Downloaded to
+  `results/h18b_latency/raw_gpu/`. Next: ensure the notebook's pin actually applies AND that the checked-out repo
+  commit is the pinned one, then rerun. The paper's `GPU_LATENCY_PENDING` marker stays until a valid run exists.
+  CPU latency (`latency_cpu.json`) is unaffected and remains the only measured latency evidence.
