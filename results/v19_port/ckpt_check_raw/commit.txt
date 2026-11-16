@@ -1,0 +1,1 @@
+ec341b4 V19 step 1: DistilBERT adapter for frozen d2i-RI (plumbing only, BERT path unchanged), zero-head layer fix, tests, port check, checkpoint check

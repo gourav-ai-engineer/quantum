@@ -1,0 +1,251 @@
+{
+ "transformers": "4.51.3",
+ "torch": "2.11.0+cpu",
+ "tasks": {
+  "mnli": {
+   "files": {
+    "config.json": {
+     "bytes": 865,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForSequenceClassification\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"finetuning_task\": \"mnli\",\n  \"hidden_dim\": 3072,\n  \"id2label\": {\n    \"0\": \"entailment\",\n    \"1\": \"neutral\",\n    \"2\": \"contradiction\"\n  },\n  \"initializer_range\": 0.02,\n  \"intermediate_size\": 3072,\n  \"label2id\": {\n    \"contradiction\": 2,\n    \"entailment\": 0,\n    \"neutral\": 1\n  },\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"problem_type\": \"single_label_classification\",\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 267870880,
+     "sha256": "06713c19127c1a22f6e78785304254900118c8ec2d1e2ac01405d3a70e8648e8"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "num_labels": 3,
+    "id2label": {
+     "0": "entailment",
+     "1": "neutral",
+     "2": "contradiction"
+    },
+    "accuracy_by_permutation": {
+     "(0, 1, 2)": 0.921999990940094,
+     "(0, 2, 1)": 0.35199999809265137,
+     "(1, 0, 2)": 0.3440000116825104,
+     "(1, 2, 0)": 0.03700000047683716,
+     "(2, 0, 1)": 0.04100000113248825,
+     "(2, 1, 0)": 0.30399999022483826
+    }
+   },
+   "loads": true
+  },
+  "mrpc": {
+   "files": {
+    "config.json": {
+     "bytes": 829,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForSequenceClassification\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"finetuning_task\": \"mrpc\",\n  \"hidden_dim\": 3072,\n  \"id2label\": {\n    \"0\": \"not_equivalent\",\n    \"1\": \"equivalent\"\n  },\n  \"initializer_range\": 0.02,\n  \"intermediate_size\": 3072,\n  \"label2id\": {\n    \"equivalent\": 1,\n    \"not_equivalent\": 0\n  },\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"problem_type\": \"single_label_classification\",\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 267867808,
+     "sha256": "a5522814e6ea093ef5103b9ea41ad32abebf02127de73baa5d22c27cc1a446a2"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "num_labels": 2,
+    "id2label": {
+     "0": "not_equivalent",
+     "1": "equivalent"
+    },
+    "accuracy_by_permutation": {
+     "(0, 1)": 0.9459999799728394,
+     "(1, 0)": 0.05400000140070915
+    }
+   },
+   "loads": true
+  },
+  "qnli": {
+   "files": {
+    "config.json": {
+     "bytes": 829,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForSequenceClassification\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"finetuning_task\": \"qnli\",\n  \"hidden_dim\": 3072,\n  \"id2label\": {\n    \"0\": \"entailment\",\n    \"1\": \"not_entailment\"\n  },\n  \"initializer_range\": 0.02,\n  \"intermediate_size\": 3072,\n  \"label2id\": {\n    \"entailment\": 0,\n    \"not_entailment\": 1\n  },\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"problem_type\": \"single_label_classification\",\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 267867808,
+     "sha256": "c831fca11a4d70034b3a5713dd44cbfdc58f097b0afd2502fc3ceb6c44eb9eba"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "num_labels": 2,
+    "id2label": {
+     "0": "entailment",
+     "1": "not_entailment"
+    },
+    "accuracy_by_permutation": {
+     "(0, 1)": 0.9449999928474426,
+     "(1, 0)": 0.054999999701976776
+    }
+   },
+   "loads": true
+  },
+  "qqp": {
+   "files": {
+    "config.json": {
+     "bytes": 824,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForSequenceClassification\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"finetuning_task\": \"qqp\",\n  \"hidden_dim\": 3072,\n  \"id2label\": {\n    \"0\": \"not_duplicate\",\n    \"1\": \"duplicate\"\n  },\n  \"initializer_range\": 0.02,\n  \"intermediate_size\": 3072,\n  \"label2id\": {\n    \"duplicate\": 1,\n    \"not_duplicate\": 0\n  },\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"problem_type\": \"single_label_classification\",\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 267867808,
+     "sha256": "0028f5ec6ee654b03cdc32bbbfd9a17dca96c1341e7ccb2be0f4046f1e053316"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "num_labels": 2,
+    "id2label": {
+     "0": "not_duplicate",
+     "1": "duplicate"
+    },
+    "accuracy_by_permutation": {
+     "(0, 1)": 0.9589999914169312,
+     "(1, 0)": 0.04100000113248825
+    }
+   },
+   "loads": true
+  },
+  "squad": {
+   "files": {
+    "config.json": {
+     "bytes": 610,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForQuestionAnswering\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"hidden_dim\": 3072,\n  \"initializer_range\": 0.02,\n  \"intermediate_size\": 3072,\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 265504718,
+     "sha256": "64fead73127d99233f7e2fda489bab3f5c564278474d9ec613c68f9c2a81aca5"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "rows": 300,
+    "no_answer_rate": 0.0,
+    "token_f1_train": 0.8676996391566159
+   },
+   "loads": true
+  },
+  "squad_v2": {
+   "files": {
+    "config.json": {
+     "bytes": 581,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForQuestionAnswering\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"hidden_dim\": 3072,\n  \"initializer_range\": 0.02,\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 265504718,
+     "sha256": "0a7b15e46906eda581c451f2d3a55363af9bb3eca3da27d8c543373236e17a70"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "rows": 300,
+    "no_answer_rate": 0.10666666666666667,
+    "token_f1_train": 0.7731987548762059
+   },
+   "loads": true
+  },
+  "sst2": {
+   "files": {
+    "config.json": {
+     "bytes": 813,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForSequenceClassification\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"finetuning_task\": \"sst2\",\n  \"hidden_dim\": 3072,\n  \"intermediate_size\": 3072,\n  \"id2label\": {\n    \"0\": \"negative\",\n    \"1\": \"positive\"\n  },\n  \"initializer_range\": 0.02,\n  \"label2id\": {\n    \"negative\": 0,\n    \"positive\": 1\n  },\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"problem_type\": \"single_label_classification\",\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 267867808,
+     "sha256": "8c6adad7b515cf0e3ce700a5a7d34b72e8af7af5216303494706841f42b3b3e9"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "num_labels": 2,
+    "id2label": {
+     "0": "negative",
+     "1": "positive"
+    },
+    "accuracy_by_permutation": {
+     "(0, 1)": 0.9929999709129333,
+     "(1, 0)": 0.007000000216066837
+    }
+   },
+   "loads": true
+  },
+  "stsb": {
+   "files": {
+    "config.json": {
+     "bytes": 754,
+     "text": "{\n  \"_name_or_path\": \"distilbert-base-uncased\",\n  \"activation\": \"gelu\",\n  \"architectures\": [\n    \"DistilBertForSequenceClassification\"\n  ],\n  \"attention_dropout\": 0.1,\n  \"dim\": 768,\n  \"dropout\": 0.1,\n  \"finetuning_task\": \"stsb\",\n  \"hidden_dim\": 3072,\n  \"id2label\": {\n    \"0\": \"LABEL_0\"\n  },\n  \"initializer_range\": 0.02,\n  \"intermediate_size\": 3072,\n  \"label2id\": {\n    \"LABEL_0\": 0\n  },\n  \"max_position_embeddings\": 512,\n  \"model_type\": \"bert\",\n  \"n_heads\": 12,\n  \"n_layers\": 6,\n  \"num_hidden_layers\": 6,\n  \"pad_token_id\": 0,\n  \"problem_type\": \"regression\",\n  \"qa_dropout\": 0.1,\n  \"seq_classif_dropout\": 0.2,\n  \"sinusoidal_pos_embds\": false,\n  \"tie_weights_\": true,\n  \"torch_dtype\": \"float32\",\n  \"transformers_version\": \"4.12.3\",\n  \"vocab_size\": 30522\n}\n"
+    },
+    "pytorch_model.bin": {
+     "bytes": 267864736,
+     "sha256": "8070ccfad67783851b0af7c25cb27cbcd53a90f58d770b66569df3d67bc650fb"
+    }
+   },
+   "config": {
+    "model_type": "bert",
+    "n_layers": 6,
+    "n_heads": 12,
+    "dim": 768,
+    "hidden_dim": 3072
+   },
+   "check": {
+    "tokenizer": "hub distilbert-base-uncased",
+    "num_labels": 1,
+    "id2label": {
+     "0": "LABEL_0"
+    },
+    "pearson_train_1000": 0.8929055913778505
+   },
+   "loads": true
+  }
+ }
+}

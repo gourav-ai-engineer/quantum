@@ -1,0 +1,24 @@
+{
+ "task": "mrpc",
+ "seed": 7,
+ "constraint": 0.5,
+ "device": "cpu",
+ "torch": "2.6.0+cpu",
+ "reference": "C:/Users/CS 08/quantum/results/beat_explore/E1_align/e0063df/d2i_ri_mrpc_seed7_c0.5.json",
+ "reference_valid": {
+  "accuracy": 0.8676470518112183
+ },
+ "ours_valid": {
+  "accuracy": 0.8676470518112183
+ },
+ "max_abs_logit_diff": 1.9669532775878906e-05,
+ "mean_abs_logit_diff": 1.0908295280387392e-06,
+ "argmax_agreement": 1.0,
+ "heldout_dist_ours": 0.04270687699317932,
+ "heldout_dist_reference": 0.042706891894340515,
+ "mac_ratio_ours": 0.4999964840066402,
+ "mac_ratio_reference": 0.4999964840066402,
+ "heads_kept_equal": true,
+ "neurons_kept_equal": true,
+ "seconds": 875.1069071292877
+}

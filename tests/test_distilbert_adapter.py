@@ -162,3 +162,31 @@ def test_question_answering_model_sensitivity():
     torch.manual_seed(0)
     s = module_sensitivity(DistilBertForQuestionAnswering(cfg).eval(), _dbatches(), "cpu", seed=0)
     assert len(s) == 4 and all(v > 0 and v == v for v in s.values())
+
+
+def test_build_d2i_ri_keeps_exactly_the_kprune_masks_on_distilbert(tmp_path):
+    """Gate analog (c), model side: beat_run.build() on DistilBERT keeps the K-prune masks it is given (the same check
+    beat_confirm_analysis.check_integrity applies to the recorded heads/neurons) and the student's shapes match them,
+    including a layer with zero kept heads."""
+    from types import SimpleNamespace
+
+    import numpy as np
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
+    import beat_run
+
+    hm, nm = np.zeros((2, 4), np.float32), np.zeros((2, 64), np.float32)
+    hm[1, [0, 2]] = 1  # layer 0 keeps no head
+    nm[0, ::3] = 1
+    nm[1, :30] = 1
+    npz = tmp_path / "m.npz"
+    np.savez(npz, **{"kprune_mrpc_seed7_c0.5__head": hm, "kprune_mrpc_seed7_c0.5__neuron": nm})
+    t, bs = _tiny_distil(), _dbatches()
+    ns = SimpleNamespace(kprune_masks=str(npz), device="cpu", ridge_rel=1e-4)
+    s, heads, neurons = beat_run.build("d2i_ri", t, bs, 12.0, 0.5, ns, "mrpc", 7, None)
+    assert heads == {0: [], 1: [0, 2]}
+    assert {l: sorted(v) for l, v in neurons.items()} == {0: list(range(0, 64, 3)), 1: list(range(30))}
+    l0, l1 = s.distilbert.transformer.layer
+    assert l1.attention.out_lin.in_features == 2 * 8 and l0.attention.out_lin.in_features == 0
+    assert l0.ffn.lin1.out_features == len(range(0, 64, 3)) and l1.ffn.lin2.in_features == 30
+    assert torch.isfinite(_logits(s, bs)).all()
+    assert beat_run.mac_ratio(heads, neurons, t.config, 12.0) < 1.0
