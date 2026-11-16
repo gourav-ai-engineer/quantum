@@ -45,13 +45,24 @@ SPECS["squad"] = {"model_id": "csarron/bert-base-uncased-squad-v1", "revision": 
                   "dataset": ("squad", None), "metric": "f1", "qa": True}
 
 
+def v19_spec(task, ckpt_root):
+    """V19: the official DistilBERT-weights checkpoint folder <ckpt_root>/<task> (a 6-layer BERT-format model, no
+    tokenizer, GLUE label order, no revision: pinned by sha256 in scripts/V19_CKPT_SHA256.json). Dataset, fields,
+    split and metric come from the BERT spec of the same task; the tokenizer is the official codes' own
+    (AutoTokenizer.from_pretrained('distilbert-base-uncased'), no token_type_ids). V19 changes nothing else."""
+    spec = {k: v for k, v in SPECS[task].items() if k not in ("model_id", "revision", "label_order")}
+    spec.update(model_id=os.path.join(ckpt_root, task), revision=None, tokenizer="distilbert-base-uncased")
+    return spec
+
+
 def load_model(spec, device):
     if not spec.get("qa"):
-        return load_sequence_classifier(spec["model_id"], device, revision=spec["revision"])
+        return load_sequence_classifier(spec["model_id"], device, revision=spec["revision"],
+                                        tokenizer_id=spec.get("tokenizer"))
     from transformers import AutoModelForQuestionAnswering, AutoTokenizer
-    tok = AutoTokenizer.from_pretrained(spec["model_id"], revision=spec["revision"])
-    model = AutoModelForQuestionAnswering.from_pretrained(spec["model_id"], revision=spec["revision"],
-                                                          attn_implementation="eager")
+    tok = AutoTokenizer.from_pretrained(spec["tokenizer"], use_fast=True) if spec.get("tokenizer") else         AutoTokenizer.from_pretrained(spec["model_id"], revision=spec["revision"])
+    kw = {} if spec["revision"] is None else {"revision": spec["revision"]}
+    model = AutoModelForQuestionAnswering.from_pretrained(spec["model_id"], attn_implementation="eager", **kw)
     return model.to(device).eval(), tok
 
 

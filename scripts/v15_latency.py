@@ -36,7 +36,7 @@ def shape_from_masks(head_path, neuron_path):
 def time_shape(heads, neurons, batch, seq_len, warmup=20, runs=100, device="cuda"):
     """Median ms of one forward pass of a BERT-base classifier keeping heads[l] heads and neurons[l] neurons."""
     from transformers import BertConfig, BertForSequenceClassification
-    cfg = BertConfig()  # BERT-base dimensions; weights are random (they do not affect latency)
+    cfg = BertConfig(num_hidden_layers=len(heads))  # BERT-base dimensions (V19: 6 layers); random weights
     cfg._attn_implementation = "eager"
     model = BertForSequenceClassification(cfg)
     prune_model(model, {l: list(range(h)) for l, h in enumerate(heads)},

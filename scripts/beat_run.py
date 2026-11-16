@@ -20,7 +20,8 @@ from datasets import load_dataset
 
 from qfc.align import sequential_refit_io
 from qfc.grp import AVG_SEQ_LEN, ffn_width, grp_prune, permute_classifier, prune_model, sequential_refit, teacher_stats
-from step22_grp import SPECS, kl_and_agreement, load_model, logits_of, make_batches
+from step22_grp import (SPECS, compare_outputs, kl_and_agreement, load_model, logits_of, make_batches, outputs_of,
+                        task_batches, v19_spec)
 
 
 def kprune_masks(npz, task, seed, c):
@@ -93,6 +94,8 @@ def main():
     p.add_argument("--max-length", type=int, default=128)
     p.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     p.add_argument("--output-dir", required=True)
+    p.add_argument("--ckpt-root", default=None,
+                   help="V19: folder with one official DistilBERT-weights checkpoint per task (see step22_grp.v19_spec)")
     p.add_argument("--smoke", action="store_true")
     p.add_argument("--allow-cpu", action="store_true")
     a = p.parse_args()
@@ -100,8 +103,9 @@ def main():
         raise SystemExit("exploration runs need a GPU (CLAUDE.md); CPU only with --smoke --allow-cpu")
     os.makedirs(a.output_dir, exist_ok=True)
     for task in a.tasks.split(","):
-        spec = SPECS[task]
-        ds = load_dataset(*spec["dataset"])
+        spec = v19_spec(task, a.ckpt_root) if a.ckpt_root else SPECS[task]
+        dn, dcfg = spec["dataset"]
+        ds = load_dataset(dn, dcfg) if dcfg else load_dataset(dn)
         teacher, tok = load_model(spec, a.device)
         if "label_order" in spec:  # MNLI: same permuted checkpoint as the official-baseline runs (V15 Phase 0)
             permute_classifier(teacher, spec["label_order"])
@@ -109,17 +113,26 @@ def main():
         valid = ds[spec.get("valid_split", "validation")]
         if a.smoke:
             valid = valid.select(range(64))
-        vb = make_batches(valid, tok, spec["text_fields"], a.batch_size, a.max_length)
-        labels = torch.tensor(valid["label"])
-        lt_valid = logits_of(teacher, vb, a.device)
+        qa = bool(spec.get("qa"))
+        if qa:  # SQuAD v1.1 (V19): per-example F1 with our preprocessing and the official metric, as the add-on dump
+            from qfc.squad import batches_from_features, make_features, per_example_scores, postprocess, predict_logits
+            vdict = valid[:]
+            v_feats = make_features(vdict, tok)
+            vb = batches_from_features(v_feats, tok, max(1, a.batch_size // 2))
+            t_st, t_en = predict_logits(teacher, vb, a.device)
+            unpruned_f1 = per_example_scores(vdict, postprocess(vdict, v_feats, t_st, t_en))[0]
+        else:
+            vb = make_batches(valid, tok, spec["text_fields"], a.batch_size, a.max_length)
+            labels = torch.tensor(valid["label"])
+            lt_valid = logits_of(teacher, vb, a.device)
         for seed in [int(s) for s in a.seeds.split(",")]:
             shuf, n = ds["train"].shuffle(seed=seed), a.calibration_size
             if a.smoke:
                 n = 64
-            cb = make_batches(shuf.select(range(n)), tok, spec["text_fields"], a.batch_size, a.max_length)
-            hb = make_batches(shuf.select(range(n, n + (64 if a.smoke else a.heldout_size))), tok, spec["text_fields"],
-                              a.batch_size, a.max_length)
-            lt_held = logits_of(teacher, hb, a.device)
+            cb = task_batches(spec, shuf.select(range(n)), tok, a.batch_size, a.max_length)
+            hb = task_batches(spec, shuf.select(range(n, n + (64 if a.smoke else a.heldout_size))), tok, a.batch_size,
+                              a.max_length)
+            lt_held = outputs_of(spec, teacher, hb, a.device)
             stats = teacher_stats(teacher, cb, a.device, seed) if any(
                 m.startswith("grp") for m in a.methods.split(",")) else None
             for c in [float(x) for x in a.constraints.split(",")]:
@@ -129,14 +142,22 @@ def main():
                         continue
                     t0 = time.time()
                     student, heads, neurons = build(method, teacher, cb, n_seq, c, a, task, seed, stats)
-                    dist, agree = heldout_dist(task, lt_held, logits_of(student, hb, a.device))
-                    ls = logits_of(student, vb, a.device)
+                    if qa:
+                        dist, agree = compare_outputs(spec, lt_held, outputs_of(spec, student, hb, a.device))
+                        st_, en_ = predict_logits(student, vb, a.device)
+                        f1, em = per_example_scores(vdict, postprocess(vdict, v_feats, st_, en_))
+                        result = {"evaluation_size": len(f1), "valid": {"f1": sum(f1) / len(f1), "em": sum(em) / len(em)},
+                                  "unpruned_valid": {"f1": sum(unpruned_f1) / len(unpruned_f1)}, "valid_f1": f1}
+                    else:
+                        dist, agree = heldout_dist(task, lt_held, logits_of(student, hb, a.device))
+                        ls = logits_of(student, vb, a.device)
+                        result = {"evaluation_size": len(labels), "valid": valid_metrics(task, ls, labels),
+                                  "unpruned_valid": valid_metrics(task, lt_valid, labels), "valid_logits": ls.tolist()}
                     rec = {"method": method, "task": task, "seed": seed, "constraint": c, "calibration_size": n,
-                           "mode": "smoke" if a.smoke else "full", "evaluation_size": len(labels),
+                           "mode": "smoke" if a.smoke else "full",
                            "heldout": f"train.shuffle({seed})[{n}:{n + (64 if a.smoke else a.heldout_size)}]",
                            "heldout_dist": dist, "heldout_dist_kind": "mse" if task == "stsb" else "kl",
-                           "heldout_teacher_agreement": agree, "valid": valid_metrics(task, ls, labels),
-                           "unpruned_valid": valid_metrics(task, lt_valid, labels), "valid_logits": ls.tolist(),
+                           "heldout_teacher_agreement": agree, **result,
                            "seq_len_for_macs": n_seq, "mac_ratio": mac_ratio(heads, neurons, cfg, n_seq),
                            "heads_kept": {str(l): h for l, h in heads.items()},
                            "neurons_kept": {str(l): x for l, x in neurons.items()}, "seconds": time.time() - t0,

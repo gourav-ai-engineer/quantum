@@ -18,15 +18,16 @@ REPO=$(cd "$(dirname "$0")/.." && pwd)
 mkdir -p "$W" && cd "$W"
 KWON_SHA=806ac5a6ff53b4978e5330d45a3de692493e4d0b
 KPRUNE_SHA=9ca629a1db1ebd835234ade03a4c0ce8fa522d7b
-KP_OUT=$W/kprune/src/outputs/bert-base-uncased
+MODEL_NAME=${MODEL_NAME:-bert-base-uncased}   # V19: MODEL_NAME=distilbert-base-uncased (+ CKPT_DIR_ROOT, CK_REQUIRE)
+KP_OUT=$W/kprune/src/outputs/$MODEL_NAME
 SEEDS="7 42 77 123 2024"
 CONS="0.7 0.6 0.5 0.4"
 
 # cupy-cuda12x needs libcublas.so.12 etc.; the Kaggle image no longer ships CUDA 12 system libs, so use the pip nvidia-*-cu12 wheels
 kwon_ld() { for d in "$W"/env_kwon/lib/python3.9/site-packages/nvidia/*/lib; do printf '%s:' "$d"; done; }
-kwon()   { (cd "$W/kwon" && LD_LIBRARY_PATH="$(kwon_ld)${LD_LIBRARY_PATH:-}" "$W/env_kwon/bin/python" main.py --model_name bert-base-uncased "$@"); }
+kwon()   { (cd "$W/kwon" && LD_LIBRARY_PATH="$(kwon_ld)${LD_LIBRARY_PATH:-}" "$W/env_kwon/bin/python" main.py --model_name "$MODEL_NAME" "$@"); }
 publish() { mkdir -p "$OUT"; for d in "$@"; do [ -e "$W/$d" ] && { mkdir -p "$OUT/$(dirname "$d")"; cp -r "$W/$d" "$OUT/$(dirname "$d")/"; }; done; du -sh "$OUT"; }
-kprune() { (cd "$W/kprune/src" && "$W/env_kprune/bin/python" main.py --model_name bert-base-uncased --gpu 0 \
+kprune() { (cd "$W/kprune/src" && "$W/env_kprune/bin/python" main.py --model_name "$MODEL_NAME" --gpu 0 \
             --lam_pred 1. --lam_rep 2.5e-4 --T 2 --mu 64 --sublayerwise_tuning "$@"); }
 
 case "$STAGE" in
@@ -53,8 +54,8 @@ setup)
   # (newer gdown dropped --remaining-ok; the folder has < 50 files, so it is not needed)
   if [ "${SKIP_KP_CKPT:-0}" != 1 ]; then  # the 'bl' stage uses only our pinned textattack checkpoints
   [ -d ck_kprune ] || gdown -q --folder https://drive.google.com/drive/folders/1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt -O ck_kprune
-  ls ck_kprune/bert-base-uncased
-  for t in mrpc sst2; do [ -f ck_kprune/bert-base-uncased/$t/config.json ] || { echo "missing K-prune ckpt $t"; exit 1; }; done
+  ls ck_kprune/$MODEL_NAME
+  for t in ${CK_REQUIRE:-mrpc sst2}; do [ -f ck_kprune/$MODEL_NAME/$t/config.json ] || { echo "missing K-prune ckpt $t"; exit 1; }; done
   fi
   publish patch_kwon.diff patch_kprune.diff
   df -h /tmp /kaggle/working || true
@@ -155,20 +156,22 @@ bl)
   # Official Kwon / K-prune baselines on a NEW task with our pinned checkpoint and calibration rows (EXPLORATION_LOG,
   # Amendment 1: STS-B). BL_TASKS (default stsb), BL_CONS (default "0.5 0.4"). Same patched unmodified algorithms as h10.
   # Results are published after every (task, seed) so a Kaggle time-out keeps what finished.
-  SKIP_KP_CKPT=1 bash "$REPO/scripts/v15_kaggle.sh" setup "$W" "$OUT"  # $0 is relative and we cd "$W" above
+  SKIP_KP_CKPT=${BL_SKIP_CKPT:-1} bash "$REPO/scripts/v15_kaggle.sh" setup "$W" "$OUT"  # $0 is relative and we cd "$W" above
   BT=${BL_TASKS:-stsb}; BC=${BL_CONS:-"0.5 0.4"}
-  (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks "$(echo $BT | tr ' ' ,)" --out "$W/inputs")
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks "$(echo $BT | tr ' ' ,)" --out "$W/inputs" ${PREP_ARGS:-})
+  CKR=${CKPT_DIR_ROOT:-$W/inputs/ckpt}   # V19: the original official checkpoint folders (sha256-verified), not re-saved copies
+  [ -z "${CKPT_SHA_FILE:-}" ] || python "$REPO/scripts/v19_verify_ckpt.py" "$CKR" "$CKPT_SHA_FILE" $BT
   mkdir -p bl
   for t in $BT; do for s in $SEEDS; do
     export V15_INDEX_FILE=$W/inputs/indices/${t}_seed${s}.json
     for c in $BC; do
       o=$W/bl/kwon_${t}_seed${s}_c${c}
-      [ -f $o/v15_student_heldout.pt ] || { mkdir -p $o; kwon --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
+      [ -f $o/v15_student_heldout.pt ] || { mkdir -p $o; kwon --task_name $t --ckpt_dir "$CKR/$t" \
         --constraint $c --seed 0 --output_dir $o > $o.log 2>&1 || echo "FAIL $o"; }
       r=$(python -c "print(round(1-$c,4))")
       e=bl/kprune_${t}_seed${s}_c${c}
       # BL_SKIP_KPRUNE=1: Kwon-only rerun (V18 fix1); the finished K-prune items must not be rerun
-      [ -n "${BL_SKIP_KPRUNE:-}" ] || [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { kprune --task_name $t --ckpt_dir "$W/inputs/ckpt/$t" \
+      [ -n "${BL_SKIP_KPRUNE:-}" ] || [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { kprune --task_name $t --ckpt_dir "$CKR/$t" \
         --exp_name $e --seed 0 --constraint $r > "$W/bl/kprune_${t}_seed${s}_c${c}.log" 2>&1 || echo "FAIL $e"; }
       rm -f "$KP_OUT/$e/model.ckpt"
     done

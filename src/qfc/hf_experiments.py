@@ -27,12 +27,14 @@ def load_sequence_classifier(
     model_id: str,
     device: str = "cpu",
     revision: str | None = None,
+    tokenizer_id: str | None = None,
 ):
-    """Load a sequence classifier with eager attention when supported."""
+    """Load a sequence classifier with eager attention when supported. tokenizer_id: load the tokenizer from another
+    id (V19: the official DistilBERT folders ship no tokenizer)."""
     AutoModelForSequenceClassification, AutoTokenizer = _require_transformers()
 
     load_kwargs = {} if revision is None else {"revision": revision}
-    tokenizer = AutoTokenizer.from_pretrained(model_id, **load_kwargs)
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_id, use_fast=True) if tokenizer_id else         AutoTokenizer.from_pretrained(model_id, **load_kwargs)
     try:
         model = AutoModelForSequenceClassification.from_pretrained(
             model_id, attn_implementation="eager", **load_kwargs

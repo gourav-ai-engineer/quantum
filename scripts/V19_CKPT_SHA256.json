@@ -1,0 +1,13 @@
+{
+ "source": "official K-prune folder 1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt, distilbert-base-uncased/<task>/pytorch_model.bin; sha256 recorded by kernel gouravcseai/v19-ckpt-check (results/v19_port/ckpt_check_raw/ckpt_check.json, commit ec341b4)",
+ "sha256": {
+  "mnli": "06713c19127c1a22f6e78785304254900118c8ec2d1e2ac01405d3a70e8648e8",
+  "mrpc": "a5522814e6ea093ef5103b9ea41ad32abebf02127de73baa5d22c27cc1a446a2",
+  "qnli": "c831fca11a4d70034b3a5713dd44cbfdc58f097b0afd2502fc3ceb6c44eb9eba",
+  "qqp": "0028f5ec6ee654b03cdc32bbbfd9a17dca96c1341e7ccb2be0f4046f1e053316",
+  "squad": "64fead73127d99233f7e2fda489bab3f5c564278474d9ec613c68f9c2a81aca5",
+  "squad_v2": "0a7b15e46906eda581c451f2d3a55363af9bb3eca3da27d8c543373236e17a70",
+  "sst2": "8c6adad7b515cf0e3ce700a5a7d34b72e8af7af5216303494706841f42b3b3e9",
+  "stsb": "8070ccfad67783851b0af7c25cb27cbcd53a90f58d770b66569df3d67bc650fb"
+ }
+}

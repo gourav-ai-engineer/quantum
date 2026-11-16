@@ -126,6 +126,10 @@ def mcc_binary(labels, preds) -> float:
 def _grid_stats(preds: np.ndarray, labels: np.ndarray, metric: str) -> list[np.ndarray]:
     if metric == "score":  # preds are per-example scores (e.g. SQuAD F1); labels are ignored
         return [preds.astype(np.float64)]
+    if metric == "pearson":  # pooled Pearson over the (seed x example) grid; preds float [S, N], labels float [N]
+        x = preds.astype(np.float64)
+        y = np.broadcast_to(labels[None, :].astype(np.float64), x.shape)
+        return [x, x * x, x * y, y, y * y]
     y = labels[None, :].astype(int)
     p = preds.astype(int)
     if metric == "accuracy":
@@ -138,6 +142,10 @@ def _grid_stats(preds: np.ndarray, labels: np.ndarray, metric: str) -> list[np.n
 def _grid_metric(totals: list[np.ndarray], metric: str, cells: float):
     if metric in ("accuracy", "score"):
         return totals[0] / cells
+    if metric == "pearson":
+        sx, sxx, sxy, sy, syy = totals
+        den = np.sqrt((cells * sxx - sx**2) * (cells * syy - sy**2))
+        return np.where(den > 0, (cells * sxy - sx * sy) / np.where(den > 0, den, 1.0), 0.0)
     return mcc_from_counts(*totals)
 
 

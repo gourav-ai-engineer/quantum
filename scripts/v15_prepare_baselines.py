@@ -25,6 +25,7 @@ def main():
     p.add_argument("--calibration-size", type=int, default=2048)
     p.add_argument("--heldout-size", type=int, default=512)
     p.add_argument("--out", required=True)
+    p.add_argument("--no-ckpt", action="store_true", help="V19: only write the index files (checkpoints stay in the original folders)")
     a = p.parse_args()
     os.makedirs(os.path.join(a.out, "indices"), exist_ok=True)
     for task in a.tasks.split(","):
@@ -41,6 +42,9 @@ def main():
             if spec.get("qa"):
                 rec["unit"] = "squad_examples"
             json.dump(rec, open(os.path.join(a.out, "indices", f"{task}_seed{seed}.json"), "w"))
+        if a.no_ckpt:
+            print(task, "indices ->", a.out)
+            continue
         model, tok = load_model(spec, "cpu")
         if "label_order" in spec:  # MNLI: every method prunes the SAME permuted checkpoint (Phase 0 decision)
             permute_classifier(model, spec["label_order"])

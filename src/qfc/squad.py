@@ -53,7 +53,7 @@ def make_features(examples, tok, max_length: int = 384, stride: int = 128):
 
 
 def batches_from_features(feats, tok, batch_size: int):
-    keys = ("input_ids", "attention_mask", "token_type_ids")
+    keys = tuple(k for k in ("input_ids", "attention_mask", "token_type_ids") if k in feats)  # DistilBERT: no token types
     out = []
     for i in range(0, len(feats["input_ids"]), batch_size):
         chunk = [{k: feats[k][j] for k in keys} for j in range(i, min(i + batch_size, len(feats["input_ids"])))]
