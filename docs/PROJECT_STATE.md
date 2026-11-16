@@ -1072,3 +1072,32 @@ Jozsa 1994, Tomamichel-Colbeck-Renner 2010, CompactifAI / ESANN 2025). Checks: n
 all cite keys resolve, braces and environments balance, no undefined refs. The purified-distance remark was added to the
 Rule 11 proof list for the supervisor. Option B (tensor networks) remains available if the supervisor wants quantum-inspired
 compression that does work in the pipeline; it would need its own pre-registration (rule 7).
+
+## Pre-registration V19: transfer of the frozen d2i-RI to DistilBERT on up to seven datasets (written 2026-11-16, BEFORE any V19 code or data; registered under the owner's standing autonomy grant of 2026-10-19; the owner's "go with next step" on 2026-11-16 was read as approval of the recommended option 1, a document-only step that is cheap to withdraw)
+
+**Why.** The paper's first limitation is one model family (BERT-base). V18 (tag `v18-freeze-fix1`) is a closed result and is NOT reopened: H18a stays "not supported" and V19 does not pool with it. V19 only asks whether the V18 picture (d2i-RI vs the two official baselines) holds on a second architecture. No new method, no new variant, no tuning.
+
+**Frozen method.** d2i-RI exactly as at `v18-freeze-fix1` (`scripts/beat_run.py` method `d2i_ri`, `src/qfc/align.py`, `src/qfc/grp.py` `sequential_refit`, ridge_rel 1e-4): K-prune masks, input-side alignment, drift-corrected refit; 2048 calibration rows `train.shuffle(seed)[:2048]`; MAC budget 0.5; seeds 7, 42, 77, 123, 2024. Nothing in this list changes.
+
+**Model and checkpoints.** DistilBERT-base-uncased, the fine-tuned checkpoints released with the official K-prune / Kwon et al. codes (the K-prune Drive folder lists `bert-base-uncased` and `distilbert-base-uncased`; per-task coverage is NOT yet verified). RoBERTa-base and BERT-large are OUT of scope: the official codes ship no checkpoints for them, K-prune's README names only BERT and DistilBERT, and a ported K-prune would be a weakened baseline (rule 12). Stated as future work.
+
+**Task list (fixed by directory listing only, before any evaluation).** Candidates: MRPC, SST-2, STS-B, QNLI, MNLI-m, QQP, SQuAD v1.1. The V19 task set is the subset that has a released DistilBERT checkpoint. If fewer than six remain, V19 is reported as a smaller study, not padded with self-fine-tuned checkpoints. Metrics as in V18 (accuracy; Pearson for STS-B; F1 for SQuAD, per-example F1 for the bootstrap). MNLI uses the same label-order check as V15 Phase 0.
+
+**Baselines.** Official Kwon et al. and K-prune, unmodified apart from the V15 add-on, same budget, seeds and calibration indices; both are run AFTER this text is committed.
+
+**Code port (the only code change permitted).** An adapter that maps DistilBERT module names (`transformer.layer`, `attention.{q_lin,k_lin,v_lin,out_lin}`, `ffn.{lin1,lin2}`) onto the interface the method already uses. Acceptance, all before any V19 statistic: (a) with the adapter, BERT-base `valid_logits` for MRPC seed 7 at c0.5 reproduce the `v18-freeze-fix1` output; (b) the existing unit tests pass, plus new tests that an unpruned DistilBERT student is recovered and that physical pruning equals masking; (c) per (task, seed), the V18 integrity gate analog (labels and evaluation size equal the official dump's, our teacher accuracy within 2 rows of the official, d2i-RI's kept heads and neurons equal the K-prune masks). A failure is an engineering failure, fixed with a dated note and tag `v19-freeze-fixN`, rerunning only affected items; any change after a statistic has been seen is forbidden (rule 12). If the port cannot meet (a)-(c) within five working days, V19 stops and is reported as not done.
+
+**Hypotheses (MAC budget 0.5, validation, per model, Holm across the V19 tasks).**
+- H19a (primary, superiority): comparator is K-prune, fixed now because it was the stronger baseline on every BERT-base task (V18 dev mean). Supported if Holm-adjusted one-sided p < 0.05 and the 95% CI lower bound of d2i-RI minus K-prune > 0 on at least two thirds of the V19 tasks (5 of 7, 4 of 6), AND no Holm-significant loss against EITHER baseline on any task. Test: paired cluster bootstrap over (seed x example), 10,000 resamples, seed 1234 (+i per task), as `qfc.metrics.cluster_bootstrap_delta`.
+- H19b (secondary, non-inferiority; a margin of 1.5 pp is the margin already used in the Round-2 protocol): supported if on EVERY V19 task the 95% CI lower bound of d2i-RI minus K-prune is > -1.5 pp (one-sided, Holm). This is the equivalence-style statement V18 did not pre-register; the expected outcome of V19 is H19a not supported and H19b supported, and that outcome is acceptable.
+- H19c (descriptive, rule 8): CPU and GPU latency and parameter count of the physically pruned DistilBERT shapes (`scripts/v15_latency.py`, transformers==4.51.3 asserted before any model call). d2i-RI keeps K-prune's masks, so its shapes equal K-prune's by construction.
+
+**Execution plan.** Step 0: list the checkpoint folder (no evaluation) and fix the task list. Step 1: write the adapter and tests on CPU, smoke test with `--smoke --allow-cpu` (engineering check only, rule 9). Step 2: one Kaggle kernel per task via the `venv-kaggle` API, results published per (task, seed); estimated 10-15 GPU-h in total, about one week of quota. Step 3: the analysis script is a copy of `scripts/beat_confirm_analysis.py` with the task list as its only change and is committed before the data. Models other than DistilBERT are not touched.
+
+**Data-use disclosure.** DistilBERT has never been run by this project. The MRPC, SST-2, STS-B, QNLI, MNLI-m and QQP validation splits were used on BERT-base (development or V18), so for those tasks only the model is new, not the split; SQuAD v1.1 validation was not loaded by any pruning method of this mission (docs/LIT_REVIEW_2026-11-12.md section 10).
+
+**Do-not-claim list.**
+- No pooling with V18 and no claim across models beyond the two tested; no claim for RoBERTa, BERT-large or decoder models.
+- No claim that d2i-RI is faster than K-prune (identical shapes).
+- No claim of state of the art, and no quantum claim: V19 uses no quantum quantity.
+- A not-supported H19a is reported as such; no rerun, no subset, no change of tasks or budget (rule 12).
