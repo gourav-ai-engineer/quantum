@@ -1101,3 +1101,11 @@ compression that does work in the pipeline; it would need its own pre-registrati
 - No claim that d2i-RI is faster than K-prune (identical shapes).
 - No claim of state of the art, and no quantum claim: V19 uses no quantum quantity.
 - A not-supported H19a is reported as such; no rerun, no subset, no change of tasks or budget (rule 12).
+
+### V19 step 0 done (2026-11-16, directory listing only, no evaluation, no model loaded)
+Listing of the official K-prune checkpoint folder (Drive id 1G4EB76s..., entries `bert-base-uncased`, `distilbert-base-uncased`): the
+`distilbert-base-uncased` folder contains `mnli, mrpc, qnli, qqp, squad, squad_v2, sst2, stsb` (the `bert-base-uncased` folder lists the same
+eight). **V19 task list is therefore fixed to seven tasks: MRPC, SST-2, STS-B, QNLI, MNLI-m, QQP, SQuAD v1.1** (`squad_v2` is out of scope).
+H19a threshold with seven tasks: at least 5 of 7. Still to verify BEFORE any statistic, as engineering checks: that `squad` is v1.1 (the
+README of K-prune lists `squad` and `squad_v2` separately), the MNLI label order of the DistilBERT checkpoint, and that each checkpoint
+loads under transformers==4.51.3.
