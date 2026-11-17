@@ -152,6 +152,20 @@ def test_loss_against_kprune_blocks_h19a_and_h19b(tmp_path):
     assert v["H19a"] == "not_supported" and v["losses"] and v["H19b"] == "not_supported"
 
 
+def test_wins_needed_is_two_thirds_rounded_up():
+    assert [va.wins_needed(n) for n in (6, 7)] == [4, 5]
+
+
+def test_six_tasks_four_wins_supports_h19a_three_do_not():
+    win = {"ci_low": 0.01, "p_le_zero": 0.001, "p_ge_zero": 1.0, "p_le_margin": 0.001}
+    tie = {"ci_low": -0.001, "p_le_zero": 0.4, "p_ge_zero": 0.6, "p_le_margin": 0.001}
+    six = [t for t in va.TASKS if t != "squad"]
+    kw = {t: dict(win) for t in six}
+    for n_win, want in ((4, "supported"), (3, "not_supported")):
+        kp = {t: dict(win if i < n_win else tie) for i, t in enumerate(six)}
+        assert va.decide({"vs_kprune": kp, "vs_kwon": kw}, six)["H19a"] == want
+
+
 def test_four_wins_of_seven_is_not_enough():
     win = {"ci_low": 0.01, "p_le_zero": 0.001, "p_ge_zero": 1.0, "p_le_margin": 0.001}
     tie = {"ci_low": -0.001, "p_le_zero": 0.4, "p_ge_zero": 0.6, "p_le_margin": 0.001}

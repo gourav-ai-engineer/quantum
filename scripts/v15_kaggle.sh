@@ -26,6 +26,13 @@ CONS="0.7 0.6 0.5 0.4"
 # cupy-cuda12x needs libcublas.so.12 etc.; the Kaggle image no longer ships CUDA 12 system libs, so use the pip nvidia-*-cu12 wheels
 kwon_ld() { for d in "$W"/env_kwon/lib/python3.9/site-packages/nvidia/*/lib; do printf '%s:' "$d"; done; }
 kwon()   { (cd "$W/kwon" && LD_LIBRARY_PATH="$(kwon_ld)${LD_LIBRARY_PATH:-}" "$W/env_kwon/bin/python" main.py --model_name "$MODEL_NAME" "$@"); }
+# V19 fix1 (engineering only): Kaggle's shared IP gets HTTP 429 from the HF Hub, which killed official runs at tokenizer/dataset
+# load. Retry a run ONLY when its log shows a 429 (a real failure is never retried); sleep grows 90 s per attempt.
+hf_retry() { local log=$1 n=0; shift
+  until "$@" > "$log" 2>&1; do n=$((n+1))
+    if grep -q "429 Client Error\|Too Many Requests" "$log" && [ "$n" -lt "${HF_RETRIES:-8}" ]; then echo "HF 429, retry $n: $log"; sleep $((90*n)); else return 1; fi
+  done; }
+inlist() { case " $2 " in *" $1 "*) return 0;; *) return 1;; esac; }   # inlist <item> "<space-separated list>"
 publish() { mkdir -p "$OUT"; for d in "$@"; do [ -e "$W/$d" ] && { mkdir -p "$OUT/$(dirname "$d")"; cp -r "$W/$d" "$OUT/$(dirname "$d")/"; }; done; du -sh "$OUT"; }
 kprune() { (cd "$W/kprune/src" && "$W/env_kprune/bin/python" main.py --model_name "$MODEL_NAME" --gpu 0 \
             --lam_pred 1. --lam_rep 2.5e-4 --T 2 --mu 64 --sublayerwise_tuning "$@"); }
@@ -166,13 +173,14 @@ bl)
     export V15_INDEX_FILE=$W/inputs/indices/${t}_seed${s}.json
     for c in $BC; do
       o=$W/bl/kwon_${t}_seed${s}_c${c}
-      [ -f $o/v15_student_heldout.pt ] || { mkdir -p $o; kwon --task_name $t --ckpt_dir "$CKR/$t" \
-        --constraint $c --seed 0 --output_dir $o > $o.log 2>&1 || echo "FAIL $o"; }
+      # V19 fix1: BL_KWON_SEEDS / BL_KPRUNE_SEEDS (default: all seeds) rerun ONLY the items that failed
+      inlist $s "${BL_KWON_SEEDS:-$SEEDS}" && { [ -f $o/v15_student_heldout.pt ] || { mkdir -p $o; hf_retry $o.log kwon --task_name $t --ckpt_dir "$CKR/$t" \
+        --constraint $c --seed 0 --output_dir $o || echo "FAIL $o"; }; }
       r=$(python -c "print(round(1-$c,4))")
       e=bl/kprune_${t}_seed${s}_c${c}
       # BL_SKIP_KPRUNE=1: Kwon-only rerun (V18 fix1); the finished K-prune items must not be rerun
-      [ -n "${BL_SKIP_KPRUNE:-}" ] || [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { kprune --task_name $t --ckpt_dir "$CKR/$t" \
-        --exp_name $e --seed 0 --constraint $r > "$W/bl/kprune_${t}_seed${s}_c${c}.log" 2>&1 || echo "FAIL $e"; }
+      [ -n "${BL_SKIP_KPRUNE:-}" ] || ! inlist $s "${BL_KPRUNE_SEEDS:-$SEEDS}" || [ -f "$KP_OUT/$e/v15_student_heldout.pt" ] || { hf_retry "$W/bl/kprune_${t}_seed${s}_c${c}.log" kprune --task_name $t --ckpt_dir "$CKR/$t" \
+        --exp_name $e --seed 0 --constraint $r || echo "FAIL $e"; }
       rm -f "$KP_OUT/$e/model.ckpt"
     done
     unset V15_INDEX_FILE
@@ -190,7 +198,10 @@ beat)
   pip uninstall -y -q torchvision torchaudio || true
   python "$REPO/scripts/preflight.py" check
   mkdir -p "$OUT/beat"
-  (cd "$REPO" && PYTHONPATH=scripts python scripts/beat_run.py $BEAT_ARGS --output-dir "$OUT/beat" 2>&1 | grep -v -i warn | tail -150)
+  # V19 fix1: full log to a published file (the old `| tail -150` left an empty log when beat crashed); exit status is kept
+  # beat_run.py is resumable (skips finished JSONs), so a 429 retry only redoes unfinished items
+  (cd "$REPO" && PYTHONPATH=scripts hf_retry "$OUT/beat/beat.log" python scripts/beat_run.py $BEAT_ARGS --output-dir "$OUT/beat") || { tail -40 "$OUT/beat/beat.log"; exit 1; }
+  grep -v -i warn "$OUT/beat/beat.log" | tail -60
   ;;
 *) echo "unknown stage $STAGE"; exit 1 ;;
 esac

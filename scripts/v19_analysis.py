@@ -34,7 +34,9 @@ from qfc.metrics import bootstrap_p_ge, bootstrap_p_le, cluster_bootstrap_delta,
 SEEDS, C, ALPHA, MARGIN = (7, 42, 77, 123, 2024), 0.5, 0.05, 0.015
 TASKS = ("mrpc", "sst2", "stsb", "qnli", "mnli", "qqp", "squad")
 METRIC = {"stsb": "pearson", "squad": "score"}  # everything else: accuracy
-WINS_NEEDED = 5  # >= 2/3 of the 7 tasks
+def wins_needed(n):
+    """Pre-registered: at least two thirds of the V19 tasks (5 of 7, 4 of 6)."""
+    return -(-2 * n // 3)
 TEACHER_ROWS_TOL = 2  # rows; teacher quality through beat_run vs the official pipeline
 
 
@@ -151,7 +153,7 @@ def decide(tests, tasks=TASKS):
     kp = tests["vs_kprune"]
     wins = [t for t in tasks if kp[t]["ci_low"] > 0 and kp[t]["holm_p_le_zero"] < ALPHA]
     losses = [(k, t) for k in tests for t in tasks if tests[k][t]["holm_p_ge_zero"] < ALPHA]
-    h19a = "supported" if len(wins) >= WINS_NEEDED and not losses else "not_supported"
+    h19a = "supported" if len(wins) >= wins_needed(len(tasks)) and not losses else "not_supported"
     noninf = [t for t in tasks if kp[t]["ci_low"] > -MARGIN and kp[t]["holm_p_le_margin"] < ALPHA]
     h19b = "supported" if len(noninf) == len(tasks) else "not_supported"
     return {"wins": wins, "losses": losses, "H19a": h19a, "noninferior_tasks": noninf, "H19b": h19b}
@@ -185,24 +187,28 @@ def main():
     ap.add_argument("--seed", type=int, default=1234)
     ap.add_argument("--out", default="v19_verdict.json")
     ap.add_argument("--integrity-only", action="store_true", help="run the gate for the tasks present; no statistics")
+    ap.add_argument("--tasks", default=",".join(TASKS),
+                    help="V19 fix1: subset of the registered tasks (SQuAD dropped, see PROJECT_STATE); H19a threshold = 2/3")
     a = ap.parse_args()
+    tasks = tuple(t for t in TASKS if t in a.tasks.split(","))
     if a.integrity_only:
         for r in a.roots:
-            for t in TASKS:
+            for t in tasks:
                 if os.path.exists(_paths(r, t, SEEDS[0])["d2i_ri"]):
                     for s in SEEDS:
                         check_integrity(r, t, s)
                     print(t, "integrity OK for", len(SEEDS), "seeds")
         return
-    root_of = find_roots(a.roots)
-    for t in TASKS:
+    root_of = find_roots(a.roots, tasks)
+    for t in tasks:
         for s in SEEDS:
             check_integrity(root_of[t], t, s)
     tests = {"vs_kprune": {}, "vs_kwon": {}}
-    for i, t in enumerate(TASKS):
-        tests["vs_kprune"][t] = compare(root_of[t], "d2i_ri", "kprune", t, a.n_boot, a.seed + i)
-        tests["vs_kwon"][t] = compare(root_of[t], "d2i_ri", "kwon", t, a.n_boot, a.seed + 10 + i)
-    verdict = decide(tests)
+    for i, t in enumerate(TASKS):  # index in the registered order, so dropping a task never shifts another task's bootstrap seed
+        if t in tasks:
+            tests["vs_kprune"][t] = compare(root_of[t], "d2i_ri", "kprune", t, a.n_boot, a.seed + i)
+            tests["vs_kwon"][t] = compare(root_of[t], "d2i_ri", "kwon", t, a.n_boot, a.seed + 10 + i)
+    verdict = decide(tests, tasks)
     out = {"comparator": "kprune", "margin": MARGIN, "tests": tests, "means": means(root_of), **verdict}
     json.dump(out, open(a.out, "w"), indent=2)
     print(json.dumps({k: out[k] for k in ("wins", "losses", "H19a", "noninferior_tasks", "H19b")}, indent=2))
