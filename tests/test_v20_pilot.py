@@ -39,6 +39,18 @@ def test_align_rows_recovers_drops_and_skips_insertions():
     assert len(m) > 0.9 * len(true)
 
 
+def test_parallel_evals_truncates_extra_rows_and_rejects_label_mismatch():
+    import pytest
+    from datasets import Dataset
+    mk = lambda labs: Dataset.from_dict({"premise": ["p"] * len(labs), "hypothesis": ["h"] * len(labs), "label": labs})
+    ok = vp.parallel_evals({"en": mk([0, 1, 2]), "as": mk([0, 1, 2]), "ta": mk([0, 1, 2, 1, 0])})
+    assert {k: len(v) for k, v in ok.items()} == {"en": 3, "as": 3, "ta": 3}
+    with pytest.raises(SystemExit):
+        vp.parallel_evals({"en": mk([0, 1, 2]), "bn": mk([0, 2, 1])})
+    with pytest.raises(SystemExit):
+        vp.parallel_evals({"en": mk([0, 1, 2]), "short": mk([0, 1])})
+
+
 def test_indicxnli_test_split_is_refused():
     import pytest
     import v20_finetune as vf

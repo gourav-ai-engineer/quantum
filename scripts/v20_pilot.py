@@ -73,6 +73,20 @@ def align_rows(labels_en, labels_other, k=32, max_shift=2000):
     return out
 
 
+def parallel_evals(evals, ref="en"):
+    """Truncate every eval set to the first len(evals[ref]) rows (IndicXNLI-ta dev has 3,238 rows; its first 2,490 are the
+    parallel ones, amendment 2) and require identical label vectors, so predictions can be paired by example id."""
+    n = len(evals[ref])
+    short = [k for k, v in evals.items() if len(v) < n]
+    if short:
+        raise SystemExit(f"eval sets shorter than {ref} ({n} rows): {short}")
+    out = {k: v.select(range(n)) for k, v in evals.items()}
+    bad = [k for k in out if out[k]["label"] != out[ref]["label"]]
+    if bad:
+        raise SystemExit(f"eval sets not label-parallel with {ref}: {bad}")
+    return out
+
+
 def repair(method, teacher, heads, neurons, cb, device, ridge):
     s = prune_model(copy.deepcopy(teacher), heads, neurons)
     if method == "d2i_r":
@@ -131,10 +145,10 @@ def main():
     evals = {"en": load_dataset(XNLI[0], "en", revision=XNLI[1])["validation"]}
     for lang in INDIC:
         evals[lang] = load_indicxnli(lang, "validation")
+    evals = parallel_evals(evals)
     if a.smoke:
         evals = {k: v.select(range(64)) for k, v in evals.items()}
     labels = {k: v["label"] for k, v in evals.items()}
-    assert all(labels[k] == labels["en"] for k in labels), "eval sets are not label-parallel"
     vb = {k: make_batches(v, tok, FIELDS, 128, a.max_length) for k, v in evals.items()}
     lab = torch.tensor(labels["en"])
     t_pred = {k: logits_of(teacher, b, device).argmax(-1) for k, b in vb.items()}

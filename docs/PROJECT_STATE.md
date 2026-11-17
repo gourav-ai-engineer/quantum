@@ -1187,3 +1187,12 @@ Owner approved the direction of `docs/Q1_GAP_RESEARCH_2026-11-17.md` and GPU use
 - **Calibration rows.** The official order of `mnli_seed<s>.json` is kept, and MNLI positions that some needed language cannot map are skipped. The first 2048 that remain are used. The positions used are stored in every result JSON.
 - **The IndicXNLI loading script is NOT executed** (third-party code); its JSON files are read directly at the pinned revision. The loader refuses the reserved test split.
 - **Nothing else changes.** The fine-tuned teacher is also published as kernel output (sha256 in ft_meta.json), so later stages reuse the same weights.
+
+**V20 pilot amendment 2 (2026-11-17, engineering, after kernel `gouravcseai/v20-pilot` v1 stopped, before any pilot statistic).** The run produced the teacher, the K-prune masks and the gate numbers, but the pilot stage aborted on its own guard (no pilot result exists).
+- **What ran.**
+  - Teacher fine-tune: 24,544 steps, 5,482 s. Gate PASSED. MNLI-m 0.8411, XNLI-en 0.8349, as 0.6859, bn 0.7406, hi 0.7534. Weights sha256 e19f3b747f4a4cadd96c4d4849b74e42222325eadc393b0149dd6d590350c901.
+  - Official K-prune, English calibration, c 0.5, seeds 7/42/77: 50.0008% FLOPs, MNLI-m accuracy 0.8271 on seed 7. Masks collected (12x12 heads, 12x3072 neurons per seed); layer 0 keeps 0 heads for all three seeds.
+- **Cause of the abort.** IndicXNLI-ta validation has 3,238 rows instead of 2,490. Its first 2,490 rows have labels identical to every other language and to XNLI-en. The other ten languages agree 1.0 with XNLI-en. The guard `eval sets are not label-parallel` fired as designed.
+- **Fix (pilot code only).** Every evaluation language is truncated to the first 2,490 rows, and the label-equality assert is kept. Tamil's extra 748 rows are not used. The teacher-gate numbers above (which used all 3,238 Tamil rows) are unaffected: the gate uses MNLI-m and as.
+- **Kwon failed at config load.** Its old transformers 4.12 could not fetch `google/muril-base-cased` (an invalid relative-URL redirect). Kwon is not part of the pilot design. It must be fixed (pass a local config/tokenizer directory) before any confirmatory study uses Kwon masks; no baseline algorithm is touched.
+- **Rerun.** Pilot stage only (`scripts/v20_pilot.py`, tag `v20-pilot-freeze-fix1`). It reads the teacher weights and masks from the first kernel's output, with the teacher sha256 verified before use. Everything else is unchanged.

@@ -1,0 +1,15 @@
+{
+ "id": "gouravcseai/v20-pilot2",
+ "title": "v20 pilot2",
+ "code_file": "v20_pilot2.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": [
+  "gouravcseai/v20-pilot"
+ ]
+}
