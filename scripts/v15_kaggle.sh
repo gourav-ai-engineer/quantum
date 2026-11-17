@@ -60,7 +60,14 @@ setup)
       transformers==4.25.1 datasets==2.14.7 numpy==1.23.4 scipy==1.10.0 scikit-learn==1.2.1 tqdm colorama; }
   # (newer gdown dropped --remaining-ok; the folder has < 50 files, so it is not needed)
   if [ "${SKIP_KP_CKPT:-0}" != 1 ]; then  # the 'bl' stage uses only our pinned textattack checkpoints
-  [ -d ck_kprune ] || gdown -q --folder https://drive.google.com/drive/folders/1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt -O ck_kprune
+  # V19 fix2: a partial Drive download (small files present, large pytorch_model.bin missing: Drive quota) passed the
+  # config.json check below and then killed the run. Retry until every required checkpoint HAS its weights file.
+  for a in 1 2 3 4 5 6; do
+    gdown -q --folder https://drive.google.com/drive/folders/1G4EB76sd2Pq-aIPnUj6JTWXBEaDMLFPt -O ck_kprune || echo "gdown exit $?"
+    ok=1; for t in ${CK_REQUIRE:-mrpc sst2}; do [ -f ck_kprune/$MODEL_NAME/$t/pytorch_model.bin ] || ok=0; done
+    [ $ok = 1 ] && break; echo "ckpt incomplete, retry $a"; sleep $((300*a))
+  done
+  [ $ok = 1 ] || { echo "CKPT_DOWNLOAD_FAILED"; exit 1; }
   ls ck_kprune/$MODEL_NAME
   for t in ${CK_REQUIRE:-mrpc sst2}; do [ -f ck_kprune/$MODEL_NAME/$t/config.json ] || { echo "missing K-prune ckpt $t"; exit 1; }; done
   fi
