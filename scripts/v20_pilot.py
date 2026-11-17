@@ -73,6 +73,21 @@ def align_rows(labels_en, labels_other, k=32, max_shift=2000):
     return out
 
 
+def pick_calibration(order, ok, n, heldout=512):
+    """First n rows of the seeded shuffle `order` whose position passes ok(); rows that fail ok() among the first n are
+    replaced by the next matching rows from index n + heldout onward (disjoint from the held-out slice, amendment 3).
+    Returns (rows, number_replaced)."""
+    keep = [i for i in order[:n] if ok(i)]
+    fill = (i for i in order[n + heldout:] if ok(i))
+    for i in fill:
+        if len(keep) >= n:
+            break
+        keep.append(i)
+    if len(keep) < n:
+        raise SystemExit(f"only {len(keep)} content-matched calibration rows (need {n})")
+    return keep, n - sum(1 for i in order[:n] if ok(i))
+
+
 def parallel_evals(evals, ref="en"):
     """Truncate every eval set to the first len(evals[ref]) rows (IndicXNLI-ta dev has 3,238 rows; its first 2,490 are the
     parallel ones, amendment 2) and require identical label vectors, so predictions can be paired by example id."""
@@ -157,14 +172,12 @@ def main():
     for seed in [int(s) for s in a.seeds.split(",")]:
         heads, neurons = kprune_masks(a.kprune_masks, "mnli", seed, a.constraint)
         n = 64 if a.smoke else a.calibration_size
-        if a.index_dir:
-            order = json.load(open(os.path.join(a.index_dir, f"mnli_seed{seed}.json")))["calibration"]
-        else:
-            order = train_of("en").add_column("_row", list(range(len(train_of("en"))))).shuffle(seed=seed)["_row"]
-        # content matching: keep the official order, skip MNLI positions some needed language cannot map
-        idx = [i for i in order if all(i in inv[l] for l in need)][:n]
-        if len(idx) < n:
-            raise SystemExit(f"only {len(idx)} content-matched calibration rows (need {n})")
+        order = train_of("en").add_column("_row", list(range(len(train_of("en"))))).shuffle(seed=seed)["_row"]
+        if a.index_dir:  # the official runs' calibration indices must be the first positions of this same shuffle
+            official = json.load(open(os.path.join(a.index_dir, f"mnli_seed{seed}.json")))["calibration"]
+            assert order[:len(official)] == official, "shuffle differs from the official index file"
+        idx, replaced = pick_calibration(order, lambda i: all(i in inv[l] for l in need), n)
+        print(f"seed={seed}: {replaced} of {n} official calibration rows replaced (no content match)", flush=True)
         for method in a.repairs.split(","):
             for lang in (["none"] if method == "none" else a.cal_langs.split(",")):
                 path = os.path.join(a.output_dir, f"{method}_{lang}_seed{seed}_c{a.constraint}.json")
@@ -180,7 +193,7 @@ def main():
                 rec = {"repair": method, "cal_lang": lang, "seed": seed, "constraint": a.constraint,
                        "calibration_size": n, "calibration_rows": "MNLI train positions from the official index file"
                        if a.index_dir else f"glue mnli train.shuffle({seed})[:{n}]", "mode": "smoke" if a.smoke else "full",
-                       "calibration_mnli_positions": idx, "evaluation_size": len(lab), "accuracy": acc, "unpruned_accuracy": unpruned,
+                       "calibration_mnli_positions": idx, "calibration_rows_replaced": replaced, "evaluation_size": len(lab), "accuracy": acc, "unpruned_accuracy": unpruned,
                        "preds": {k: v.tolist() for k, v in preds.items()}, "labels": lab.tolist(),
                        "mac_ratio": mac_ratio(heads, neurons, cfg, n_seq),
                        "heads_kept_per_layer": [len(heads[l]) for l in sorted(heads)],

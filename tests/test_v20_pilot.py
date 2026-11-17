@@ -51,6 +51,19 @@ def test_parallel_evals_truncates_extra_rows_and_rejects_label_mismatch():
         vp.parallel_evals({"en": mk([0, 1, 2]), "short": mk([0, 1])})
 
 
+def test_pick_calibration_replaces_unmatched_from_beyond_heldout():
+    import pytest
+    order = list(range(100, 0, -1))                       # shuffled positions 100..1
+    bad = {order[3], order[7]}                            # two of the first 10 have no match
+    rows, rep = vp.pick_calibration(order, lambda i: i not in bad, n=10, heldout=5)
+    assert rep == 2 and len(rows) == 10 and not (set(rows) & bad)
+    assert rows[:8] == [i for i in order[:10] if i not in bad]
+    assert rows[8:] == order[15:17]                       # fill starts after n + heldout = 15, never the held-out slice
+    assert not set(rows) & set(order[10:15])
+    with pytest.raises(SystemExit):
+        vp.pick_calibration(order[:12], lambda i: i not in bad, n=10, heldout=5)
+
+
 def test_indicxnli_test_split_is_refused():
     import pytest
     import v20_finetune as vf
