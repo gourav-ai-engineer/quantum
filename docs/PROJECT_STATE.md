@@ -1177,3 +1177,13 @@ Owner approved the direction of `docs/Q1_GAP_RESEARCH_2026-11-17.md` and GPU use
 - **Reported but not part of the rule:** other languages, `d2i_ri`, `mixed`.
 
 **Reserved, untouched until a confirmatory freeze:** the IndicXNLI and XNLI TEST splits (all languages), all of SIB-200, any other model (IndicBERTv2, mBERT), Kwon masks as a selection factor, and target-language selection. The pilot reads only validation.
+
+**V20 pilot amendment 1 (2026-11-17, engineering, before any V20 GPU run or result).**
+- **The pre-registration assumption was wrong.** It said IndicXNLI train is row-aligned with MNLI train. The CPU check during the smoke run shows it is aligned only for rows 0–6072. After that, IndicXNLI = MNLI with rows dropped, and the shift grows: +1 at row 6073, +14 at 50000, +82 at 300000. Its length is still 392,702, so some rows are not MNLI rows.
+- **as, bn and hi share one order** (label agreement 1.0 between them).
+- **Fix.** `align_rows` (scripts/v20_pilot.py, unit-tested) rebuilds the row map. A row is mapped only when its next 32 labels match MNLI at a nearby shift (chance 3^-32); unmatched rows are left out.
+- **Coverage.** 389,423 of 392,702 rows mapped (99.17%) for each of as, bn, hi.
+- **Text check.** On 20,000 sampled mapped pairs, an English premise with a ≥2-digit number shares that number with the Assamese premise in 2123 of 2226 cases (95.4%), against 6 of 2266 (0.26%) for random pairs.
+- **Calibration rows.** The official order of `mnli_seed<s>.json` is kept, and MNLI positions that some needed language cannot map are skipped. The first 2048 that remain are used. The positions used are stored in every result JSON.
+- **The IndicXNLI loading script is NOT executed** (third-party code); its JSON files are read directly at the pinned revision. The loader refuses the reserved test split.
+- **Nothing else changes.** The fine-tuned teacher is also published as kernel output (sha256 in ft_meta.json), so later stages reuse the same weights.
