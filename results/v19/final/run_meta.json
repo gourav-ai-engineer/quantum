@@ -1,0 +1,15 @@
+{
+ "experiment": "V19 confirmatory (frozen d2i-RI vs official Kwon and K-prune on 6-layer BERT-format 'DistilBERT' checkpoints)",
+ "tasks": ["mrpc","sst2","stsb","qnli","mnli","qqp"],
+ "squad": "dropped (official K-prune OOM on 15 GB T4), deviation recorded before any statistic",
+ "seeds": [7,42,77,123,2024],
+ "constraint": 0.5,
+ "freeze_tags": ["v19-freeze (5f43361)","v19-freeze-fix1 (9278d32)","v19-freeze-fix2 (1eba371)"],
+ "kernels": ["gouravcseai/v19-mrpc","gouravcseai/v19-sst2","gouravcseai/v19-stsb","gouravcseai/v19-qqp","gouravcseai/v19-qnli (+ v19fix-qnli)","gouravcseai/v19fix2-mnli"],
+ "environment": "torch 2.6.0+cu124, transformers 4.51.3, Kaggle T4",
+ "analysis": "scripts/v19_analysis.py --tasks mrpc,sst2,stsb,qnli,mnli,qqp (run once, after integrity gate passed for all six)",
+ "analysis_json_sha256": "see sha256sum of v19_analysis.json",
+ "heldout_pt_manifest": "heldout_pt_sha256.txt",
+ "verdict": {"H19a": "not_supported", "H19b": "supported"},
+ "note": "Engineering fixes only (HF 429 retry, partial Drive checkpoint retry); method, seeds, budget, thresholds unchanged."
+}

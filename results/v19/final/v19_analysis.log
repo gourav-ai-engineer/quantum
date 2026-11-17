@@ -1,0 +1,16 @@
+{
+  "wins": [
+    "qqp"
+  ],
+  "losses": [],
+  "H19a": "not_supported",
+  "noninferior_tasks": [
+    "mrpc",
+    "sst2",
+    "stsb",
+    "qnli",
+    "mnli",
+    "qqp"
+  ],
+  "H19b": "supported"
+}
