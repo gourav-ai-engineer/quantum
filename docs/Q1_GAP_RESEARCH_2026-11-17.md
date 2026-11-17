@@ -85,7 +85,8 @@ This is a bet, not a promise. If H20b fails, the paper becomes a descriptive ben
 **Keyword search (S2, first query only, 106 results):**
 - **Only near hit:** "Effects of Attention Head Pruning on Encoder-only Language Models for Multilingual Recipe Classification", SpeD 2025, 5 pages `[record only]`. It is a small application note; read it before any novelty claim.
 - **Query "pruning multilingual BERT low-resource languages disparity"** (837 results, top 40 read by title): one pruning hit, "Pruning for Performance" (Konkani, mBERT+BiLSTM, IJCNLP-AACL 2025, arXiv 2506.02005) `[summary]`. It prunes 12 of 144 heads by gradient importance for a single fine-tuned low-resource task. That is not retraining-free compression at a MAC budget, so it is not the gap.
-- **Not yet run:** the other four queries were rate-limited.
+- **Query "head pruning cross-lingual transfer without fine-tuning"** (199 results, titles filtered for prun/compress/sparsi): GRASP LoRA (adapter sparsity) and CLOVER (pruning with fine-tuning). Neither is relevant.
+- **Still unrun:** three queries stayed rate-limited after retries (XLM-R calibration language, Indian-language encoder compression, LS reconstruction multilingual). The ACL Anthology/web pass covered the same terms.
 
 ## 4. Research questions and candidate hypotheses (NOT frozen; to be pre-registered as V20 before code)
 
