@@ -1201,3 +1201,31 @@ Owner approved the direction of `docs/Q1_GAP_RESEARCH_2026-11-17.md` and GPU use
 - **Fix.** The 17 unmatched positions are replaced by the next matched rows of the SAME seeded shuffle (`train.shuffle(seed)` order), taken from position 2,560 onward, so they are disjoint from the 512 held-out rows (positions 2,048–2,559). The first 2,048 official rows are kept wherever they match. The positions used are stored in every result JSON.
 - **Consequence, disclosed.** The pilot's repair calibration set differs from the K-prune selection calibration set by 17 of 2,048 rows (0.8%). It is the SAME set for every repair and every calibration language, so no contrast is affected.
 - Teacher, masks, seeds, design, decision rule: unchanged. Tag `v20-pilot-freeze-fix2`.
+
+## V20 PILOT VERDICT: NO-GO (2026-11-18; kernel `gouravcseai/v20-pilot2` v3, tag `v20-pilot-freeze-fix2`, commit e98c3fbb, Tesla T4, torch 2.6.0, transformers 4.51.3)
+Data: `results/v20_pilot/e98c3fbb/` (33 per-example result JSONs, `decision.json`, `run.log`, `ft_meta.json`). Evaluation: XNLI-en and IndicXNLI validation, 2,490 parallel rows each, calibration 2,048 content-matched rows (13 replaced per seed for seeds 42/77, 17 for seed 7, amendment 3). Seeds 7/42/77 vary masks and calibration only; the teacher is one fine-tune, so the CIs do not cover fine-tuning variance. Sanity checks passed before reading statistics: MAC ratio 0.5000 in every file, layer 0 keeps 0 heads, unpruned accuracies equal the teacher gate.
+
+**Rule applied exactly as pre-registered (d2i_r, paired cluster bootstrap over seed x example, 10,000 resamples, seed 1234):**
+- P1 pooled over {as, bn, hi} = **-0.1357**, 95% CI [-0.1634, -0.1072]. Required: CI low > 0 and point >= 0.01. **FAILED, with the wrong sign.**
+- P2: as +0.0304 [+0.0129, +0.0478]; bn +0.0538 [+0.0379, +0.0696]; hi -0.0023 [-0.0161, +0.0112]. Two of three CIs are > 0 (this half of the rule holds).
+- **GO = false. NO-GO.** The mechanism claim H20b (English-calibrated repair raises English accuracy more than target-language accuracy) is dropped.
+
+**Descriptive numbers (mean over 3 seeds, exploration only, rule 9):**
+
+| setting | en | as | bn | hi |
+|---|---|---|---|---|
+| unpruned teacher | 0.835 | 0.686 | 0.741 | 0.753 |
+| mask only (K-prune, English selection) | 0.685 | 0.409 | 0.410 | 0.410 |
+| d2i_r, English calibration | 0.824 | 0.645 | 0.670 | 0.739 |
+| d2i_r, own-language calibration | - | 0.676 | 0.724 | 0.737 |
+| d2i_r, mixed calibration | 0.813 | 0.668 | 0.716 | 0.728 |
+| d2i_ri, English calibration | 0.829 | 0.616 | 0.717 | 0.734 |
+
+- Direction of the effect: the English-selected mask destroys the target languages (to about 0.41) far more than English (0.685), and repair recovers the targets far more in absolute terms (+0.24 to +0.33) than English (+0.14). The disparity enters through MASK selection, not through the repair.
+- After English-calibrated d2i_r the remaining gap to the unpruned teacher is small: en -0.011, as -0.041, bn -0.071, hi -0.014. Mixed calibration cuts it to -0.018 (as), -0.025 (bn), -0.025 (hi), at -0.022 for en. d2i_ri (descriptive, not part of the rule): P1 pooled -0.135 [-0.165, -0.105]; P2 as +0.063 [CI low +0.034], bn +0.009, hi +0.003. d2i_ri/en as is worse than d2i_r/en (0.616 vs 0.645), a non-monotone interaction that the pilot cannot explain.
+
+**Consequences.**
+1. No V20 confirmatory is registered. Nothing on this evidence supports a Q1 mechanism claim for repair-induced disparity.
+2. The unexplored candidate that the pilot points to is the mask-selection side (English-selected masks collapse target languages; the reserved factor "target-language selection" was never run). It is a different hypothesis, not a rescue of H20b: it would need its own written hypothesis, math, tests and baselines BEFORE any code (rule 7), and the residual-gap ceiling above (<= about 7 points after repair) limits how large a paper it can support.
+3. Open engineering item unchanged: Kwon baseline cannot load `google/muril-base-cased` under transformers 4.12 (needs a local config/tokenizer directory).
+4. Fallback remains the descriptive benchmark (probably Q2). The direction decision is the owner's.

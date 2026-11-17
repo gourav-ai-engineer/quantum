@@ -1,0 +1,4 @@
+versions OK: {'torch': '2.6.0', 'transformers': '4.51.3', 'datasets': '3.6.0', 'pyarrow': '24.0.0'}
+device: Tesla T4
+head_mask effective: loss(all ones)=0.694228 loss(all zeros)=0.694195
+PREFLIGHT OK

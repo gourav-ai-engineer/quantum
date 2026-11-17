@@ -1,0 +1,74 @@
+e98c3fb V20 pilot fix2: replace the 13-17 unmatched calibration rows from beyond the held-out slice; amendment 3
+ft_meta: /kaggle/input/notebooks/gouravcseai/v20-pilot/v20/ft/ft_meta.json
+IN=/kaggle/input/notebooks/gouravcseai/v20-pilot/v20
+Tesla T4, 15360 MiB
+Tesla T4, 15360 MiB
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+bigframes 2.51.0 requires google-cloud-bigquery-storage<3.0.0,>=2.30.0, which is not installed.
+pathos 0.3.5 requires dill>=0.4.1, but you have dill 0.3.8 which is incompatible.
+pathos 0.3.5 requires multiprocess>=0.70.19, but you have multiprocess 0.70.16 which is incompatible.
+s3fs 2025.12.0 requires fsspec==2025.12.0, but you have fsspec 2025.3.0 which is incompatible.
+tpot 1.1.0 requires dill>=0.3.9, but you have dill 0.3.8 which is incompatible.
+gcsfs 2025.12.0 requires fsspec==2025.12.0, but you have fsspec 2025.3.0 which is incompatible.
+torchvision 0.26.0+cu130 requires torch==2.11.0, but you have torch 2.6.0 which is incompatible.
+cudf-cu13 26.6.0 requires pyarrow<24,>=19.0.0, but you have pyarrow 24.0.0 which is incompatible.
+gradio-client 2.7.2 requires huggingface-hub<3.0,>=1.16.0, but you have huggingface-hub 0.36.2 which is incompatible.
+gradio 6.30.0 requires huggingface-hub<3.0,>=1.16.0, but you have huggingface-hub 0.36.2 which is incompatible.
+gradio 6.30.0 requires pillow<13.0,>=8.0, but you have pillow 13.0.0 which is incompatible.
+diffusers 0.42.0 requires huggingface-hub<3.0,>=1.32.0, but you have huggingface-hub 0.36.2 which is incompatible.
+We strongly recommend passing in an `attention_mask` since your input_ids may be padded. See https://huggingface.co/docs/transformers/troubleshooting#incorrect-output-when-padding-tokens-arent-masked.
+versions OK: {'torch': '2.6.0', 'transformers': '4.51.3', 'datasets': '3.6.0', 'pyarrow': '24.0.0'}
+device: Tesla T4
+head_mask effective: loss(all ones)=0.694228 loss(all zeros)=0.694195
+PREFLIGHT OK
+2.6.0+cu124 4.51.3
+/kaggle/input/notebooks/gouravcseai/v20-pilot/v20/ft/mnli/pytorch_model.bin: OK
+Generating train split:   0%|          | 0/392702 [00:00<?, ? examples/s]Generating train split:  20%|██        | 79000/392702 [00:00<00:00, 781539.34 examples/s]Generating train split:  49%|████▊     | 191000/392
+Generating validation_matched split:   0%|          | 0/9815 [00:00<?, ? examples/s]Generating validation_matched split: 100%|██████████| 9815/9815 [00:00<00:00, 906185.34 examples/s]
+Generating validation_mismatched split:   0%|          | 0/9832 [00:00<?, ? examples/s]Generating validation_mismatched split: 100%|██████████| 9832/9832 [00:00<00:00, 981119.07 examples/s]
+Generating test_matched split:   0%|          | 0/9796 [00:00<?, ? examples/s]Generating test_matched split: 100%|██████████| 9796/9796 [00:00<00:00, 923789.87 examples/s]
+Generating test_mismatched split:   0%|          | 0/9847 [00:00<?, ? examples/s]Generating test_mismatched split: 100%|██████████| 9847/9847 [00:00<00:00, 956580.31 examples/s]
+as train rows=392702 mapped to MNLI=389423 (0.9917)
+bn train rows=392702 mapped to MNLI=389423 (0.9917)
+hi train rows=392702 mapped to MNLI=389423 (0.9917)
+Generating train split:   0%|          | 0/392702 [00:00<?, ? examples/s]Generating train split:  16%|█▌        | 63000/392702 [00:00<00:00, 615022.06 examples/s]Generating train split:  45%|████▍     | 176000/392
+Generating test split:   0%|          | 0/5010 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 5010/5010 [00:00<00:00, 885336.55 examples/s]
+Generating validation split:   0%|          | 0/2490 [00:00<?, ? examples/s]Generating validation split: 100%|██████████| 2490/2490 [00:00<00:00, 717048.88 examples/s]
+unpruned {'en': 0.8349, 'as': 0.6855, 'bn': 0.7406, 'gu': 0.7044, 'hi': 0.753, 'kn': 0.7402, 'ml': 0.7181, 'mr': 0.7137, 'or': 0.7032, 'pa': 0.7418, 'ta': 0.7349, 'te': 0.7221}
+seed=7: 17 of 2048 official calibration rows replaced (no content match)
+seed=7 none/none: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.6924, 'as': 0.4072, 'bn': 0.4076, 'gu': 0.4084, 'hi': 0.408, 'kn': 0.4333, 'ml': 0.4277, 'mr': 0.4173, 'or': 0.4137, 'pa': 0.4177, 'ta': 0.4422,
+seed=7 d2i_r/en: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.8257, 'as': 0.6422, 'bn': 0.6743, 'gu': 0.708, 'hi': 0.7442, 'kn': 0.6988, 'ml': 0.6811, 'mr': 0.6639, 'or': 0.6293, 'pa': 0.7181, 'ta': 0.7008, 
+seed=7 d2i_r/as: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.7695, 'as': 0.6767, 'bn': 0.7237, 'gu': 0.7072, 'hi': 0.7225, 'kn': 0.7064, 'ml': 0.6843, 'mr': 0.6795, 'or': 0.6695, 'pa': 0.7169, 'ta': 0.6763,
+seed=7 d2i_r/bn: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.7514, 'as': 0.6663, 'bn': 0.7273, 'gu': 0.702, 'hi': 0.7369, 'kn': 0.7072, 'ml': 0.6743, 'mr': 0.6759, 'or': 0.6241, 'pa': 0.7008, 'ta': 0.6972, 
+seed=7 d2i_r/hi: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.7562, 'as': 0.6418, 'bn': 0.657, 'gu': 0.6904, 'hi': 0.7369, 'kn': 0.6988, 'ml': 0.6651, 'mr': 0.6695, 'or': 0.6438, 'pa': 0.7217, 'ta': 0.7016, 
+seed=7 d2i_r/mixed: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.8096, 'as': 0.6719, 'bn': 0.71, 'gu': 0.7008, 'hi': 0.7289, 'kn': 0.7044, 'ml': 0.6847, 'mr': 0.6687, 'or': 0.6795, 'pa': 0.7269, 'ta': 0.7076
+seed=7 d2i_ri/en: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.8321, 'as': 0.6076, 'bn': 0.7177, 'gu': 0.6325, 'hi': 0.7353, 'kn': 0.696, 'ml': 0.6799, 'mr': 0.6627, 'or': 0.6129, 'pa': 0.7068, 'ta': 0.6996,
+seed=7 d2i_ri/as: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.7867, 'as': 0.6823, 'bn': 0.7177, 'gu': 0.6839, 'hi': 0.7265, 'kn': 0.7116, 'ml': 0.6888, 'mr': 0.6783, 'or': 0.6835, 'pa': 0.7153, 'ta': 0.7, '
+seed=7 d2i_ri/bn: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.7835, 'as': 0.6719, 'bn': 0.7277, 'gu': 0.7028, 'hi': 0.7382, 'kn': 0.7149, 'ml': 0.6815, 'mr': 0.6759, 'or': 0.6446, 'pa': 0.7181, 'ta': 0.706,
+seed=7 d2i_ri/hi: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.7643, 'as': 0.6474, 'bn': 0.7016, 'gu': 0.6932, 'hi': 0.7373, 'kn': 0.7052, 'ml': 0.6691, 'mr': 0.6606, 'or': 0.6229, 'pa': 0.7269, 'ta': 0.6932
+seed=7 d2i_ri/mixed: mac=0.500 heads=[0, 6, 6, 5, 10, 9, 8, 8, 7, 4, 7, 12] acc={'en': 0.8181, 'as': 0.6703, 'bn': 0.7181, 'gu': 0.7028, 'hi': 0.7265, 'kn': 0.7133, 'ml': 0.6884, 'mr': 0.6807, 'or': 0.6912, 'pa': 0.7333, 'ta': 0.7
+seed=42: 13 of 2048 official calibration rows replaced (no content match)
+seed=42 none/none: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.6727, 'as': 0.4116, 'bn': 0.4137, 'gu': 0.4133, 'hi': 0.4173, 'kn': 0.4365, 'ml': 0.4341, 'mr': 0.4253, 'or': 0.4249, 'pa': 0.4325, 'ta': 0.444
+seed=42 d2i_r/en: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.8245, 'as': 0.643, 'bn': 0.6695, 'gu': 0.712, 'hi': 0.7285, 'kn': 0.7145, 'ml': 0.6952, 'mr': 0.6651, 'or': 0.6361, 'pa': 0.712, 'ta': 0.7088, '
+seed=42 d2i_r/as: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.7614, 'as': 0.6771, 'bn': 0.7064, 'gu': 0.694, 'hi': 0.7249, 'kn': 0.7076, 'ml': 0.6727, 'mr': 0.6703, 'or': 0.6418, 'pa': 0.7028, 'ta': 0.6723,
+seed=42 d2i_r/bn: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.7582, 'as': 0.659, 'bn': 0.7225, 'gu': 0.702, 'hi': 0.7169, 'kn': 0.7024, 'ml': 0.6747, 'mr': 0.6731, 'or': 0.6558, 'pa': 0.7133, 'ta': 0.6924, 
+seed=42 d2i_r/hi: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.7871, 'as': 0.6562, 'bn': 0.6739, 'gu': 0.6964, 'hi': 0.7325, 'kn': 0.7064, 'ml': 0.6739, 'mr': 0.6538, 'or': 0.6562, 'pa': 0.7285, 'ta': 0.6952
+seed=42 d2i_r/mixed: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.8169, 'as': 0.6687, 'bn': 0.7253, 'gu': 0.7052, 'hi': 0.7293, 'kn': 0.7133, 'ml': 0.6912, 'mr': 0.6743, 'or': 0.6707, 'pa': 0.7237, 'ta': 0.7
+seed=42 d2i_ri/en: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.8305, 'as': 0.5948, 'bn': 0.7149, 'gu': 0.6566, 'hi': 0.7369, 'kn': 0.7064, 'ml': 0.6871, 'mr': 0.6622, 'or': 0.6076, 'pa': 0.7068, 'ta': 0.706
+seed=42 d2i_ri/as: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.7787, 'as': 0.6735, 'bn': 0.7124, 'gu': 0.6851, 'hi': 0.7285, 'kn': 0.7189, 'ml': 0.6799, 'mr': 0.6731, 'or': 0.6695, 'pa': 0.7008, 'ta': 0.697
+seed=42 d2i_ri/bn: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.7884, 'as': 0.6675, 'bn': 0.7265, 'gu': 0.6948, 'hi': 0.7281, 'kn': 0.7189, 'ml': 0.6859, 'mr': 0.6763, 'or': 0.6317, 'pa': 0.7137, 'ta': 0.695
+seed=42 d2i_ri/hi: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.7803, 'as': 0.6538, 'bn': 0.7036, 'gu': 0.692, 'hi': 0.7349, 'kn': 0.7052, 'ml': 0.6783, 'mr': 0.6602, 'or': 0.5859, 'pa': 0.7309, 'ta': 0.6988
+seed=42 d2i_ri/mixed: mac=0.500 heads=[0, 7, 6, 5, 10, 9, 8, 7, 7, 4, 7, 12] acc={'en': 0.8197, 'as': 0.6791, 'bn': 0.7265, 'gu': 0.7, 'hi': 0.7305, 'kn': 0.7161, 'ml': 0.6912, 'mr': 0.6739, 'or': 0.6839, 'pa': 0.7237, 'ta': 0.706
+seed=77: 13 of 2048 official calibration rows replaced (no content match)
+seed=77 none/none: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.6888, 'as': 0.408, 'bn': 0.408, 'gu': 0.4076, 'hi': 0.4056, 'kn': 0.4337, 'ml': 0.4297, 'mr': 0.4229, 'or': 0.4153, 'pa': 0.4245, 'ta': 0.4418
+seed=77 d2i_r/en: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.8217, 'as': 0.6506, 'bn': 0.6671, 'gu': 0.702, 'hi': 0.7438, 'kn': 0.7076, 'ml': 0.6888, 'mr': 0.6594, 'or': 0.6438, 'pa': 0.7181, 'ta': 0.6863
+seed=77 d2i_r/as: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.7751, 'as': 0.6731, 'bn': 0.7096, 'gu': 0.7056, 'hi': 0.7329, 'kn': 0.6952, 'ml': 0.6771, 'mr': 0.6791, 'or': 0.6614, 'pa': 0.7068, 'ta': 0.667
+seed=77 d2i_r/bn: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.7466, 'as': 0.6715, 'bn': 0.7225, 'gu': 0.7012, 'hi': 0.7309, 'kn': 0.7137, 'ml': 0.6763, 'mr': 0.6731, 'or': 0.6562, 'pa': 0.7185, 'ta': 0.702
+seed=77 d2i_r/hi: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.7671, 'as': 0.6365, 'bn': 0.6791, 'gu': 0.6948, 'hi': 0.7402, 'kn': 0.7064, 'ml': 0.6759, 'mr': 0.6639, 'or': 0.6506, 'pa': 0.7185, 'ta': 0.694
+seed=77 d2i_r/mixed: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.8137, 'as': 0.6647, 'bn': 0.7141, 'gu': 0.6968, 'hi': 0.7253, 'kn': 0.7016, 'ml': 0.6827, 'mr': 0.6679, 'or': 0.6723, 'pa': 0.7229, 'ta': 0.
+seed=77 d2i_ri/en: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.8249, 'as': 0.6442, 'bn': 0.7185, 'gu': 0.6265, 'hi': 0.7301, 'kn': 0.7032, 'ml': 0.6755, 'mr': 0.6614, 'or': 0.5952, 'pa': 0.712, 'ta': 0.685
+seed=77 d2i_ri/as: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.7908, 'as': 0.6799, 'bn': 0.7137, 'gu': 0.6691, 'hi': 0.7225, 'kn': 0.7096, 'ml': 0.6799, 'mr': 0.6863, 'or': 0.6767, 'pa': 0.708, 'ta': 0.694
+seed=77 d2i_ri/bn: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.7719, 'as': 0.6606, 'bn': 0.7229, 'gu': 0.7004, 'hi': 0.7369, 'kn': 0.7141, 'ml': 0.6892, 'mr': 0.6739, 'or': 0.6578, 'pa': 0.7201, 'ta': 0.71
+seed=77 d2i_ri/hi: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.7695, 'as': 0.6542, 'bn': 0.7161, 'gu': 0.704, 'hi': 0.7394, 'kn': 0.708, 'ml': 0.6751, 'mr': 0.655, 'or': 0.6076, 'pa': 0.7245, 'ta': 0.6956,
+seed=77 d2i_ri/mixed: mac=0.500 heads=[0, 6, 6, 5, 10, 10, 9, 7, 7, 4, 7, 12] acc={'en': 0.8225, 'as': 0.6711, 'bn': 0.7116, 'gu': 0.6912, 'hi': 0.7333, 'kn': 0.7056, 'ml': 0.6859, 'mr': 0.6747, 'or': 0.6787, 'pa': 0.7253, 'ta': 0
+33
