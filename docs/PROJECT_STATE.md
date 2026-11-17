@@ -1145,3 +1145,35 @@ Versus official Kwon: d2i-RI higher on all six; Holm-significant on STS-B (+0.01
 Unpruned references (accuracy / Pearson): MRPC 0.848, SST-2 0.914, STS-B 0.863, QNLI 0.886, MNLI 0.821, QQP 0.900. Evaluation sizes 408, 872, 1500, 5463, 9815, 40430.
 **Reading.** Same as V18 (BERT-base): d2i-RI keeps K-prune's masks, ties K-prune within noise, beats Kwon. It gives no speed gain (same shapes as K-prune). The one significant win (QQP, 0.16 points, largest eval set) is tiny and is not a paper-level claim. Parity result, replicated on a second architecture depth. No SOTA, speedup or quantum claim.
 Held-out prediction files and masks are committed (`results/v19/final/raw`, hashes in `heldout_pt_sha256.txt`). Rule 11 independent check still outstanding before any paper-ready call.
+
+## V20 PILOT pre-registration (2026-11-17, written BEFORE any V20 code or run; branch `research/qfc-v20-multilingual`)
+Owner approved the direction of `docs/Q1_GAP_RESEARCH_2026-11-17.md` and GPU use ("i approve for everthing you need", 2026-11-17). This is an exploration PILOT on validation data only. It decides whether the mechanism hypothesis H20b is worth a confirmatory study. Its numbers are never paper results.
+
+**Question.** In a multilingual encoder fine-tuned on English NLI, does the retraining-free least-squares REPAIR (fitted on calibration activations) create a cross-lingual disparity that mask selection alone does not, and does repairing with target-language calibration remove it?
+
+**Setup (fixed now).**
+- **Model.** `google/muril-base-cased` rev afd9f36c7923d54e97903922ff1b260d091d202f (BERT arch, vocab 197,285).
+- **Fine-tuning recipe.** One pinned recipe, `scripts/v20_finetune.py`:
+  - data: GLUE MNLI train (English), 2 epochs;
+  - optimizer: AdamW lr 2e-5, weight decay 0.01, linear warmup 10% then linear decay;
+  - batch 32, max_len 128, fp16, seed 42;
+  - output: saved as pytorch_model.bin with its sha256 recorded.
+
+  This is a single fine-tune and is never called a seed (rule 6).
+- **Teacher gate.** Must pass BEFORE any pruning result is looked at: MNLI validation_matched ≥ 0.78 and IndicXNLI-as validation ≥ 0.55. If it fails, the recipe is fixed and the gate rerun; no pruning numbers are read until it passes.
+- **Selection.** Official K-prune (patched data/index add-on only, as V15–V19), `--model_name google/muril-base-cased`, task mnli, our 2048 English calibration rows (`train.shuffle(seed)[:2048]`), constraint c = 0.5 (remove 0.5), calibration seeds 7, 42, 77. The masks are FIXED for every pilot cell, so selection language = en in the pilot.
+- **Repair factor.** `none` (mask only, no weight change), `d2i_r` (drift-corrected output refit, K-prune-style compensation, V17), `d2i_ri` (V18 method).
+- **Calibration language for repair.** `en`, `as`, `bn`, `hi`, `mixed`. Content-matched: the SAME 2048 MNLI train row indices, taken from GLUE MNLI (en) or from IndicXNLI train (row-aligned translation of MNLI train, verified row 0–1 match 2026-11-17). `mixed` = rows assigned round-robin to en/as/bn/hi (512 each). Unlabeled use only (labels are never read by the repair).
+- **Evaluation.** XNLI-en validation (2490) + IndicXNLI validation (2490 per language, all 11 languages; n-way parallel with XNLI-en). Per-example predictions are stored.
+
+**Pilot decision rule (fixed now; dev languages as, bn, hi; en is the reference).** Let M = mask-only, R_L = repair with calibration L, acc on validation.
+- **P1 (disparity from English repair).** Δ(T) = [R_en(en) − M(en)] − [R_en(T) − M(T)], computed for both repairs.
+- **P2 (target repair helps the target).** R_T(T) − R_en(T).
+- **Statistics.** Paired cluster bootstrap over (seed × example), 10,000 resamples. Examples are parallel across languages, so pairing is per example id.
+- **GO for a confirmatory V20.** Both must hold for `d2i_r`:
+  - P1 pooled over T ∈ {as, bn, hi} has 95% CI > 0 and point ≥ 0.01;
+  - P2 has 95% CI > 0 for at least 2 of the 3 languages.
+- **NO-GO.** Otherwise the mechanism claim is dropped (descriptive fallback, see the gap doc §8).
+- **Reported but not part of the rule:** other languages, `d2i_ri`, `mixed`.
+
+**Reserved, untouched until a confirmatory freeze:** the IndicXNLI and XNLI TEST splits (all languages), all of SIB-200, any other model (IndicBERTv2, mBERT), Kwon masks as a selection factor, and target-language selection. The pilot reads only validation.
