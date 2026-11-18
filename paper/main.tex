@@ -33,9 +33,12 @@ compensation held equal, which selection rule wins depends on the task. (v) Fina
 three tasks never used in development (QNLI, MNLI-m, QQP; five calibration seeds, 50\% of MACs) asks whether a combination of K-prune's masks,
 input-side alignment and the drift-corrected refit (d2i-RI) beats both official baselines. The hypothesis is \emph{not}
 supported: d2i-RI is statistically indistinguishable from K-prune on QNLI and MNLI-m and ahead by 0.13 points on QQP (not enough to meet the
-pre-registered bar of two of three tasks), and it beats the method of Kwon et al.\ by 2.8--8.1 points on all three. We make no claim of improved accuracy
+pre-registered bar of two of three tasks), and it beats the method of Kwon et al.\ by 2.8--8.1 points on all three. (vi) A second pre-registered
+test transfers the frozen d2i-RI, unchanged, to the 6-layer distilled checkpoints released with K-prune on six GLUE tasks. Superiority over K-prune is again not
+supported (one win of six, QQP, $+0.16$ points), while the pre-registered non-inferiority to K-prune within 1.5 points holds on all six tasks; d2i-RI is
+higher than Kwon et al.\ on all six, significantly on four. We make no claim of improved accuracy
 over the state of the art. Because d2i-RI keeps K-prune's masks, its pruned shapes, and so its latency, are K-prune's; latency is reported
-descriptively from physically pruned shapes. Results (iii)--(v) use no quantum quantity. The quantum-information quantities are
+descriptively from physically pruned shapes. Results (iii)--(vi) use no quantum quantity. The quantum-information quantities are
 mathematical representations computed classically; no quantum hardware is used and no quantum advantage is claimed.
 \end{abstract}
 
@@ -63,9 +66,10 @@ advantage over a module-output refit is a drift-corrected least-squares target (
 equalizing compensation the remaining effect of selection is task-dependent. Finally we freeze one strong
 combination (K-prune masks, input-side alignment, drift-corrected refit; d2i-RI) and test it once, on tasks and splits never used in
 development, against both official baselines (Section~\ref{sec:v18}). It reaches the level of the stronger baseline, K-prune, but does not beat it.
+A second pre-registered test on a 6-layer distilled model and six tasks repeats this picture and adds a pre-registered non-inferiority result (Section~\ref{sec:v19}).
 All of this is negative or descriptive evidence, and the paper is framed accordingly. The quantum formalism serves as a
 mathematical representation for analysing redundancy: every quantity is computed classically,
-Sections~\ref{sec:v15}--\ref{sec:v18} use no quantum quantity, and we claim no quantum advantage.
+Sections~\ref{sec:v15}--\ref{sec:v19} use no quantum quantity, and we claim no quantum advantage.
 
 \paragraph{Contributions.} (i) A quantum-information formulation of attention-head redundancy (density operators, squared
 Uhlmann fidelity, purified distance) and a characterization of when attention-pattern fidelity fails as a redundancy proxy, with
@@ -77,7 +81,8 @@ statistically indistinguishable after it (attention-pattern coverage excepted). 
 al.\ and K-prune code, with the task-dependent outcome; (v) a decomposition showing that K-prune's compensation is
 reproduced to within 3\% by a drift-corrected LS refit (post-hoc, on development tasks), and a selection $\times$ compensation table that holds compensation fixed;
 (vi) a pre-registered confirmatory test (QNLI, MNLI-m, QQP) of a frozen combination against both official baselines, whose outcome is a tie with K-prune and a
-clear win over Kwon et al., together with a descriptive latency table of the physically pruned shapes.
+clear win over Kwon et al., together with a descriptive latency table of the physically pruned shapes; (vii) a pre-registered transfer of the frozen
+combination to a 6-layer distilled model on six tasks, with superiority not supported and non-inferiority to K-prune (margin 1.5 points) supported on every task.
 Hypotheses, thresholds and analysis code were fixed before the corresponding data were seen, with one exception stated
 in Section~\ref{sec:prereg}; negative results are reported as such.
 
@@ -208,6 +213,7 @@ V15--V17 is the logit KL to the teacher on 512 held-out \emph{training} rows, no
 held out from calibration only: the fine-tuned teachers were trained on the training split, so this KL is not evidence of
 generalization. The V16 and V17 studies are pre-registered in the repository but, as stated above, after development data
 were seen; the drift-corrected mechanism was found by reading K-prune's code after V16 and checked on the same development rows.
+V19 (Section~\ref{sec:v19}) was registered after V18 and evaluates the frozen V18 code on a new model; its validation splits had been used with BERT-base, and its one deviation (SQuAD dropped) was decided before any V19 statistic.
 
 \section{Results}
 \subsection{Attention similarity versus output similarity}\label{sec:diag}
@@ -399,18 +405,53 @@ Kwon et al., QNLI / MNLI-m / QQP & 57.6 / 54.9 / 52.6 & 943 / 1020 / 878 & 42.24
 K-prune (= d2i-RI), QNLI / MNLI-m / QQP & 47.7 / 48.3 / 48.4 & 815 / 814 / 820 & 42.43 / 42.49 / 42.50\\\bottomrule
 \end{tabular}\end{table}
 
+\subsection{Pre-registered transfer to a 6-layer distilled model (V19)}\label{sec:v19}
+% results/v19/final/v19_analysis.json ; scripts/v19_analysis.py (run once, after the integrity gate passed on all six tasks)
+\paragraph{Design (frozen before any V19 data).} The V18 method is applied unchanged (same code, ridge, 2048 calibration rows, five seeds, 50\% of MACs; no tuning)
+to the fine-tuned DistilBERT checkpoints released in the official K-prune folder. These are 6-layer models stored in BERT format (they load as a 6-layer
+BERT with no missing or unexpected weights); we call them DistilBERT after their source, and the official codes and our pipeline feed them the DistilBERT tokenizer.
+Both official baselines run on the original checkpoints (verified by SHA-256), with the same seeds and calibration rows. V19 does not reopen or pool with V18.
+\paragraph{Hypotheses.} H19a (primary): d2i-RI exceeds K-prune (fixed in advance as the comparator) with Holm-adjusted one-sided $p<0.05$ and CI lower bound $>0$ on at
+least two thirds of the tasks, and no Holm-significant loss to either baseline. H19b (secondary): non-inferiority to K-prune with a margin of 1.5 points, required on
+every task (CI lower bound $>-1.5$ points and Holm-adjusted one-sided $p<0.05$ for $H_0\colon\delta\le-1.5$). Same paired cluster bootstrap as V18.
+\paragraph{Deviation, decided before any statistic.} SQuAD~v1.1 was in the registered task list, but official K-prune ran out of memory on the only available GPU (T4, 15\,GB)
+for every seed. Patching it would have modified a baseline, so SQuAD was dropped before any V19 statistic was computed; the analysis covers six tasks, H19a needs 4 of 6,
+and Holm runs over six. Two further fixes (retries for Hub rate limits and for a partial checkpoint download) were engineering only; method, seeds, budget and thresholds are unchanged.
+For these six tasks the validation splits had been used with BERT-base (development or V18); only the model is new.
+\paragraph{Outcome.} \textbf{H19a is not supported} (one win of six, QQP; no loss). \textbf{H19b is supported on all six tasks} (Holm-adjusted $p\le0.0006$ for every task).
+Against K-prune the differences are within $\pm0.16$ points in mean and every 95\% interval lies within $[-0.64,+0.50]$ points (Table~\ref{tab:v19}). Against Kwon et al.\ d2i-RI
+is higher on all six tasks, Holm-significantly on STS-B, QNLI, MNLI-m and QQP ($+1.10$ to $+3.78$ points, Holm $p\le0.0009$) but not on MRPC ($+1.67$, Holm $p=0.15$) or SST-2 ($+0.37$, Holm $p=0.30$).
+This repeats the BERT-base picture of Section~\ref{sec:v18} on a second model depth: d2i-RI keeps K-prune's masks and matches its accuracy without exceeding it. The non-inferiority statement applies to this model only;
+no equivalence test was registered for V18.
+\begin{table}[t]\centering\small
+\caption{V19 result, 50\% of MACs, 6-layer distilled checkpoints of the official K-prune release, mean validation metric over five calibration seeds (accuracy, \%; STS-B: Pearson $\times100$), and paired difference d2i-RI minus baseline in points with 95\% cluster-bootstrap CI.
+Evaluation sizes: MRPC 408, SST-2 872, STS-B 1500, QNLI 5463, MNLI-m 9815, QQP 40430. Source: \texttt{results/v19/final/v19\_analysis.json}.}\label{tab:v19}
+\begin{tabular}{lcccccc}\toprule
+ & Unpruned & Kwon et al. & K-prune & d2i-RI & d2i-RI $-$ K-prune & d2i-RI $-$ Kwon\\\midrule
+MRPC & 84.80 & 83.68 & 85.44 & 85.34 & $-0.10$ [$-0.64,+0.44$] & $+1.67$ [$-0.64,+3.97$]\\
+SST-2 & 91.40 & 89.70 & 90.11 & 90.07 & $-0.05$ [$-0.57,+0.50$] & $+0.37$ [$-0.96,+1.70$]\\
+STS-B & 86.33 & 85.08 & 86.06 & 86.16 & $+0.10$ [$-0.02,+0.22$] & $+1.10$ [$+0.50,+1.71$]\\
+QNLI & 88.56 & 86.49 & 87.65 & 87.72 & $+0.07$ [$-0.17,+0.32$] & $+1.23$ [$+0.55,+2.01$]\\
+MNLI-m & 82.11 & 77.17 & 80.96 & 80.95 & $-0.01$ [$-0.21,+0.20$] & $+3.78$ [$+2.89,+4.69$]\\
+QQP & 89.99 & 86.38 & 88.81 & 88.97 & $+0.16$ [$+0.07,+0.25$] & $+2.59$ [$+1.76,+3.52$]\\\bottomrule
+\end{tabular}\end{table}
+\paragraph{Latency (H19c, descriptive).} \todo{not yet measured: CPU and GPU latency and parameter count of the physically pruned 6-layer shapes, \texttt{scripts/v15\_latency.py}, transformers 4.51.3 asserted. d2i-RI shapes equal K-prune's by construction.}
+
 \section{Limitations}
 \begin{itemize}\setlength\itemsep{0pt}
 \item The quantum-information quantities (density operators, fidelity, purified distance) are mathematical representations
 computed classically; no quantum hardware is used and no quantum advantage is claimed. The fidelity analysis explains redundancy
 and bounds the merge error, but it does not by itself yield a selector that beats classical ones after the LS refit
 (Section~\ref{sec:v14}).
-\item One model family (BERT-base) and two development tasks for GRP; no RoBERTa, no decoder, no larger model.
+\item Two encoder depths of one family (BERT-base and the 6-layer distilled checkpoints of the official K-prune release) and two development tasks for GRP; no RoBERTa, no BERT-large, no decoder,
+no multilingual model. RoBERTa and BERT-large were excluded because the official baseline codes ship no checkpoints for them, and porting K-prune would weaken a baseline.
 \item The V15--V17 gate metric is the logit KL on held-out training rows. It is a calibration-side quantity; we
 did not run the accuracy comparison (H11), so no accuracy conclusion about GRP or GRP-R is drawn.
 \item Latency (Section~\ref{sec:v18}) is measured on random-weight BERT-base models of the pruned shapes, one GPU type and one CPU, at sequence length 128; it is descriptive and no speed claim is made
 for d2i-RI relative to K-prune (identical shapes). V14 results are functional masks.
-\item The confirmatory claim covers BERT-base, three tasks, 50\% of MACs, five calibration seeds and retraining-free pruning only; no claim at 40\% MACs, on MRPC/SST-2/STS-B (development data) or on other models.
+\item The V18 confirmatory claim covers BERT-base, three tasks, 50\% of MACs, five calibration seeds and retraining-free pruning only; no claim at 40\% MACs or on MRPC/SST-2/STS-B (development data) for BERT-base.
+The V19 claims cover the 6-layer distilled checkpoints, six tasks (SQuAD dropped, Section~\ref{sec:v19}), 50\% of MACs and five calibration seeds; the non-inferiority result is not transferred to BERT-base, where no equivalence test was registered.
+Both use one fine-tuned checkpoint per task, so the intervals do not include fine-tuning variance.
 d2i-RI was developed on the development tasks after V15--V17, and the published G-Pruner claim of lower degradation than K-prune was not reproduced, so d2i-RI is not claimed to be at the level of the best published method.
 \item MRPC has 408 validation examples, so accuracy differences of one to two points are within noise there.
 \item V14 uses a single, uniform sparsity level (6 of 12 heads); its Kaggle run did not record exact package version

@@ -940,6 +940,14 @@ curves, ablations (fidelity vs HS vs cosine), limitations.
 - PDF not compiled: no LaTeX on this machine.
 - Phase 2 (V18): screened, no idea written up. Candidate "choose allocation rule per task by calibration KL" is model selection over two known pruners (not a principle); "drift-aware allocation" is GRP-R (gate failed); "absorption/repairability" allocation is published (2606.15161, 2605.25508). Honest option needing owner decision: a descriptive confirmatory replication of the selection x compensation table on QNLI/MNLI-m/QQP with official baselines (not a new method).
 
+## Analysis paper v2 status (2026-11-18, branch paper/analysis-v2, owner chose Direction D)
+- Scope: the existing analysis paper (V14-V18, title and quantum-representation framing unchanged), extended with V19. Section `sec:v19` + Table `tab:v19` added; every number is copied from `results/v19/final/v19_analysis.json`. The abstract, contributions, disclosure and limitations were updated. Non-inferiority is stated for V19 only; V18 stays a descriptive tie (no equivalence test registered).
+- V20 is NOT in the paper: its pre-registration says pilot numbers are never paper results (rule 12). A multilingual extension needs a new V21 pre-registration on the reserved IndicXNLI/XNLI test splits before any code. It is blocked on Kwon/MuRIL loading parity and needs the owner's GPU go.
+- Open items:
+  - H19c latency of the 6-layer shapes was pre-registered but has not been run (`\todo` in the paper). CPU can run locally; GPU needs a Kaggle run.
+  - Rule 11 independent check of V18/V19 numbers and of the proofs.
+  - No PDF compiled (no LaTeX on this machine).
+
 ## Exploration phase "beat the baselines" (started 2026-10-27, branch research/beat-explore)
 Owner mission: docs/CLI_MISSION_BEAT.md (no paper work until a method beats Kwon et al. and K-prune). All ideas, failures
 included, are logged in docs/EXPLORATION_LOG.md, whose "Fixed rules" section (metrics, meaning of "beats both", freeze
