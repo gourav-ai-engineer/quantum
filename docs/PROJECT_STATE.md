@@ -954,6 +954,12 @@ curves, ablations (fidelity vs HS vs cosine), limitations.
     - Cause: not identified. Other desktop applications were running, and thermal or power-state changes are possible.
     - Why the runs cannot be used: shapes are timed in a fixed order, so the drift biases the Kwon-versus-K-prune comparison.
     - Fix needed before rerunning: an engineering change, to be documented before it is run. Repeat all shapes in R rounds in a shuffled order, report the median of the per-round medians, and keep the unpruned drift control. Run on an otherwise idle machine, or in a Kaggle CPU kernel. The archived files are `run1_invalid_*`, `run2_drift_*` and run 3's `latency_cpu.json` + `cpu_log.txt`.
+  - **CPU latency rerun protocol (written 2026-11-18, before the run; the owner said "use Kaggle CPU").**
+    - Engineering change: `scripts/v15_latency.py --rounds R --order-seed S --threads T`. Every round times every shape once, in a seeded random order, and rebuilds each model. The reported value is the median of the per-round medians. The defaults (`--rounds 1`, no seed) keep the original protocol. Test: `tests/test_latency_rounds.py`.
+    - Shapes (`results/latency_cpu_rounds/shapes.json`, 20 shapes): the seed-7 shapes of V19 (6-layer, 13 shapes) and of H18b (12-layer BERT-base, 7 shapes). Each depth has its own unpruned control.
+    - The H18b CPU table in the paper came from this same machine and the same fixed-order loop, so it carries the same unquantified drift risk. It is rerun here.
+    - Settings: Kaggle CPU kernel `kaggle/cpu_latency_rounds` (no GPU), FP32, seq 128, batch 1 and 32, 30 runs after 5 warm-up runs per round, R = 10, S = 0, T = all of the kernel's logical CPUs. torch, transformers 4.51.3 (asserted) and the CPU model are recorded.
+    - **Validity rule (fixed now).** The run is INVALID if, for either unpruned control at either batch size, the per-round medians have max/min > 1.10. An invalid run is archived as an engineering record, and no number from it is used. A valid run replaces the H18b CPU table and fills the H19c CPU part. The paper reports the median over rounds and the max/min range.
   - The owner confirmed on 2026-11-18 to keep the name "DistilBERT", with the 6-layer BERT-format fact stated.
   - Rule 11 independent check of V18/V19 numbers and of the proofs.
   - No PDF compiled (no LaTeX on this machine).

@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/cpu-latency-rounds",
+ "title": "cpu latency rounds",
+ "code_file": "cpu_latency_rounds.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": false,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}

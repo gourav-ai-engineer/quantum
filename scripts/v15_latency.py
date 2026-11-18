@@ -67,6 +67,35 @@ def time_shape(heads, neurons, batch, seq_len, warmup=20, runs=100, device="cuda
     return statistics.median(ts), params
 
 
+def measure(shapes, batches, rounds=1, order_seed=None, timer=None):
+    """{name: rec}. rounds=1, order_seed=None: each shape timed once in the given order (the original protocol).
+    Otherwise every round times every shape once, in a seeded random order (a model is rebuilt per round), and
+    median_ms_b<b> is the median of the per-round medians, so slow drift of the machine cannot favour one shape.
+    timer(heads, neurons, batch) -> (median_ms, params)."""
+    import random
+    names = list(shapes)
+    out = {n: {"heads": shapes[n][0], "neurons": shapes[n][1]} for n in names}
+    rng = random.Random(order_seed)
+    per = {n: {b: [] for b in batches} for n in names}
+    orders = []
+    for r in range(rounds):
+        order = names[:] if order_seed is None else rng.sample(names, len(names))
+        orders.append(order)
+        for n in order:
+            for b in batches:
+                ms, params = timer(shapes[n][0], shapes[n][1], b)
+                per[n][b].append(ms)
+                out[n]["params_encoder"] = params
+            print(f"round {r} {n}", {b: round(per[n][b][-1], 3) for b in batches}, flush=True)
+    for n in names:
+        for b in batches:
+            out[n][f"median_ms_b{b}"] = statistics.median(per[n][b])
+            if rounds > 1:
+                out[n][f"round_medians_ms_b{b}"] = per[n][b]
+                out[n][f"max_over_min_b{b}"] = max(per[n][b]) / min(per[n][b])
+    return out, orders
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--grp", nargs="*", default=[], help="glob(s) of step22 JSONs")
@@ -79,8 +108,13 @@ def main():
     ap.add_argument("--warmup", type=int, default=20)
     ap.add_argument("--batches", type=int, nargs="*", default=[1, 32])
     ap.add_argument("--seq-len", type=int, default=128)
+    ap.add_argument("--rounds", type=int, default=1, help="time every shape once per round (default 1: original protocol)")
+    ap.add_argument("--order-seed", type=int, default=None, help="shuffle the shape order in every round with this seed")
+    ap.add_argument("--threads", type=int, default=None, help="torch.set_num_threads (CPU)")
     ap.add_argument("--out")
     a = ap.parse_args()
+    if a.threads:
+        torch.set_num_threads(a.threads)
     if a.device == "cuda" and not a.dump_shapes and not torch.cuda.is_available():
         raise SystemExit("H12 latency must be measured on a GPU (rule 8); use --device cpu for the separate CPU measurement")
     shapes = {"unpruned": ([12] * 12, [3072] * 12)}
@@ -97,17 +131,19 @@ def main():
         shapes = {k: tuple(v) for k, v in json.load(open(a.shapes)).items()}
     if a.device == "cpu":
         import platform
-        dev = f"cpu: {platform.processor()}, torch threads {torch.get_num_threads()}"
+        cpu = platform.processor()
+        if os.path.exists("/proc/cpuinfo"):  # Linux (Kaggle): platform.processor() is often empty
+            cpu = next((l.split(":", 1)[1].strip() for l in open("/proc/cpuinfo") if l.startswith("model name")), cpu)
+        dev = f"cpu: {cpu}, {os.cpu_count()} logical cpus, torch threads {torch.get_num_threads()}"
     else:
         dev = torch.cuda.get_device_name(0)
     out = {"device": dev, "torch": torch.__version__, "seq_len": a.seq_len,
-           "dtype": "fp16" if a.device == "cuda" else "fp32", "runs": a.runs, "warmup": a.warmup, "results": {}}
-    for name, (h, n) in shapes.items():
-        rec = {"heads": h, "neurons": n}
-        for b in a.batches:
-            ms, params = time_shape(h, n, b, a.seq_len, a.warmup, a.runs, a.device)
-            rec[f"median_ms_b{b}"], rec["params_encoder"] = ms, params
-        out["results"][name] = rec
+           "dtype": "fp16" if a.device == "cuda" else "fp32", "runs": a.runs, "warmup": a.warmup,
+           "rounds": a.rounds, "order_seed": a.order_seed, "torch_threads": torch.get_num_threads()}
+    out["results"], out["round_orders"] = measure(
+        shapes, a.batches, a.rounds, a.order_seed,
+        lambda h, n, b: time_shape(h, n, b, a.seq_len, a.warmup, a.runs, a.device))
+    for name, rec in out["results"].items():
         print(name, {k: round(v, 3) for k, v in rec.items() if k.startswith("median")}, rec["params_encoder"], flush=True)
     json.dump(out, open(a.out, "w"), indent=2)
 
