@@ -171,6 +171,8 @@ bl)
   # Amendment 1: STS-B). BL_TASKS (default stsb), BL_CONS (default "0.5 0.4"). Same patched unmodified algorithms as h10.
   # Results are published after every (task, seed) so a Kaggle time-out keeps what finished.
   SKIP_KP_CKPT=${BL_SKIP_CKPT:-1} bash "$REPO/scripts/v15_kaggle.sh" setup "$W" "$OUT"  # $0 is relative and we cd "$W" above
+  # V21: the E1-verified local tokenizer dirs, linked under the relative name MODEL_NAME=v21tok_<key> (as in stage v21e1)
+  [ -z "${V21_TOK_DIR:-}" ] || for d in "$V21_TOK_DIR"/*; do k=$(basename "$d"); ln -sfn "$d" "$W/kwon/v21tok_$k"; ln -sfn "$d" "$W/kprune/src/v21tok_$k"; done
   BT=${BL_TASKS:-stsb}; BC=${BL_CONS:-"0.5 0.4"}
   (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks "$(echo $BT | tr ' ' ,)" --out "$W/inputs" ${PREP_ARGS:-})
   CKR=${CKPT_DIR_ROOT:-$W/inputs/ckpt}   # V19: the original official checkpoint folders (sha256-verified), not re-saved copies

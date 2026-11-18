@@ -29,6 +29,7 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--out", required=True)
     p.add_argument("--n-extra", type=int, default=512)
+    p.add_argument("--tok-only", action="store_true", help="write tok/ and prep_meta.json only (V21 confirmatory kernels)")
     a = p.parse_args()
     import torch
     from datasets import load_dataset
@@ -49,6 +50,10 @@ def main():
                     continue
                 shutil.copy(hf_hub_download(rid, f, revision=rev), os.path.join(d, f))
             meta["files"][var] = {f: sha256(os.path.join(d, f)) for f in sorted(os.listdir(d))}
+    if a.tok_only:  # V21 confirmatory kernels: only the E1-verified tokenizer dirs
+        json.dump(meta, open(os.path.join(a.out, "prep_meta.json"), "w"), indent=1)
+        print("tok dirs", sorted(meta["files"]))
+        return
     mrpc = load_dataset("glue", "mrpc")["validation"].select(range(64))
     pairs = {"premise": list(mrpc["sentence1"]), "hypothesis": list(mrpc["sentence2"])}
     sets = {"en": load_dataset(XNLI[0], "en", revision=XNLI[1])["validation"]}

@@ -1,8 +1,8 @@
 # V21 pre-registration (DRAFT): confirmatory multilingual analysis of retraining-free structured pruning
 
-**Status: DRAFT, written 2026-11-18, before any V21 code or run. The owner asked for this draft ("draft V21", 2026-11-18). It is NOT frozen.**
+**Status: FROZEN 2026-11-18 at tag `v21-freeze`.** The owner approved the text and gave the GPU go ("freeze + go", 2026-11-18). All gates E1–E5 pass. The text is copied into `docs/PROJECT_STATE.md`. Rule 12 applies from here: any change is a dated `v21-freeze-fixN` amendment for an engineering failure only, made before any statistic is seen.
 
-The draft is frozen only when all of the following hold:
+It was written 2026-11-18, before any V21 code or run, at the owner's request ("draft V21"). The conditions for the freeze were:
 
 1. The owner confirms or edits the text before any run.
 2. The engineering gates E1–E5 below pass. They read no test split, except E3, which reads labels only.
@@ -50,7 +50,8 @@ IndicBERTv2 and XLM-R are out of scope. IndicBERTv2's architecture and baseline 
   - The other five teachers are new.
 - **Teacher gate (validation only).** Each teacher must pass the V20 gate before use: MNLI-m ≥ 0.78 and IndicXNLI-as ≥ 0.55.
   - For mBERT the second condition is IndicXNLI-hi ≥ 0.55 instead. mBERT has very little Assamese pretraining data, and this choice is made now.
-  - A teacher that fails the gate is reported. No teacher is replaced after its test numbers are seen.
+  - A teacher that fails the gate is reported and is never replaced: there is no replacement seed. Its kernel stops before any test-split prediction is made.
+  - That model's pooled statistics and its all-teachers sign rule then run over the teachers that passed, and the paper discloses this. If fewer than 2 teachers of a model pass, every hypothesis for that model is "not run".
 
 ### Selection
 
@@ -231,8 +232,19 @@ Conditions 2 (K-prune official) and 3 (Kwon official) need each official tuned s
   - labels and evaluation size are equal across pipelines;
   - unpruned validation accuracy equals the teacher-gate value;
   - the MAC ratio of every mask is 0.500;
-  - d2i-RI's kept units equal K-prune's masks.
+  - d2i-RI's kept units equal K-prune's masks;
+  - the official environments' teacher predictions differ from ours in at most 2 rows per language.
+- **Kwon missing.** If the only integrity failure of a unit is an official Kwon entry marked "missing" (Kwon could not run unmodified), the unit counts as passing for every hypothesis except H21-4(ii). H21-4(ii) is then "not run" for that model, as the analysis script does when any unit of the model lacks the Kwon files. A missing K-prune entry, or any other failure, fails the unit.
 - **Engineering failures.** Fixed with a dated note and the tag `v21-freeze-fixN`. Only the affected items are rerun. Nothing changes after any statistic has been seen.
+- **Implementation (fixed at the freeze).**
+  - One Kaggle kernel per unit: `kaggle/v21_<model>_t<seed>/`, ids `gouravcseai/v21-<model>-t<seed>`. Each clones the tag `v21-freeze`.
+  - Teacher: `scripts/v20_finetune.py --model-id <pin> --seed <s>`; the kernel stops on a failed gate. `muril_t42` instead reuses the V20 teacher from kernel `gouravcseai/v20-pilot` after its sha256 check.
+  - Tokenizers: `scripts/v21_e1_prep.py --tok-only` writes the E1-verified local directories.
+  - Test sets: `scripts/v21_run.py --write-extra-eval --allow-test` writes the add-on's `V21_EXTRA_EVAL` JSON.
+  - Official baselines: stage `bl` of `scripts/v15_kaggle.sh` with `MODEL_NAME=v21tok_<model>`, `V21_TOK_DIR`, the V20 settings (MNLI, c 0.5, seeds 7/42/77, `--no-ckpt` index files) and the teacher as `CKPT_DIR_ROOT`.
+  - Our conditions, the official files and the integrity gate: `scripts/v21_run.py ... --allow-test`. Kernel stdout shows only the integrity line, not accuracies.
+  - Order: `muril_t42` and `mbert_t42` first (end-to-end check of the test path, and the first fine-tuned mBERT teacher through both official codes). The other four start after both pass their integrity gate.
+  - The descriptive CPU latency and parameter counts (section 3) are measured afterwards in a separate CPU kernel. They are not part of the analysis script.
 
 ## 6. Do-not-claim list
 
@@ -253,3 +265,4 @@ Recorded 2026-11-18. The owner's words: "mBERT, 3 seeds, go for pre-freeze check
    - The 6 confirmatory kernels and the 5 new teacher fine-tunes are NOT yet approved.
    - They need a separate go after the freeze.
 4. **"Use Kaggle CPU"** answers the latency question, not a V21 item. The V19/H18b CPU latency is rerun on a Kaggle CPU kernel with shuffled rounds.
+5. **"freeze + go" (2026-11-18, after E1–E5 passed).** The owner approved this text without edits, which freezes it. The owner also gave the GPU go for the 5 new teacher fine-tunes and the 6 confirmatory kernels.

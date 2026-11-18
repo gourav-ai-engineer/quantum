@@ -1,0 +1,15 @@
+{
+ "id": "gouravcseai/v21-muril-t42",
+ "title": "v21 muril t42",
+ "code_file": "v21_muril_t42.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": [
+  "gouravcseai/v20-pilot"
+ ]
+}

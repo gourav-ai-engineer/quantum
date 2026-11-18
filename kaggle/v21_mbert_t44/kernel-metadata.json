@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/v21-mbert-t44",
+ "title": "v21 mbert t44",
+ "code_file": "v21_mbert_t44.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}
