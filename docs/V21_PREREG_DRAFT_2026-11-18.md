@@ -196,6 +196,22 @@ Conditions 2 (K-prune official) and 3 (Kwon official) need each official tuned s
 - **Parity gate.** The chosen route's predictions on MNLI-m validation must equal the existing add-on dump row for row.
 - **Scope.** E5 is smoke-tested on validation slices only. No test split is read.
 
+### Gate status (2026-11-18)
+
+- **E2: PASS.** `results/v21_gates/ee832e5a/e2_e3.json` (script `scripts/v21_gates.py`, commit ee832e5a).
+  - mBERT is pinned at `google-bert/bert-base-multilingual-cased` rev `3f076fdb1ab68d5b2880cb87a0886f315b8146f8`. The legacy id `bert-base-multilingual-cased` resolves to it.
+  - Both pins equal the current hub heads.
+  - MuRIL and mBERT have identical dimensions (hidden 768, 12 layers, 12 heads, intermediate 3072, model type bert), so the MAC accounting is identical.
+  - Vocabularies: MuRIL 197,285, mBERT 119,547. Whether the official codes accept them is shown by E1's runs.
+- **E3: PASS.** Same file. XNLI-en test and IndicXNLI forward/test have 5,010 rows in every one of the 12 languages, no extra rows, and labels equal to XNLI-en everywhere. Only labels, counts and file sha256 were read.
+- **E1, E5: running.** Kaggle kernel `gouravcseai/v21-e1` (GPU), code d2d2447f.
+- **E4: PASS (engineering only, rule 9).** CPU `--smoke --allow-cpu`, validation, 64 rows per language, seed 7.
+  - Inputs: the mBERT random-head checkpoint from `v21_e1_prep.py`, a synthetic 50%-MAC mask npz, and planted official dumps with random logits.
+  - `scripts/v21_run.py` ran all four of our conditions, assembled the K-prune/Kwon files and wrote `integrity.json`. `scripts/v21_analysis.py` (bd279c74) ran on that output.
+  - Kept physical shapes equal the masks, and the MAC ratio is 0.500.
+  - The integrity gate FAILED as intended on the planted faults: 46–47 of 64 teacher rows differed, and the teacher accuracy did not match a fake ft_meta value.
+  - No number from the smoke run is a result.
+
 ## 5. Compute and execution
 
 - **Kernels.** Six, one per (model, teacher), each under the 12-hour cap.
