@@ -1,0 +1,28 @@
+11/18/2026 10:21:17 - INFO - __main__ - Namespace(model_name='bert-base-uncased', task_name='mrpc', ckpt_dir='/tmp/v15/inputs/ckpt/mrpc', output_dir='/tmp/v15/v21e1/kwon_mrpc_hub', gpu=0, metric='mac', constraint=0.5, mha_lut=None, ffn_lut=None, num_samples=2048, seed=0)
+11/18/2026 10:21:17 - INFO - __main__ - Seed number: 0
+Downloading readme: 0.00B [00:00, ?B/s]Downloading readme: 35.3kB [00:00, 43.6MB/s]
+Downloading data files:   0%|          | 0/3 [00:00<?, ?it/s]
+Downloading data:   0%|          | 0.00/649k [00:00<?, ?B/s][A
+Downloading data: 100%|██████████| 649k/649k [00:00<00:00, 1.00MB/s][ADownloading data: 100%|██████████| 649k/649k [00:00<00:00, 1.00MB/s]
+Downloading data files:  33%|███▎      | 1/3 [00:00<00:01,  1.54it/s]
+Downloading data:   0%|          | 0.00/75.7k [00:00<?, ?B/s][A
+Downloading data: 100%|██████████| 75.7k/75.7k [00:00<00:00, 303kB/s][ADownloading data: 100%|██████████| 75.7k/75.7k [00:00<00:00, 302kB/s]
+Downloading data files:  67%|██████▋   | 2/3 [00:00<00:00,  2.40it/s]
+Downloading data:   0%|          | 0.00/308k [00:00<?, ?B/s][A
+Downloading data: 100%|██████████| 308k/308k [00:00<00:00, 1.18MB/s][ADownloading data: 100%|██████████| 308k/308k [00:00<00:00, 1.18MB/s]
+Downloading data files: 100%|██████████| 3/3 [00:01<00:00,  2.88it/s]Downloading data files: 100%|██████████| 3/3 [00:01<00:00,  2.57it/s]
+Extracting data files:   0%|          | 0/3 [00:00<?, ?it/s]Extracting data files: 100%|██████████| 3/3 [00:00<00:00, 1605.78it/s]
+Generating train split:   0%|          | 0/3668 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 3668/3668 [00:00<00:00, 64861.28 examples/s]
+Generating validation split:   0%|          | 0/408 [00:00<?, ? examples/s]Generating validation split: 100%|██████████| 408/408 [00:00<00:00, 158407.48 examples/s]
+Generating test split:   0%|          | 0/1725 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 1725/1725 [00:00<00:00, 472516.61 examples/s]
+Map:   0%|          | 0/3668 [00:00<?, ? examples/s]Map:  27%|██▋       | 1000/3668 [00:00<00:00, 6826.42 examples/s]Map:  55%|█████▍    | 2000/3668 [00:00<00:00, 5276.93 examples/s]Map:  82%|████████▏ | 3000/3668 [00:00<00:00, 6305.31 examples/s]Map: 100%|██████████| 3668/3668 [00:00<00:00, 6398.45 examples/s]
+Map:   0%|          | 0/408 [00:00<?, ? examples/s]Map: 100%|██████████| 408/408 [00:00<00:00, 7942.69 examples/s]
+Map:   0%|          | 0/1725 [00:00<?, ? examples/s]Map:  58%|█████▊    | 1000/1725 [00:00<00:00, 8753.38 examples/s]Map: 100%|██████████| 1725/1725 [00:00<00:00, 8542.69 examples/s]
+11/18/2026 10:21:45 - INFO - __main__ - Pruned Model MAC: 50.00 %
+  0%|          | 0/12 [00:00<?, ?it/s]  8%|▊         | 1/12 [00:21<03:59, 21.74s/it] 17%|█▋        | 2/12 [00:27<02:02, 12.30s/it] 25%|██▌       | 3/12 [00:32<01:21,  9.03s/it] 33%|███▎      | 4/12 [00:38<01:01,  7.63s/it] 42%|████▏     | 5/12 [00:43<00:48,  6.87s/it] 50%|█████     | 6/12 [00:49<00:38,  6.46s/it] 58%|█████▊    | 7/12 [00:55<00:31,  6.29s/it] 67%|██████▋   | 8/12 [01:01<00:24,  6.24s/it] 75%|███████▌  | 9/12 [01:07<00:18,  6.29s/it] 83%|████████▎ | 10/12 [01:13<00:12,  6.01s/it] 92%|█████████▏| 11/12 [01:18<00:05,  5.78s/it] 92%|█████████▏| 11/12 [01:23<00:07,  7.61s/it]
+11/18/2026 10:23:12 - INFO - __main__ - mrpc Pruning time (s): 105.51507258415222
+Map:   0%|          | 0/3668 [00:00<?, ? examples/s]Map:  27%|██▋       | 1000/3668 [00:00<00:00, 8479.23 examples/s]Map:  55%|█████▍    | 2000/3668 [00:00<00:00, 8372.96 examples/s]Map:  82%|████████▏ | 3000/3668 [00:00<00:00, 8478.85 examples/s]Map: 100%|██████████| 3668/3668 [00:00<00:00, 8384.84 examples/s]
+/tmp/v15/kwon/evaluate/glue.py:11: FutureWarning: load_metric is deprecated and will be removed in the next major version of datasets. Use 'evaluate.load' instead, from the new library 🤗 Evaluate: https://huggingface.co/docs/evaluate
+  metric = load_metric("glue", task_name)
+Downloading builder script:   0%|          | 0.00/1.84k [00:00<?, ?B/s]Downloading builder script: 5.76kB [00:00, 14.1MB/s]                   
+11/18/2026 10:23:15 - INFO - __main__ - mrpc Test accuracy: 0.8529

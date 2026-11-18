@@ -1,0 +1,62 @@
+[{"stream_name":"stderr","time":7.729390579,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":7.729435931,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":7.729440366,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":7.729443035,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":8.326298082,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":8.326325609,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":8.326331276,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":8.326354837,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":6103.628667461,"data":"d2d2447 V21 E1/E2/E5 tooling: local tokenizer dirs for the official codes, same-kernel A/B, add-on extra-set dumps (V21_EXTRA_EVAL), report + tests; E2/E3 gate output; kernel v21_e1\n"}
+,{"stream_name":"stdout","time":6103.630694537,"data":"IN=/kaggle/input/notebooks/gouravcseai/v20-pilot/v20\n"}
+,{"stream_name":"stdout","time":6103.630709122,"data":"Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":6103.630715509,"data":"Tesla T4, 15360 MiB\n"}
+,{"stream_name":"stdout","time":6103.630720572,"data":"/kaggle/input/notebooks/gouravcseai/v20-pilot/v20/ft/mnli/pytorch_model.bin: OK\n"}
+,{"stream_name":"stdout","time":6103.630725761,"data":"ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n"}
+,{"stream_name":"stdout","time":6103.630731145,"data":"We strongly recommend passing in an `attention_mask` since your input_ids may be padded. See https://huggingface.co/docs/transformers/troubleshooting#incorrect-output-when-padding-tokens-arent-masked.\n"}
+,{"stream_name":"stdout","time":6103.630738283,"data":"versions OK: {'torch': '2.6.0', 'transformers': '4.51.3', 'datasets': '3.6.0', 'pyarrow': '24.0.0'}\n"}
+,{"stream_name":"stdout","time":6103.63074336,"data":"PREFLIGHT OK\n"}
+,{"stream_name":"stdout","time":6103.63074814,"data":"v21tok_bert ok\n"}
+,{"stream_name":"stdout","time":6103.630752898,"data":"v21tok_bert ok\n"}
+,{"stream_name":"stdout","time":6103.630757669,"data":"v21tok_bert_slow ok\n"}
+,{"stream_name":"stdout","time":6103.630762517,"data":"v21tok_bert_slow ok\n"}
+,{"stream_name":"stdout","time":6103.630767391,"data":"v21tok_mbert ok\n"}
+,{"stream_name":"stdout","time":6103.630772252,"data":"v21tok_mbert ok\n"}
+,{"stream_name":"stdout","time":6103.630777033,"data":"v21tok_mbert_slow ok\n"}
+,{"stream_name":"stdout","time":6103.63078197,"data":"v21tok_mbert_slow ok\n"}
+,{"stream_name":"stdout","time":6103.63078689,"data":"v21tok_muril ok\n"}
+,{"stream_name":"stdout","time":6103.630791867,"data":"v21tok_muril ok\n"}
+,{"stream_name":"stdout","time":6103.630797118,"data":"bert-base-uncased ok\n"}
+,{"stream_name":"stdout","time":6103.630802684,"data":"bert-base-uncased ok\n"}
+,{"stream_name":"stdout","time":6103.630808445,"data":"google/muril-base-cased OSError: Can't load config for 'google/muril-base-cased'. Make sure that:\n"}
+,{"stream_name":"stdout","time":6103.63081415,"data":"google/muril-base-cased ok\n"}
+,{"stream_name":"stdout","time":6103.630819027,"data":"bert-base-multilingual-cased ok\n"}
+,{"stream_name":"stdout","time":6103.630823915,"data":"bert-base-multilingual-cased ok\n"}
+,{"stream_name":"stdout","time":6103.630838708,"data":"{'E1_pass': True, 'E2_codes_accept_vocab': True, 'E5_pass': True, 'chosen': {'kwon/bert': 'v21tok_bert', 'kwon/muril': 'v21tok_muril', 'kwon/mbert': 'v21tok_mbert', 'kprune/bert': 'v21tok_bert', 'kprune/muril': 'v21tok_muril', 'kprune/mbert\n"}
+,{"stream_name":"stdout","time":6103.630844425,"data":"/kaggle/working/v21:\n"}
+,{"stream_name":"stdout","time":6103.630848293,"data":"total 44\n"}
+,{"stream_name":"stdout","time":6103.630852083,"data":"drwxr-xr-x 3 root root 4096 Nov 18 11:53 .\n"}
+,{"stream_name":"stdout","time":6103.630856045,"data":"drwxr-xr-x 4 root root 4096 Nov 18 10:11 ..\n"}
+,{"stream_name":"stdout","time":6103.630859883,"data":"-rw-r--r-- 1 root root   40 Nov 18 10:11 gpu.txt\n"}
+,{"stream_name":"stdout","time":6103.630863825,"data":"-rw-r--r-- 1 root root   53 Nov 18 10:11 input_root.txt\n"}
+,{"stream_name":"stdout","time":6103.630867875,"data":"-rw-r--r-- 1 root root 1328 Nov 18 10:19 patch_kprune.diff\n"}
+,{"stream_name":"stdout","time":6103.630872004,"data":"-rw-r--r-- 1 root root 1163 Nov 18 10:19 patch_kwon.diff\n"}
+,{"stream_name":"stdout","time":6103.630903507,"data":"-rw-r--r-- 1 root root 1492 Nov 18 11:53 run.log\n"}
+,{"stream_name":"stdout","time":6103.63090891,"data":"drwxr-xr-x 3 root root 4096 Nov 18 11:53 v21e1\n"}
+,{"stream_name":"stdout","time":6103.630912936,"data":"-rw-r--r-- 1 root root 8667 Nov 18 11:53 v21e1_stage.log\n"}
+,{"stream_name":"stdout","time":6103.630916995,"data":"\n"}
+,{"stream_name":"stdout","time":6103.630920722,"data":"/kaggle/working/v21/v21e1:\n"}
+,{"stream_name":"stdout","time":6103.630924691,"data":"total 24\n"}
+,{"stream_name":"stdout","time":6103.630932459,"data":"drwxr-xr-x  3 root root 4096 Nov 18 11:53 .\n"}
+,{"stream_name":"stdout","time":6103.63093638,"data":"drwxr-xr-x  3 root root 4096 Nov 18 11:53 ..\n"}
+,{"stream_name":"stdout","time":6103.630940264,"data":"-rw-r--r--  1 root root 4733 Nov 18 11:53 e1_e5.json\n"}
+,{"stream_name":"stdout","time":6103.630944179,"data":"-rw-r--r--  1 root root 2224 Nov 18 11:53 prep_meta.json\n"}
+,{"stream_name":"stdout","time":6103.630948132,"data":"drwxr-xr-x 13 root root 4096 Nov 18 11:53 runs\n"}
+,{"stream_name":"stderr","time":6106.365961978,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":6106.365996303,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":6106.624348604,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":6106.624374889,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":6107.539335533,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":6107.613508397,"data":"[NbConvertApp] Writing 6177 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":6110.205357339,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":6110.378501689,"data":"[NbConvertApp] Writing 281576 bytes to __results__.html\n"}
+]

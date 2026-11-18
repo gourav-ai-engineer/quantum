@@ -1,0 +1,12 @@
+11/18/2026 10:43:46 - INFO - __main__ - Namespace(model_name='v21tok_bert', task_name='mrpc', ckpt_dir='/tmp/v15/inputs/ckpt/mrpc', output_dir='/tmp/v15/v21e1/kwon_mrpc_local', gpu=0, metric='mac', constraint=0.5, mha_lut=None, ffn_lut=None, num_samples=2048, seed=0)
+11/18/2026 10:43:46 - INFO - __main__ - Seed number: 0
+Map:   0%|          | 0/3668 [00:00<?, ? examples/s]Map:  27%|██▋       | 1000/3668 [00:00<00:00, 7920.25 examples/s]Map:  55%|█████▍    | 2000/3668 [00:00<00:00, 8265.44 examples/s]Map:  82%|████████▏ | 3000/3668 [00:00<00:00, 6182.10 examples/s]Map: 100%|██████████| 3668/3668 [00:00<00:00, 6839.94 examples/s]
+Map:   0%|          | 0/408 [00:00<?, ? examples/s]Map: 100%|██████████| 408/408 [00:00<00:00, 7882.58 examples/s]
+Map:   0%|          | 0/1725 [00:00<?, ? examples/s]Map:  58%|█████▊    | 1000/1725 [00:00<00:00, 8232.97 examples/s]Map: 100%|██████████| 1725/1725 [00:00<00:00, 8110.20 examples/s]
+11/18/2026 10:44:12 - INFO - __main__ - Pruned Model MAC: 50.00 %
+  0%|          | 0/12 [00:00<?, ?it/s]  8%|▊         | 1/12 [00:25<04:37, 25.24s/it] 17%|█▋        | 2/12 [00:31<02:22, 14.25s/it] 25%|██▌       | 3/12 [00:37<01:34, 10.45s/it] 33%|███▎      | 4/12 [00:43<01:10,  8.76s/it] 42%|████▏     | 5/12 [00:50<00:54,  7.83s/it] 50%|█████     | 6/12 [00:56<00:43,  7.29s/it] 58%|█████▊    | 7/12 [01:02<00:35,  7.03s/it] 67%|██████▋   | 8/12 [01:09<00:27,  6.88s/it] 75%|███████▌  | 9/12 [01:16<00:20,  6.84s/it] 83%|████████▎ | 10/12 [01:21<00:12,  6.48s/it] 92%|█████████▏| 11/12 [01:27<00:06,  6.18s/it] 92%|█████████▏| 11/12 [01:32<00:08,  8.44s/it]
+11/18/2026 10:45:48 - INFO - __main__ - mrpc Pruning time (s): 116.19413542747498
+Map:   0%|          | 0/3668 [00:00<?, ? examples/s]Map:  27%|██▋       | 1000/3668 [00:00<00:00, 8338.06 examples/s]Map:  55%|█████▍    | 2000/3668 [00:00<00:00, 8385.10 examples/s]Map:  82%|████████▏ | 3000/3668 [00:00<00:00, 8505.79 examples/s]Map: 100%|██████████| 3668/3668 [00:00<00:00, 8413.09 examples/s]
+/tmp/v15/kwon/evaluate/glue.py:11: FutureWarning: load_metric is deprecated and will be removed in the next major version of datasets. Use 'evaluate.load' instead, from the new library 🤗 Evaluate: https://huggingface.co/docs/evaluate
+  metric = load_metric("glue", task_name)
+11/18/2026 10:45:51 - INFO - __main__ - mrpc Test accuracy: 0.8529

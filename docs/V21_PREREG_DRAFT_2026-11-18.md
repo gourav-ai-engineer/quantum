@@ -204,7 +204,13 @@ Conditions 2 (K-prune official) and 3 (Kwon official) need each official tuned s
   - MuRIL and mBERT have identical dimensions (hidden 768, 12 layers, 12 heads, intermediate 3072, model type bert), so the MAC accounting is identical.
   - Vocabularies: MuRIL 197,285, mBERT 119,547. Whether the official codes accept them is shown by E1's runs.
 - **E3: PASS.** Same file. XNLI-en test and IndicXNLI forward/test have 5,010 rows in every one of the 12 languages, no extra rows, and labels equal to XNLI-en everywhere. Only labels, counts and file sha256 were read.
-- **E1, E5: running.** Kaggle kernel `gouravcseai/v21-e1` (GPU), code d2d2447f.
+- **E1: PASS. E5: PASS.** Kaggle kernel `gouravcseai/v21-e1` (Tesla T4), code d2d2447f. Report `results/v21_gates/d2d2447f/e1/v21/v21e1/e1_e5.json`, with logs, prep_meta and run dumps beside it. Validation data only.
+  - Tokenizers: every local directory (bert, bert_slow, muril, mbert, mbert_slow) loads in both official envs and gives token ids equal to our env's pinned hub tokenizer on the 320 reference pairs. Chosen: `v21tok_bert`, `v21tok_muril` and `v21tok_mbert` for both codes; no slow fallback is needed.
+  - Decisive A/B (BERT-base MRPC, seed 7, same kernel): hub id vs local dir gives equal keep patterns, equal raw mask values, equal validation predictions and max |logit diff| 0.0, for both Kwon and K-prune. The hub-vs-hub rerun is also identical, and both equal the V15-era MRPC dumps (agreement 1.0, max diff 0.0).
+  - Reported only: the hub id `google/muril-base-cased` still fails in Kwon's env (`OSError: Can't load config`), which is why the local directories are used; it loads in K-prune's env. K-prune MuRIL hub vs local is identical. K-prune MuRIL local equals the V20 seed-7 masks (heads and neurons).
+  - Both codes ran on MuRIL (V20 teacher) and on mBERT (random 3-way head) at c = 0.5. MAC ratios by `qfc.grp.model_mac`: 0.49999–0.50000. K-prune keeps 0 heads in MuRIL layer 0 (a whole layer's attention pruned).
+  - E5: with `V21_EXTRA_EVAL`, both codes' teacher and student dumps on `x_mnli_m` equal their validation dumps (logits and labels), and the en/as/bn/hi extra sets (512 rows each) are written.
+  - Not covered by E1/E5: Kwon/K-prune on mBERT with a fine-tuned teacher (none exists yet); the first confirmatory kernel's integrity gate covers it.
 - **E4: PASS (engineering only, rule 9).** CPU `--smoke --allow-cpu`, validation, 64 rows per language, seed 7.
   - Inputs: the mBERT random-head checkpoint from `v21_e1_prep.py`, a synthetic 50%-MAC mask npz, and planted official dumps with random logits.
   - `scripts/v21_run.py` ran all four of our conditions, assembled the K-prune/Kwon files and wrote `integrity.json`. `scripts/v21_analysis.py` (bd279c74) ran on that output.

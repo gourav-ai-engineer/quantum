@@ -1,0 +1,45 @@
+d2d2447 V21 E1/E2/E5 tooling: local tokenizer dirs for the official codes, same-kernel A/B, add-on extra-set dumps (V21_EXTRA_EVAL), report + tests; E2/E3 gate output; kernel v21_e1
+IN=/kaggle/input/notebooks/gouravcseai/v20-pilot/v20
+Tesla T4, 15360 MiB
+Tesla T4, 15360 MiB
+/kaggle/input/notebooks/gouravcseai/v20-pilot/v20/ft/mnli/pytorch_model.bin: OK
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+We strongly recommend passing in an `attention_mask` since your input_ids may be padded. See https://huggingface.co/docs/transformers/troubleshooting#incorrect-output-when-padding-tokens-arent-masked.
+versions OK: {'torch': '2.6.0', 'transformers': '4.51.3', 'datasets': '3.6.0', 'pyarrow': '24.0.0'}
+PREFLIGHT OK
+v21tok_bert ok
+v21tok_bert ok
+v21tok_bert_slow ok
+v21tok_bert_slow ok
+v21tok_mbert ok
+v21tok_mbert ok
+v21tok_mbert_slow ok
+v21tok_mbert_slow ok
+v21tok_muril ok
+v21tok_muril ok
+bert-base-uncased ok
+bert-base-uncased ok
+google/muril-base-cased OSError: Can't load config for 'google/muril-base-cased'. Make sure that:
+google/muril-base-cased ok
+bert-base-multilingual-cased ok
+bert-base-multilingual-cased ok
+{'E1_pass': True, 'E2_codes_accept_vocab': True, 'E5_pass': True, 'chosen': {'kwon/bert': 'v21tok_bert', 'kwon/muril': 'v21tok_muril', 'kwon/mbert': 'v21tok_mbert', 'kprune/bert': 'v21tok_bert', 'kprune/muril': 'v21tok_muril', 'kprune/mbert
+/kaggle/working/v21:
+total 44
+drwxr-xr-x 3 root root 4096 Nov 18 11:53 .
+drwxr-xr-x 4 root root 4096 Nov 18 10:11 ..
+-rw-r--r-- 1 root root   40 Nov 18 10:11 gpu.txt
+-rw-r--r-- 1 root root   53 Nov 18 10:11 input_root.txt
+-rw-r--r-- 1 root root 1328 Nov 18 10:19 patch_kprune.diff
+-rw-r--r-- 1 root root 1163 Nov 18 10:19 patch_kwon.diff
+-rw-r--r-- 1 root root 1492 Nov 18 11:53 run.log
+drwxr-xr-x 3 root root 4096 Nov 18 11:53 v21e1
+-rw-r--r-- 1 root root 8667 Nov 18 11:53 v21e1_stage.log
+
+/kaggle/working/v21/v21e1:
+total 24
+drwxr-xr-x  3 root root 4096 Nov 18 11:53 .
+drwxr-xr-x  3 root root 4096 Nov 18 11:53 ..
+-rw-r--r--  1 root root 4733 Nov 18 11:53 e1_e5.json
+-rw-r--r--  1 root root 2224 Nov 18 11:53 prep_meta.json
+drwxr-xr-x 13 root root 4096 Nov 18 11:53 runs

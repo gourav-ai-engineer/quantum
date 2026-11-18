@@ -1,0 +1,54 @@
+{
+ "pins": {
+  "bert": [
+   "google-bert/bert-base-uncased",
+   "86b5e0934494bd15c9632b12f734a8a67f723594"
+  ],
+  "muril": [
+   "google/muril-base-cased",
+   "afd9f36c7923d54e97903922ff1b260d091d202f"
+  ],
+  "mbert": [
+   "google-bert/bert-base-multilingual-cased",
+   "3f076fdb1ab68d5b2880cb87a0886f315b8146f8"
+  ]
+ },
+ "files": {
+  "bert": {
+   "config.json": "7160e1553ad2ca51d8c1cb066be533db31826e12d173824c1bb0cb1a4f187d20",
+   "tokenizer.json": "ce64fce797c24f68df90b40a3f74f579b336a493db14bd583fd520ea0d8c9a98",
+   "tokenizer_config.json": "a025160ef0431f1a392f6f050c1310f4c5d9fb6f275932dbccba73c4d214bf10",
+   "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+  },
+  "bert_slow": {
+   "config.json": "7160e1553ad2ca51d8c1cb066be533db31826e12d173824c1bb0cb1a4f187d20",
+   "tokenizer_config.json": "a025160ef0431f1a392f6f050c1310f4c5d9fb6f275932dbccba73c4d214bf10",
+   "vocab.txt": "07eced375cec144d27c900241f3e339478dec958f92fddbc551f295c992038a3"
+  },
+  "muril": {
+   "config.json": "be7bd5c3ffdc23ce6151d589b6844a9fe488beab2324ac854060ae6ba61fd1af",
+   "special_tokens_map.json": "88bbdf754dd64c44fff9e61b2c7d4380ded1bdf5c6d386be827ee28d79596cb9",
+   "tokenizer_config.json": "0f2c28bab3018be1dff3f9989db82107a21c802250864f4c63e8defaad39025f",
+   "vocab.txt": "b96cc938b4009d063a605930cb82aef2c91ee52a94e94e6fcb78510d4ee5310b"
+  },
+  "mbert": {
+   "config.json": "4d10c2021c6b5fbe8b70698abc6ccc6691dc28d1bae9732f7fa1087782feba7e",
+   "tokenizer.json": "f4a4d5bf7301717e261fafbe26e1eb967f6ba4cb3ae0ab7a29f4642ec229f386",
+   "tokenizer_config.json": "0f6d13e6f4da6f9e24f22ada6bc3be571123d858d7c0c05a8a7cd55a9c23c2e8",
+   "vocab.txt": "fe0fda7c425b48c516fc8f160d594c8022a0808447475c1a7c6d6479763f310c"
+  },
+  "mbert_slow": {
+   "config.json": "4d10c2021c6b5fbe8b70698abc6ccc6691dc28d1bae9732f7fa1087782feba7e",
+   "tokenizer_config.json": "0f6d13e6f4da6f9e24f22ada6bc3be571123d858d7c0c05a8a7cd55a9c23c2e8",
+   "vocab.txt": "fe0fda7c425b48c516fc8f160d594c8022a0808447475c1a7c6d6479763f310c"
+  }
+ },
+ "ckpt_mbert_rand_sha256": "3c59957cf2438a427380950bd6a5b33883cb0785d12dfcf0cad0bec4387d6f2e",
+ "extra_eval_rows": {
+  "mnli_m": 9815,
+  "en": 512,
+  "as": 512,
+  "bn": 512,
+  "hi": 512
+ }
+}

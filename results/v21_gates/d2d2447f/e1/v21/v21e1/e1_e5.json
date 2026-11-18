@@ -1,0 +1,272 @@
+{
+ "tokenizer": {
+  "kwon/bert": {
+   "bert": {
+    "loads": true,
+    "ids_equal_ref": true
+   },
+   "bert_slow": {
+    "loads": true,
+    "ids_equal_ref": true
+   }
+  },
+  "kwon/muril": {
+   "muril": {
+    "loads": true,
+    "ids_equal_ref": true
+   }
+  },
+  "kwon/mbert": {
+   "mbert": {
+    "loads": true,
+    "ids_equal_ref": true
+   },
+   "mbert_slow": {
+    "loads": true,
+    "ids_equal_ref": true
+   }
+  },
+  "kprune/bert": {
+   "bert": {
+    "loads": true,
+    "ids_equal_ref": true
+   },
+   "bert_slow": {
+    "loads": true,
+    "ids_equal_ref": true
+   }
+  },
+  "kprune/muril": {
+   "muril": {
+    "loads": true,
+    "ids_equal_ref": true
+   }
+  },
+  "kprune/mbert": {
+   "mbert": {
+    "loads": true,
+    "ids_equal_ref": true
+   },
+   "mbert_slow": {
+    "loads": true,
+    "ids_equal_ref": true
+   }
+  }
+ },
+ "chosen": {
+  "kwon/bert": "v21tok_bert",
+  "kwon/muril": "v21tok_muril",
+  "kwon/mbert": "v21tok_mbert",
+  "kprune/bert": "v21tok_bert",
+  "kprune/muril": "v21tok_muril",
+  "kprune/mbert": "v21tok_mbert"
+ },
+ "hub_id_loads": {
+  "kprune_bert-base-multilingual-cased": true,
+  "kprune_bert-base-uncased": true,
+  "kprune_google_muril-base-cased": true,
+  "kwon_bert-base-multilingual-cased": true,
+  "kwon_bert-base-uncased": true,
+  "kwon_google_muril-base-cased": "OSError: Can't load config for 'google/muril-base-cased'. Make sure that:\n\n- 'google/muril-base-cased' is a correct model identifier listed on 'https://huggingface.co/models'\n  (make sure 'google/muril-base-cased' is not a path to a local directory with something else, in that case)\n\n- or 'google/muril-base-cased' is the correct path to a directory containing a config.json file\n\n"
+ },
+ "ab_mrpc": {
+  "kwon": {
+   "hub_vs_local": {
+    "ran": true,
+    "keep_pattern_equal": true,
+    "mask_values_equal": true,
+    "val_preds_equal": true,
+    "val_logits_max_abs_diff": 0.0
+   },
+   "hub_vs_hub_rerun": {
+    "ran": true,
+    "keep_pattern_equal": true,
+    "mask_values_equal": true,
+    "val_preds_equal": true,
+    "val_logits_max_abs_diff": 0.0
+   }
+  },
+  "kprune": {
+   "hub_vs_local": {
+    "ran": true,
+    "keep_pattern_equal": true,
+    "mask_values_equal": true,
+    "val_preds_equal": true,
+    "val_logits_max_abs_diff": 0.0
+   },
+   "hub_vs_hub_rerun": {
+    "ran": true,
+    "keep_pattern_equal": true,
+    "mask_values_equal": true,
+    "val_preds_equal": true,
+    "val_logits_max_abs_diff": 0.0
+   }
+  }
+ },
+ "v15_era_mrpc": {
+  "kwon": {
+   "val_pred_agreement": 1.0,
+   "val_logits_max_abs_diff": 0.0
+  },
+  "kprune": {
+   "val_pred_agreement": 1.0,
+   "val_logits_max_abs_diff": 0.0
+  }
+ },
+ "multilingual_runs": {
+  "kwon_muril_local": {
+   "ran": true,
+   "mac_ratio": 0.499998132028802,
+   "heads_kept": [
+    8,
+    10,
+    9,
+    11,
+    12,
+    12,
+    9,
+    10,
+    10,
+    5,
+    7,
+    4
+   ]
+  },
+  "kprune_muril_local": {
+   "ran": true,
+   "mac_ratio": 0.4999917809267289,
+   "heads_kept": [
+    0,
+    6,
+    6,
+    5,
+    10,
+    9,
+    8,
+    8,
+    7,
+    4,
+    7,
+    12
+   ]
+  },
+  "kprune_muril_hub": {
+   "ran": true,
+   "mac_ratio": 0.4999917809267289,
+   "heads_kept": [
+    0,
+    6,
+    6,
+    5,
+    10,
+    9,
+    8,
+    8,
+    7,
+    4,
+    7,
+    12
+   ]
+  },
+  "kwon_mbert_local": {
+   "ran": true,
+   "mac_ratio": 0.4999841596042411,
+   "heads_kept": [
+    10,
+    7,
+    8,
+    10,
+    12,
+    9,
+    4,
+    10,
+    10,
+    7,
+    7,
+    6
+   ]
+  },
+  "kprune_mbert_local": {
+   "ran": true,
+   "mac_ratio": 0.4999863264508308,
+   "heads_kept": [
+    7,
+    2,
+    6,
+    7,
+    9,
+    7,
+    5,
+    10,
+    6,
+    3,
+    2,
+    5
+   ]
+  }
+ },
+ "kprune_muril_vs_v20_seed7": {
+  "head_equal": true,
+  "neuron_equal": true
+ },
+ "kprune_muril_hub_vs_local": {
+  "ran": true,
+  "keep_pattern_equal": true,
+  "mask_values_equal": true,
+  "val_preds_equal": true,
+  "val_logits_max_abs_diff": 0.0
+ },
+ "e5_parity": {
+  "kwon_muril_local": {
+   "teacher": {
+    "present": true,
+    "logits_equal": true,
+    "labels_equal": true,
+    "extra_sets": {
+     "en": 512,
+     "as": 512,
+     "bn": 512,
+     "hi": 512
+    }
+   },
+   "student": {
+    "present": true,
+    "logits_equal": true,
+    "labels_equal": true,
+    "extra_sets": {
+     "en": 512,
+     "as": 512,
+     "bn": 512,
+     "hi": 512
+    }
+   }
+  },
+  "kprune_muril_local": {
+   "teacher": {
+    "present": true,
+    "logits_equal": true,
+    "labels_equal": true,
+    "extra_sets": {
+     "en": 512,
+     "as": 512,
+     "bn": 512,
+     "hi": 512
+    }
+   },
+   "student": {
+    "present": true,
+    "logits_equal": true,
+    "labels_equal": true,
+    "extra_sets": {
+     "en": 512,
+     "as": 512,
+     "bn": 512,
+     "hi": 512
+    }
+   }
+  }
+ },
+ "E1_pass": true,
+ "E2_codes_accept_vocab": true,
+ "E5_pass": true
+}

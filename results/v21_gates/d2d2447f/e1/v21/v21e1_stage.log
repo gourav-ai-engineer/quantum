@@ -1,0 +1,81 @@
+ERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.
+bigframes 2.51.0 requires google-cloud-bigquery-storage<3.0.0,>=2.30.0, which is not installed.
+pathos 0.3.5 requires dill>=0.4.1, but you have dill 0.3.8 which is incompatible.
+pathos 0.3.5 requires multiprocess>=0.70.19, but you have multiprocess 0.70.16 which is incompatible.
+s3fs 2025.12.0 requires fsspec==2025.12.0, but you have fsspec 2025.3.0 which is incompatible.
+tpot 1.1.0 requires dill>=0.3.9, but you have dill 0.3.8 which is incompatible.
+gcsfs 2025.12.0 requires fsspec==2025.12.0, but you have fsspec 2025.3.0 which is incompatible.
+torchvision 0.26.0+cu130 requires torch==2.11.0, but you have torch 2.6.0 which is incompatible.
+cudf-cu13 26.6.0 requires pyarrow<24,>=19.0.0, but you have pyarrow 24.0.0 which is incompatible.
+gradio-client 2.7.2 requires huggingface-hub<3.0,>=1.16.0, but you have huggingface-hub 0.36.2 which is incompatible.
+gradio 6.30.0 requires huggingface-hub<3.0,>=1.16.0, but you have huggingface-hub 0.36.2 which is incompatible.
+gradio 6.30.0 requires pillow<13.0,>=8.0, but you have pillow 13.0.0 which is incompatible.
+diffusers 0.42.0 requires huggingface-hub<3.0,>=1.32.0, but you have huggingface-hub 0.36.2 which is incompatible.
+We strongly recommend passing in an `attention_mask` since your input_ids may be padded. See https://huggingface.co/docs/transformers/troubleshooting#incorrect-output-when-padding-tokens-arent-masked.
+versions OK: {'torch': '2.6.0', 'transformers': '4.51.3', 'datasets': '3.6.0', 'pyarrow': '24.0.0'}
+device: Tesla T4
+head_mask effective: loss(all ones)=0.694228 loss(all zeros)=0.694195
+PREFLIGHT OK
+patched: kwon/main.py
+patched: kprune/src/main.py
+24K	/kaggle/working/v21
+Filesystem      Size  Used Avail Use% Mounted on
+overlay         8.0T  7.1T  950G  89% /
+/dev/loop2       20G   90M   20G   1% /kaggle/working
+Generating train split:   0%|          | 0/3668 [00:00<?, ? examples/s]Generating train split: 100%|██████████| 3668/3668 [00:00<00:00, 392406.95 examples/s]
+Generating validation split:   0%|          | 0/408 [00:00<?, ? examples/s]Generating validation split: 100%|██████████| 408/408 [00:00<00:00, 154922.69 examples/s]
+Generating test split:   0%|          | 0/1725 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 1725/1725 [00:00<00:00, 317861.98 examples/s]
+Generating train split:   0%|          | 0/392702 [00:00<?, ? examples/s]Generating train split:  19%|█▉        | 76000/392702 [00:00<00:00, 748400.81 examples/s]Generating train split:  48%|████▊     | 189000/392702 [00:00<00:00, 968813.96 examples/s]Generating train split:  74%|███████▍  | 291000/392702 [00:00<00:00, 985250.52 examples/s]Generating train split: 100%|██████████| 392702/392702 [00:00<00:00, 991998.04 examples/s]
+Generating test split:   0%|          | 0/5010 [00:00<?, ? examples/s]Generating test split: 100%|██████████| 5010/5010 [00:00<00:00, 831294.53 examples/s]
+Generating validation split:   0%|          | 0/2490 [00:00<?, ? examples/s]Generating validation split: 100%|██████████| 2490/2490 [00:00<00:00, 642064.24 examples/s]
+Generating train split:   0%|          | 0/392702 [00:00<?, ? examples/s]Generating train split:  22%|██▏       | 86000/392702 [00:00<00:00, 851488.57 examples/s]Generating train split:  52%|█████▏    | 204000/392702 [00:00<00:00, 1035271.86 examples/s]Generating train split:  79%|███████▉  | 311000/392702 [00:00<00:00, 1011213.94 examples/s]Generating train split: 100%|██████████| 392702/392702 [00:00<00:00, 1014038.94 examples/s]
+Generating validation_matched split:   0%|          | 0/9815 [00:00<?, ? examples/s]Generating validation_matched split: 100%|██████████| 9815/9815 [00:00<00:00, 951202.52 examples/s]
+Generating validation_mismatched split:   0%|          | 0/9832 [00:00<?, ? examples/s]Generating validation_mismatched split: 100%|██████████| 9832/9832 [00:00<00:00, 960551.50 examples/s]
+Generating test_matched split:   0%|          | 0/9796 [00:00<?, ? examples/s]Generating test_matched split: 100%|██████████| 9796/9796 [00:00<00:00, 999085.76 examples/s]
+Generating test_mismatched split:   0%|          | 0/9847 [00:00<?, ? examples/s]Generating test_mismatched split: 100%|██████████| 9847/9847 [00:00<00:00, 928181.93 examples/s]
+Some weights of BertForSequenceClassification were not initialized from the model checkpoint at google-bert/bert-base-multilingual-cased and are newly initialized: ['classifier.bias', 'classifier.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+prep done {'mnli_m': 9815, 'en': 512, 'as': 512, 'bn': 512, 'hi': 512} ['bert', 'bert_slow', 'mbert', 'mbert_slow', 'muril']
+mrpc indices + checkpoint -> /tmp/v15/inputs
+v21tok_bert ok
+The cache for model files in Transformers v4.22.0 has been updated. Migrating your old cache. This is a one-time only operation. You can interrupt this and resume the migration later on by calling `transformers.utils.move_cache()`.
+Moving 0 files to the new cache system
+0it [00:00, ?it/s]0it [00:00, ?it/s]
+v21tok_bert ok
+v21tok_bert_slow ok
+v21tok_bert_slow ok
+v21tok_mbert ok
+v21tok_mbert ok
+v21tok_mbert_slow ok
+v21tok_mbert_slow ok
+v21tok_muril ok
+v21tok_muril ok
+Downloading:   0%|          | 0.00/48.0 [00:00<?, ?B/s]Downloading: 100%|██████████| 48.0/48.0 [00:00<00:00, 241kB/s]
+Downloading:   0%|          | 0.00/570 [00:00<?, ?B/s]Downloading: 100%|██████████| 570/570 [00:00<00:00, 4.34MB/s]
+Downloading: 0.00B [00:00, ?B/s]Downloading: 226kB [00:00, 8.35MB/s]
+Downloading: 0.00B [00:00, ?B/s]Downloading: 455kB [00:00, 11.4MB/s]
+bert-base-uncased ok
+/tmp/v15/env_kprune/lib/python3.10/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+bert-base-uncased ok
+Invalid URL '/api/resolve-cache/models/google/muril-base-cased/afd9f36c7923d54e97903922ff1b260d091d202f/config.json?%2Fgoogle%2Fmuril-base-cased%2Fresolve%2Fmain%2Fconfig.json=&etag=%22e059df2aaf7b1546fe53057c8bfc886bcec4fd77%22': No scheme supplied. Perhaps you meant https:///api/resolve-cache/models/google/muril-base-cased/afd9f36c7923d54e97903922ff1b260d091d202f/config.json?%2Fgoogle%2Fmuril-base-cased%2Fresolve%2Fmain%2Fconfig.json=&etag=%22e059df2aaf7b1546fe53057c8bfc886bcec4fd77%22?
+google/muril-base-cased OSError: Can't load config for 'google/muril-base-cased'. Make sure that:
+
+- 'google/muril-base-cased' is a correct model identifier listed on 'https://huggingface.co/models'
+  (make sure 'google/muril-base-cased' is not a path to a local directory with something else, in that case)
+
+- or 'google/muril-base-cased' is the correct path to a directory containing a config.json file
+
+
+/tmp/v15/env_kprune/lib/python3.10/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+google/muril-base-cased ok
+Downloading:   0%|          | 0.00/49.0 [00:00<?, ?B/s]Downloading: 100%|██████████| 49.0/49.0 [00:00<00:00, 308kB/s]
+Downloading:   0%|          | 0.00/625 [00:00<?, ?B/s]Downloading: 100%|██████████| 625/625 [00:00<00:00, 4.82MB/s]
+Downloading: 0.00B [00:00, ?B/s]Downloading: 972kB [00:00, 17.9MB/s]
+Downloading: 0.00B [00:00, ?B/s]Downloading: 1.87MB [00:00, 24.3MB/s]
+bert-base-multilingual-cased ok
+/tmp/v15/env_kprune/lib/python3.10/site-packages/huggingface_hub/file_download.py:949: FutureWarning: `resume_download` is deprecated and will be removed in version 1.0.0. Downloads always resume when possible. If you want to force a new download, use `force_download=True`.
+  warnings.warn(
+bert-base-multilingual-cased ok
+{'E1_pass': True, 'E2_codes_accept_vocab': True, 'E5_pass': True, 'chosen': {'kwon/bert': 'v21tok_bert', 'kwon/muril': 'v21tok_muril', 'kwon/mbert': 'v21tok_mbert', 'kprune/bert': 'v21tok_bert', 'kprune/muril': 'v21tok_muril', 'kprune/mbert': 'v21tok_mbert'}}

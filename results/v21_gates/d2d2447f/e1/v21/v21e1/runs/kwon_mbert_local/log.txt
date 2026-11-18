@@ -1,0 +1,5 @@
+11/18/2026 11:33:02 - INFO - __main__ - Namespace(model_name='v21tok_mbert', task_name='mnli', ckpt_dir='/tmp/v15/v21e1in/ckpt_mbert_rand', output_dir='/tmp/v15/v21e1/kwon_mbert_local', gpu=0, metric='mac', constraint=0.5, mha_lut=None, ffn_lut=None, num_samples=2048, seed=0)
+11/18/2026 11:33:02 - INFO - __main__ - Seed number: 0
+11/18/2026 11:34:11 - INFO - __main__ - Pruned Model MAC: 50.00 %
+11/18/2026 11:35:56 - INFO - __main__ - mnli Pruning time (s): 127.10651803016663
+11/18/2026 11:37:39 - INFO - __main__ - mnli Test accuracy: 0.3185
