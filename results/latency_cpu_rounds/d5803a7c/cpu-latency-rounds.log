@@ -1,0 +1,296 @@
+[{"stream_name":"stderr","time":10.578715955,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":10.578775719,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":10.578782639,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":10.578788071,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stderr","time":11.526483285,"data":"0.00s - Debugger warning: It seems that frozen modules are being used, which may\n"}
+,{"stream_name":"stderr","time":11.526532895,"data":"0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off\n"}
+,{"stream_name":"stderr","time":11.526539361,"data":"0.00s - to python to disable frozen modules.\n"}
+,{"stream_name":"stderr","time":11.526544187,"data":"0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.\n"}
+,{"stream_name":"stdout","time":20003.757571319,"data":"d5803a7 CPU latency: shuffled rounds (--rounds/--order-seed/--threads) + test; V19+H18b seed-7 shapes; Kaggle CPU kernel; protocol and validity rule written before the run\n"}
+,{"stream_name":"stdout","time":20003.757764094,"data":"diffusers 0.42.0 requires huggingface-hub\u003c3.0,\u003e=1.32.0, but you have huggingface-hub 0.36.2 which is incompatible.\n"}
+,{"stream_name":"stdout","time":20003.757772799,"data":"Successfully installed huggingface-hub-0.36.2 tokenizers-0.21.4 transformers-4.51.3\n"}
+,{"stream_name":"stdout","time":20003.757778599,"data":"Successfully installed quantum-attention-pruning-0.1.0\n"}
+,{"stream_name":"stdout","time":20003.757784429,"data":"2.11.0+cpu 4.51.3 4\n"}
+,{"stream_name":"stdout","time":20003.757790099,"data":"Architecture:                            x86_64\n"}
+,{"stream_name":"stdout","time":20003.757795667,"data":"CPU op-mode(s):                          32-bit, 64-bit\n"}
+,{"stream_name":"stdout","time":20003.757801284,"data":"Address sizes:                           46 bits physical, 48 bits virtual\n"}
+,{"stream_name":"stdout","time":20003.757807082,"data":"Byte Order:                              Little Endian\n"}
+,{"stream_name":"stdout","time":20003.757812774,"data":"CPU(s):                                  4\n"}
+,{"stream_name":"stdout","time":20003.757818393,"data":"On-line CPU(s) list:                     0-3\n"}
+,{"stream_name":"stdout","time":20003.757823971,"data":"Vendor ID:                               GenuineIntel\n"}
+,{"stream_name":"stdout","time":20003.757829729,"data":"Model name:                              Intel(R) Xeon(R) CPU @ 2.20GHz\n"}
+,{"stream_name":"stdout","time":20003.757835379,"data":"CPU family:                              6\n"}
+,{"stream_name":"stdout","time":20003.757840805,"data":"Model:                                   79\n"}
+,{"stream_name":"stdout","time":20003.757846342,"data":"Thread(s) per core:                      2\n"}
+,{"stream_name":"stdout","time":20003.7578518,"data":"Core(s) per socket:                      2\n"}
+,{"stream_name":"stdout","time":20003.757857221,"data":"Socket(s):                               1\n"}
+,{"stream_name":"stdout","time":20003.757862636,"data":"Stepping:                                0\n"}
+,{"stream_name":"stdout","time":20003.75786773,"data":"BogoMIPS:                                4399.99\n"}
+,{"stream_name":"stdout","time":20003.757874739,"data":"Flags:                                   fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 ss ht syscall nx pdpe1gb rdtscp lm constant_tsc rep_good nopl xtopology nonstop_tsc cpuid tsc_known_freq pni pclmulqdq ssse3 fma cx16 pcid sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm abm 3dnowprefetch pti ssbd ibrs ibpb stibp fsgsbase tsc_adjust bmi1 hle avx2 smep bmi2 erms invpcid rtm rdseed adx smap xsaveopt arat md_clear arch_capabilities\n"}
+,{"stream_name":"stdout","time":20003.757898877,"data":"Hypervisor vendor:                       KVM\n"}
+,{"stream_name":"stdout","time":20003.757904022,"data":"Virtualization type:                     full\n"}
+,{"stream_name":"stdout","time":20003.757908729,"data":"L1d cache:                               64 KiB (2 instances)\n"}
+,{"stream_name":"stdout","time":20003.757913497,"data":"L1i cache:                               64 KiB (2 instances)\n"}
+,{"stream_name":"stdout","time":20003.757918331,"data":"L2 cache:                                512 KiB (2 instances)\n"}
+,{"stream_name":"stdout","time":20003.757925266,"data":"L3 cache:                                55 MiB (1 instance)\n"}
+,{"stream_name":"stdout","time":20003.757929813,"data":"NUMA node(s):                            1\n"}
+,{"stream_name":"stdout","time":20003.757934472,"data":"NUMA node0 CPU(s):                       0-3\n"}
+,{"stream_name":"stdout","time":20003.75793861,"data":"Vulnerability Gather data sampling:      Not affected\n"}
+,{"stream_name":"stdout","time":20003.757943102,"data":"Vulnerability Ghostwrite:                Not affected\n"}
+,{"stream_name":"stdout","time":20003.757947846,"data":"Vulnerability Indirect target selection: Mitigation; Aligned branch/return thunks\n"}
+,{"stream_name":"stdout","time":20003.757952618,"data":"Vulnerability Itlb multihit:             Not affected\n"}
+,{"stream_name":"stdout","time":20003.757957027,"data":"Vulnerability L1tf:                      Mitigation; PTE Inversion\n"}
+,{"stream_name":"stdout","time":20003.757961665,"data":"Vulnerability Mds:                       Mitigation; Clear CPU buffers; SMT Host state unknown\n"}
+,{"stream_name":"stdout","time":20003.757966396,"data":"Vulnerability Meltdown:                  Mitigation; PTI\n"}
+,{"stream_name":"stdout","time":20003.757971209,"data":"Vulnerability Mmio stale data:           Vulnerable: Clear CPU buffers attempted, no microcode; SMT Host state unknown\n"}
+,{"stream_name":"stdout","time":20003.757975927,"data":"Vulnerability Old microcode:             Not affected\n"}
+,{"stream_name":"stdout","time":20003.757980531,"data":"Vulnerability Reg file data sampling:    Not affected\n"}
+,{"stream_name":"stdout","time":20003.757985262,"data":"Vulnerability Retbleed:                  Mitigation; IBRS\n"}
+,{"stream_name":"stdout","time":20003.757990039,"data":"Vulnerability Spec rstack overflow:      Not affected\n"}
+,{"stream_name":"stdout","time":20003.757994744,"data":"Vulnerability Spec store bypass:         Mitigation; Speculative Store Bypass disabled via prctl\n"}
+,{"stream_name":"stdout","time":20003.757999654,"data":"Vulnerability Spectre v1:                Mitigation; usercopy/swapgs barriers and __user pointer sanitization\n"}
+,{"stream_name":"stdout","time":20003.758004821,"data":"Vulnerability Spectre v2:                Mitigation; IBRS; IBPB conditional; STIBP conditional; RSB filling; PBRSB-eIBRS Not affected; BHI SW loop, KVM SW loop\n"}
+,{"stream_name":"stdout","time":20003.758010097,"data":"Vulnerability Srbds:                     Not affected\n"}
+,{"stream_name":"stdout","time":20003.758015036,"data":"Vulnerability Tsa:                       Not affected\n"}
+,{"stream_name":"stdout","time":20003.758020019,"data":"Vulnerability Tsx async abort:           Mitigation; Clear CPU buffers; SMT Host state unknown\n"}
+,{"stream_name":"stdout","time":20003.758024952,"data":"Vulnerability Vmscape:                   Not affected\n"}
+,{"stream_name":"stdout","time":20003.758029614,"data":"I0000 00:00:1794995825.682265     128 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.\n"}
+,{"stream_name":"stdout","time":20003.758039324,"data":"I0000 00:00:1794995844.127171     128 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.\n"}
+,{"stream_name":"stdout","time":20003.758044858,"data":"round 0 v19|kwon:mnli:seed7 {1: 72.333, 32: 1970.611}\n"}
+,{"stream_name":"stdout","time":20003.758049416,"data":"round 0 v19|kwon:qqp:seed7 {1: 75.658, 32: 1913.872}\n"}
+,{"stream_name":"stdout","time":20003.758054009,"data":"round 0 h18b|kwon:qnli:seed7 {1: 141.399, 32: 3708.625}\n"}
+,{"stream_name":"stdout","time":20003.758058582,"data":"round 0 v19|kwon:mrpc:seed7 {1: 79.18, 32: 1861.833}\n"}
+,{"stream_name":"stdout","time":20003.7580628,"data":"round 0 v19|kprune:sst2:seed7 {1: 79.331, 32: 2000.797}\n"}
+,{"stream_name":"stdout","time":20003.758067994,"data":"round 0 h18b|kprune:qqp:seed7 {1: 177.648, 32: 4203.6}\n"}
+,{"stream_name":"stdout","time":20003.758072351,"data":"round 0 v19|kprune:qqp:seed7 {1: 98.863, 32: 2091.728}\n"}
+,{"stream_name":"stdout","time":20003.758076883,"data":"round 0 h18b|kprune:qnli:seed7 {1: 158.979, 32: 3356.263}\n"}
+,{"stream_name":"stdout","time":20003.758081577,"data":"round 0 v19|unpruned {1: 124.542, 32: 3576.208}\n"}
+,{"stream_name":"stdout","time":20003.758086284,"data":"round 0 h18b|kprune:mnli:seed7 {1: 132.76, 32: 3347.073}\n"}
+,{"stream_name":"stdout","time":20003.758090857,"data":"round 0 v19|kwon:sst2:seed7 {1: 67.293, 32: 1721.092}\n"}
+,{"stream_name":"stdout","time":20003.758095466,"data":"round 0 h18b|kwon:qqp:seed7 {1: 137.415, 32: 3439.929}\n"}
+,{"stream_name":"stdout","time":20003.758100043,"data":"round 0 h18b|kwon:mnli:seed7 {1: 136.905, 32: 3438.356}\n"}
+,{"stream_name":"stdout","time":20003.758104665,"data":"round 0 v19|kwon:qnli:seed7 {1: 67.862, 32: 1711.668}\n"}
+,{"stream_name":"stdout","time":20003.758109426,"data":"round 0 v19|kprune:qnli:seed7 {1: 68.781, 32: 1728.328}\n"}
+,{"stream_name":"stdout","time":20003.758113966,"data":"round 0 h18b|unpruned {1: 255.029, 32: 7333.289}\n"}
+,{"stream_name":"stdout","time":20003.758118567,"data":"round 0 v19|kprune:mrpc:seed7 {1: 68.312, 32: 1721.155}\n"}
+,{"stream_name":"stdout","time":20003.758123168,"data":"round 0 v19|kprune:stsb:seed7 {1: 68.058, 32: 1734.909}\n"}
+,{"stream_name":"stdout","time":20003.758127742,"data":"round 0 v19|kprune:mnli:seed7 {1: 68.34, 32: 1722.466}\n"}
+,{"stream_name":"stdout","time":20003.758132246,"data":"round 0 v19|kwon:stsb:seed7 {1: 68.797, 32: 1736.173}\n"}
+,{"stream_name":"stdout","time":20003.758136909,"data":"round 1 h18b|kwon:qqp:seed7 {1: 137.378, 32: 3507.855}\n"}
+,{"stream_name":"stdout","time":20003.758141928,"data":"round 1 h18b|kwon:mnli:seed7 {1: 139.254, 32: 3471.29}\n"}
+,{"stream_name":"stdout","time":20003.758146261,"data":"round 1 v19|kwon:stsb:seed7 {1: 69.574, 32: 1750.755}\n"}
+,{"stream_name":"stdout","time":20003.75815096,"data":"round 1 v19|kprune:sst2:seed7 {1: 70.209, 32: 1714.05}\n"}
+,{"stream_name":"stdout","time":20003.758155465,"data":"round 1 v19|kprune:qqp:seed7 {1: 70.337, 32: 1735.214}\n"}
+,{"stream_name":"stdout","time":20003.758159699,"data":"round 1 h18b|kprune:mnli:seed7 {1: 132.829, 32: 3349.288}\n"}
+,{"stream_name":"stdout","time":20003.758164286,"data":"round 1 h18b|kprune:qqp:seed7 {1: 132.528, 32: 3364.051}\n"}
+,{"stream_name":"stdout","time":20003.758168645,"data":"round 1 v19|kprune:mrpc:seed7 {1: 67.702, 32: 1716.363}\n"}
+,{"stream_name":"stdout","time":20003.758173254,"data":"round 1 v19|kwon:sst2:seed7 {1: 68.023, 32: 1707.271}\n"}
+,{"stream_name":"stdout","time":20003.758177914,"data":"round 1 v19|kprune:qnli:seed7 {1: 68.517, 32: 1718.162}\n"}
+,{"stream_name":"stdout","time":20003.758182466,"data":"round 1 v19|kprune:stsb:seed7 {1: 67.941, 32: 1722.813}\n"}
+,{"stream_name":"stdout","time":20003.758191218,"data":"round 1 v19|kwon:mrpc:seed7 {1: 69.256, 32: 1758.772}\n"}
+,{"stream_name":"stdout","time":20003.758222789,"data":"round 1 v19|unpruned {1: 129.52, 32: 3631.402}\n"}
+,{"stream_name":"stdout","time":20003.758228127,"data":"round 1 v19|kwon:qnli:seed7 {1: 68.685, 32: 1709.201}\n"}
+,{"stream_name":"stdout","time":20003.758232511,"data":"round 1 h18b|kprune:qnli:seed7 {1: 134.597, 32: 3429.295}\n"}
+,{"stream_name":"stdout","time":20003.758237207,"data":"round 1 v19|kprune:mnli:seed7 {1: 70.45, 32: 1729.338}\n"}
+,{"stream_name":"stdout","time":20003.758241805,"data":"round 1 h18b|unpruned {1: 252.031, 32: 7331.986}\n"}
+,{"stream_name":"stdout","time":20003.75824636,"data":"round 1 v19|kwon:mnli:seed7 {1: 68.554, 32: 1746.731}\n"}
+,{"stream_name":"stdout","time":20003.758251112,"data":"round 1 v19|kwon:qqp:seed7 {1: 80.972, 32: 1917.546}\n"}
+,{"stream_name":"stdout","time":20003.758255674,"data":"round 1 h18b|kwon:qnli:seed7 {1: 162.893, 32: 3857.852}\n"}
+,{"stream_name":"stdout","time":20003.758260266,"data":"round 2 v19|kwon:mnli:seed7 {1: 74.412, 32: 1751.551}\n"}
+,{"stream_name":"stdout","time":20003.758264861,"data":"round 2 h18b|unpruned {1: 265.136, 32: 7599.137}\n"}
+,{"stream_name":"stdout","time":20003.758270262,"data":"round 2 v19|kprune:sst2:seed7 {1: 72.696, 32: 1790.315}\n"}
+,{"stream_name":"stdout","time":20003.758274857,"data":"round 2 v19|kwon:stsb:seed7 {1: 72.235, 32: 1768.545}\n"}
+,{"stream_name":"stdout","time":20003.758279419,"data":"round 2 v19|unpruned {1: 133.407, 32: 3651.085}\n"}
+,{"stream_name":"stdout","time":20003.758284002,"data":"round 2 v19|kwon:qnli:seed7 {1: 67.576, 32: 1755.055}\n"}
+,{"stream_name":"stdout","time":20003.758288994,"data":"round 2 h18b|kprune:mnli:seed7 {1: 141.141, 32: 3476.659}\n"}
+,{"stream_name":"stdout","time":20003.758294211,"data":"round 2 v19|kprune:mrpc:seed7 {1: 69.841, 32: 1759.452}\n"}
+,{"stream_name":"stdout","time":20003.758298716,"data":"round 2 h18b|kwon:qnli:seed7 {1: 136.036, 32: 3554.289}\n"}
+,{"stream_name":"stdout","time":20003.758303406,"data":"round 2 h18b|kwon:qqp:seed7 {1: 142.513, 32: 3537.727}\n"}
+,{"stream_name":"stdout","time":20003.758308148,"data":"round 2 v19|kwon:sst2:seed7 {1: 70.241, 32: 1772.219}\n"}
+,{"stream_name":"stdout","time":20003.758312715,"data":"round 2 v19|kprune:stsb:seed7 {1: 72.476, 32: 1768.254}\n"}
+,{"stream_name":"stdout","time":20003.758317292,"data":"round 2 v19|kwon:mrpc:seed7 {1: 70.734, 32: 1757.654}\n"}
+,{"stream_name":"stdout","time":20003.758321626,"data":"round 2 h18b|kprune:qqp:seed7 {1: 138.17, 32: 3466.898}\n"}
+,{"stream_name":"stdout","time":20003.758326284,"data":"round 2 v19|kprune:qqp:seed7 {1: 71.916, 32: 1799.911}\n"}
+,{"stream_name":"stdout","time":20003.758330546,"data":"round 2 h18b|kprune:qnli:seed7 {1: 140.333, 32: 3649.417}\n"}
+,{"stream_name":"stdout","time":20003.758335212,"data":"round 2 v19|kprune:qnli:seed7 {1: 77.763, 32: 1926.872}\n"}
+,{"stream_name":"stdout","time":20003.758339717,"data":"round 2 v19|kprune:mnli:seed7 {1: 89.169, 32: 1897.937}\n"}
+,{"stream_name":"stdout","time":20003.758344162,"data":"round 2 h18b|kwon:mnli:seed7 {1: 153.489, 32: 3688.796}\n"}
+,{"stream_name":"stdout","time":20003.758348811,"data":"round 2 v19|kwon:qqp:seed7 {1: 79.832, 32: 1856.917}\n"}
+,{"stream_name":"stdout","time":20003.758353352,"data":"round 3 v19|kprune:stsb:seed7 {1: 78.022, 32: 1845.416}\n"}
+,{"stream_name":"stdout","time":20003.758357875,"data":"round 3 v19|kprune:sst2:seed7 {1: 77.115, 32: 1880.876}\n"}
+,{"stream_name":"stdout","time":20003.758362409,"data":"round 3 h18b|kwon:qqp:seed7 {1: 151.325, 32: 3488.012}\n"}
+,{"stream_name":"stdout","time":20003.758366824,"data":"round 3 v19|kwon:sst2:seed7 {1: 70.428, 32: 1750.85}\n"}
+,{"stream_name":"stdout","time":20003.758375889,"data":"round 3 v19|kprune:qqp:seed7 {1: 71.082, 32: 1800.592}\n"}
+,{"stream_name":"stdout","time":20003.758380488,"data":"round 3 v19|kwon:qnli:seed7 {1: 75.652, 32: 1765.69}\n"}
+,{"stream_name":"stdout","time":20003.758384854,"data":"round 3 h18b|kwon:qnli:seed7 {1: 148.889, 32: 3485.763}\n"}
+,{"stream_name":"stdout","time":20003.758389905,"data":"round 3 v19|kwon:mrpc:seed7 {1: 69.35, 32: 1722.147}\n"}
+,{"stream_name":"stdout","time":20003.758394417,"data":"round 3 h18b|kprune:mnli:seed7 {1: 134.064, 32: 3368.492}\n"}
+,{"stream_name":"stdout","time":20003.758398862,"data":"round 3 v19|kwon:mnli:seed7 {1: 74.247, 32: 1765.712}\n"}
+,{"stream_name":"stdout","time":20003.758403248,"data":"round 3 v19|kprune:qnli:seed7 {1: 69.889, 32: 1769.441}\n"}
+,{"stream_name":"stdout","time":20003.758407618,"data":"round 3 v19|kwon:stsb:seed7 {1: 71.548, 32: 1745.2}\n"}
+,{"stream_name":"stdout","time":20003.758412189,"data":"round 3 h18b|kprune:qnli:seed7 {1: 146.065, 32: 3527.249}\n"}
+,{"stream_name":"stdout","time":20003.758416554,"data":"round 3 v19|kprune:mnli:seed7 {1: 73.381, 32: 1770.606}\n"}
+,{"stream_name":"stdout","time":20003.758421106,"data":"round 3 h18b|unpruned {1: 257.594, 32: 7534.86}\n"}
+,{"stream_name":"stdout","time":20003.758460936,"data":"round 3 v19|unpruned {1: 131.232, 32: 3683.992}\n"}
+,{"stream_name":"stdout","time":20003.758466511,"data":"round 3 h18b|kprune:qqp:seed7 {1: 139.192, 32: 3406.099}\n"}
+,{"stream_name":"stdout","time":20003.758471126,"data":"round 3 v19|kwon:qqp:seed7 {1: 68.417, 32: 1720.434}\n"}
+,{"stream_name":"stdout","time":20003.758475864,"data":"round 3 v19|kprune:mrpc:seed7 {1: 67.971, 32: 1715.735}\n"}
+,{"stream_name":"stdout","time":20003.758480523,"data":"round 3 h18b|kwon:mnli:seed7 {1: 135.488, 32: 3404.076}\n"}
+,{"stream_name":"stdout","time":20003.75848615,"data":"round 4 h18b|kprune:mnli:seed7 {1: 133.512, 32: 3355.39}\n"}
+,{"stream_name":"stdout","time":20003.758490957,"data":"round 4 h18b|kprune:qqp:seed7 {1: 132.939, 32: 3367.496}\n"}
+,{"stream_name":"stdout","time":20003.758495538,"data":"round 4 v19|kprune:qqp:seed7 {1: 67.846, 32: 1728.818}\n"}
+,{"stream_name":"stdout","time":20003.758500097,"data":"round 4 h18b|kwon:qnli:seed7 {1: 136.212, 32: 3448.249}\n"}
+,{"stream_name":"stdout","time":20003.758504402,"data":"round 4 v19|kwon:mrpc:seed7 {1: 70.964, 32: 1731.205}\n"}
+,{"stream_name":"stdout","time":20003.758508684,"data":"round 4 v19|unpruned {1: 127.471, 32: 3597.366}\n"}
+,{"stream_name":"stdout","time":20003.758513154,"data":"round 4 v19|kprune:stsb:seed7 {1: 68.522, 32: 1728.66}\n"}
+,{"stream_name":"stdout","time":20003.758517489,"data":"round 4 v19|kwon:qqp:seed7 {1: 67.658, 32: 1715.212}\n"}
+,{"stream_name":"stdout","time":20003.758522354,"data":"round 4 v19|kwon:stsb:seed7 {1: 68.403, 32: 1722.582}\n"}
+,{"stream_name":"stdout","time":20003.7585266,"data":"round 4 h18b|kwon:mnli:seed7 {1: 135.267, 32: 3421.796}\n"}
+,{"stream_name":"stdout","time":20003.758531272,"data":"round 4 v19|kwon:qnli:seed7 {1: 68.48, 32: 1718.737}\n"}
+,{"stream_name":"stdout","time":20003.758535729,"data":"round 4 h18b|unpruned {1: 252.574, 32: 7330.708}\n"}
+,{"stream_name":"stdout","time":20003.758540342,"data":"round 4 v19|kwon:mnli:seed7 {1: 68.584, 32: 1715.479}\n"}
+,{"stream_name":"stdout","time":20003.758544849,"data":"round 4 v19|kprune:qnli:seed7 {1: 68.38, 32: 1721.296}\n"}
+,{"stream_name":"stdout","time":20003.758549391,"data":"round 4 h18b|kprune:qnli:seed7 {1: 135.294, 32: 3372.773}\n"}
+,{"stream_name":"stdout","time":20003.758553965,"data":"round 4 h18b|kwon:qqp:seed7 {1: 136.297, 32: 3423.562}\n"}
+,{"stream_name":"stdout","time":20003.758558467,"data":"round 4 v19|kwon:sst2:seed7 {1: 68.661, 32: 1707.321}\n"}
+,{"stream_name":"stdout","time":20003.758568252,"data":"round 4 v19|kprune:mnli:seed7 {1: 68.392, 32: 1709.566}\n"}
+,{"stream_name":"stdout","time":20003.758572888,"data":"round 4 v19|kprune:sst2:seed7 {1: 67.415, 32: 1698.378}\n"}
+,{"stream_name":"stdout","time":20003.758577459,"data":"round 4 v19|kprune:mrpc:seed7 {1: 68.477, 32: 1746.385}\n"}
+,{"stream_name":"stdout","time":20003.758581875,"data":"round 5 v19|kprune:mnli:seed7 {1: 71.182, 32: 1764.661}\n"}
+,{"stream_name":"stdout","time":20003.758587889,"data":"round 5 v19|kwon:qqp:seed7 {1: 70.618, 32: 1779.185}\n"}
+,{"stream_name":"stdout","time":20003.758592562,"data":"round 5 v19|kwon:mrpc:seed7 {1: 73.037, 32: 1763.323}\n"}
+,{"stream_name":"stdout","time":20003.758597224,"data":"round 5 v19|kprune:mrpc:seed7 {1: 69.423, 32: 1768.117}\n"}
+,{"stream_name":"stdout","time":20003.758601704,"data":"round 5 v19|kprune:sst2:seed7 {1: 73.339, 32: 1746.751}\n"}
+,{"stream_name":"stdout","time":20003.758605962,"data":"round 5 v19|kwon:stsb:seed7 {1: 69.945, 32: 1757.678}\n"}
+,{"stream_name":"stdout","time":20003.758610371,"data":"round 5 v19|kprune:stsb:seed7 {1: 70.503, 32: 1757.783}\n"}
+,{"stream_name":"stdout","time":20003.758614664,"data":"round 5 v19|kwon:qnli:seed7 {1: 70.359, 32: 1745.68}\n"}
+,{"stream_name":"stdout","time":20003.758619156,"data":"round 5 h18b|kprune:mnli:seed7 {1: 134.736, 32: 3436.277}\n"}
+,{"stream_name":"stdout","time":20003.758623845,"data":"round 5 h18b|kwon:qnli:seed7 {1: 141.177, 32: 3450.691}\n"}
+,{"stream_name":"stdout","time":20003.758628237,"data":"round 5 v19|kwon:mnli:seed7 {1: 68.58, 32: 1724.528}\n"}
+,{"stream_name":"stdout","time":20003.758632737,"data":"round 5 v19|kprune:qqp:seed7 {1: 68.706, 32: 1734.77}\n"}
+,{"stream_name":"stdout","time":20003.758637276,"data":"round 5 v19|unpruned {1: 127.207, 32: 3626.769}\n"}
+,{"stream_name":"stdout","time":20003.758641809,"data":"round 5 h18b|kprune:qnli:seed7 {1: 136.858, 32: 3398.563}\n"}
+,{"stream_name":"stdout","time":20003.758646337,"data":"round 5 v19|kwon:sst2:seed7 {1: 69.343, 32: 1732.914}\n"}
+,{"stream_name":"stdout","time":20003.758650847,"data":"round 5 h18b|kwon:mnli:seed7 {1: 138.398, 32: 3725.979}\n"}
+,{"stream_name":"stdout","time":20003.758655429,"data":"round 5 v19|kprune:qnli:seed7 {1: 72.958, 32: 1900.745}\n"}
+,{"stream_name":"stdout","time":20003.758668424,"data":"round 5 h18b|unpruned {1: 264.116, 32: 7550.038}\n"}
+,{"stream_name":"stdout","time":20003.75867296,"data":"round 5 h18b|kprune:qqp:seed7 {1: 140.605, 32: 3507.575}\n"}
+,{"stream_name":"stdout","time":20003.758677785,"data":"round 5 h18b|kwon:qqp:seed7 {1: 150.984, 32: 3492.328}\n"}
+,{"stream_name":"stdout","time":20003.758690106,"data":"round 6 h18b|kwon:qqp:seed7 {1: 139.899, 32: 3465.915}\n"}
+,{"stream_name":"stdout","time":20003.758694884,"data":"round 6 v19|unpruned {1: 132.909, 32: 3642.076}\n"}
+,{"stream_name":"stdout","time":20003.758699162,"data":"round 6 v19|kwon:qnli:seed7 {1: 70.834, 32: 1737.792}\n"}
+,{"stream_name":"stdout","time":20003.758703749,"data":"round 6 h18b|kprune:mnli:seed7 {1: 140.376, 32: 3448.573}\n"}
+,{"stream_name":"stdout","time":20003.758708472,"data":"round 6 v19|kwon:stsb:seed7 {1: 70.543, 32: 1736.924}\n"}
+,{"stream_name":"stdout","time":20003.75871288,"data":"round 6 h18b|kprune:qqp:seed7 {1: 136.277, 32: 3389.558}\n"}
+,{"stream_name":"stdout","time":20003.758717584,"data":"round 6 v19|kwon:qqp:seed7 {1: 68.298, 32: 1726.693}\n"}
+,{"stream_name":"stdout","time":20003.758722329,"data":"round 6 h18b|unpruned {1: 254.591, 32: 7211.41}\n"}
+,{"stream_name":"stdout","time":20003.75872688,"data":"round 6 h18b|kwon:qnli:seed7 {1: 137.218, 32: 3427.136}\n"}
+,{"stream_name":"stdout","time":20003.758731536,"data":"round 6 h18b|kwon:mnli:seed7 {1: 136.457, 32: 3421.5}\n"}
+,{"stream_name":"stdout","time":20003.758740284,"data":"round 6 v19|kprune:qqp:seed7 {1: 69.172, 32: 1722.221}\n"}
+,{"stream_name":"stdout","time":20003.758744947,"data":"round 6 v19|kwon:mnli:seed7 {1: 69.399, 32: 1719.547}\n"}
+,{"stream_name":"stdout","time":20003.758749686,"data":"round 6 v19|kprune:qnli:seed7 {1: 67.886, 32: 1720.792}\n"}
+,{"stream_name":"stdout","time":20003.758754604,"data":"round 6 v19|kwon:mrpc:seed7 {1: 68.989, 32: 1715.965}\n"}
+,{"stream_name":"stdout","time":20003.75875928,"data":"round 6 v19|kprune:mrpc:seed7 {1: 68.354, 32: 1720.07}\n"}
+,{"stream_name":"stdout","time":20003.75876392,"data":"round 6 v19|kprune:mnli:seed7 {1: 69.593, 32: 1713.249}\n"}
+,{"stream_name":"stdout","time":20003.758768547,"data":"round 6 v19|kprune:stsb:seed7 {1: 68.666, 32: 1725.588}\n"}
+,{"stream_name":"stdout","time":20003.758773209,"data":"round 6 h18b|kprune:qnli:seed7 {1: 135.284, 32: 3376.439}\n"}
+,{"stream_name":"stdout","time":20003.758777886,"data":"round 6 v19|kwon:sst2:seed7 {1: 69.306, 32: 1707.123}\n"}
+,{"stream_name":"stdout","time":20003.758782162,"data":"round 6 v19|kprune:sst2:seed7 {1: 68.407, 32: 1701.552}\n"}
+,{"stream_name":"stdout","time":20003.758786902,"data":"round 7 h18b|kwon:qqp:seed7 {1: 135.763, 32: 3429.521}\n"}
+,{"stream_name":"stdout","time":20003.758791554,"data":"round 7 h18b|kwon:qnli:seed7 {1: 134.779, 32: 3439.435}\n"}
+,{"stream_name":"stdout","time":20003.758795727,"data":"round 7 h18b|unpruned {1: 252.343, 32: 7195.879}\n"}
+,{"stream_name":"stdout","time":20003.758799876,"data":"round 7 h18b|kprune:qqp:seed7 {1: 135.25, 32: 3380.913}\n"}
+,{"stream_name":"stdout","time":20003.758804697,"data":"round 7 h18b|kprune:mnli:seed7 {1: 134.731, 32: 3363.911}\n"}
+,{"stream_name":"stdout","time":20003.758809012,"data":"round 7 v19|kwon:qnli:seed7 {1: 69.437, 32: 1709.1}\n"}
+,{"stream_name":"stdout","time":20003.758813645,"data":"round 7 v19|kprune:mnli:seed7 {1: 68.665, 32: 1713.126}\n"}
+,{"stream_name":"stdout","time":20003.758818254,"data":"round 7 v19|unpruned {1: 125.573, 32: 3587.161}\n"}
+,{"stream_name":"stdout","time":20003.758822811,"data":"round 7 v19|kprune:qqp:seed7 {1: 68.806, 32: 1721.99}\n"}
+,{"stream_name":"stdout","time":20003.758827366,"data":"round 7 v19|kprune:qnli:seed7 {1: 68.272, 32: 1732.949}\n"}
+,{"stream_name":"stdout","time":20003.758831895,"data":"round 7 v19|kwon:stsb:seed7 {1: 68.957, 32: 1726.614}\n"}
+,{"stream_name":"stdout","time":20003.758836817,"data":"round 7 v19|kwon:mrpc:seed7 {1: 68.774, 32: 1744.89}\n"}
+,{"stream_name":"stdout","time":20003.758841382,"data":"round 7 v19|kprune:stsb:seed7 {1: 72.201, 32: 1744.338}\n"}
+,{"stream_name":"stdout","time":20003.758845924,"data":"round 7 h18b|kprune:qnli:seed7 {1: 137.431, 32: 3393.696}\n"}
+,{"stream_name":"stdout","time":20003.758850462,"data":"round 7 v19|kwon:sst2:seed7 {1: 68.874, 32: 1715.022}\n"}
+,{"stream_name":"stdout","time":20003.758855621,"data":"round 7 h18b|kwon:mnli:seed7 {1: 134.829, 32: 3422.957}\n"}
+,{"stream_name":"stdout","time":20003.758860171,"data":"round 7 v19|kprune:sst2:seed7 {1: 67.836, 32: 1705.681}\n"}
+,{"stream_name":"stdout","time":20003.758864954,"data":"round 7 v19|kprune:mrpc:seed7 {1: 68.863, 32: 1733.271}\n"}
+,{"stream_name":"stdout","time":20003.758869621,"data":"round 7 v19|kwon:mnli:seed7 {1: 72.572, 32: 1783.874}\n"}
+,{"stream_name":"stdout","time":20003.758873972,"data":"round 7 v19|kwon:qqp:seed7 {1: 71.493, 32: 1762.657}\n"}
+,{"stream_name":"stdout","time":20003.758877957,"data":"round 8 v19|kwon:qnli:seed7 {1: 70.772, 32: 1725.234}\n"}
+,{"stream_name":"stdout","time":20003.758882706,"data":"round 8 v19|kwon:qqp:seed7 {1: 68.372, 32: 1719.153}\n"}
+,{"stream_name":"stdout","time":20003.758887309,"data":"round 8 h18b|kprune:mnli:seed7 {1: 134.275, 32: 3392.795}\n"}
+,{"stream_name":"stdout","time":20003.758895682,"data":"round 8 h18b|kwon:qnli:seed7 {1: 136.032, 32: 3457.044}\n"}
+,{"stream_name":"stdout","time":20003.758900106,"data":"round 8 v19|kprune:mrpc:seed7 {1: 68.327, 32: 1729.176}\n"}
+,{"stream_name":"stdout","time":20003.758904544,"data":"round 8 h18b|unpruned {1: 253.91, 32: 7184.673}\n"}
+,{"stream_name":"stdout","time":20003.758909051,"data":"round 8 v19|kwon:sst2:seed7 {1: 68.286, 32: 1714.554}\n"}
+,{"stream_name":"stdout","time":20003.75891356,"data":"round 8 v19|kprune:stsb:seed7 {1: 68.64, 32: 1722.614}\n"}
+,{"stream_name":"stdout","time":20003.758918155,"data":"round 8 v19|kprune:qqp:seed7 {1: 69.072, 32: 1722.329}\n"}
+,{"stream_name":"stdout","time":20003.758922684,"data":"round 8 h18b|kprune:qqp:seed7 {1: 135.719, 32: 3376.909}\n"}
+,{"stream_name":"stdout","time":20003.758927304,"data":"round 8 h18b|kwon:qqp:seed7 {1: 136.224, 32: 3439.318}\n"}
+,{"stream_name":"stdout","time":20003.758931998,"data":"round 8 h18b|kprune:qnli:seed7 {1: 136.215, 32: 3401.259}\n"}
+,{"stream_name":"stdout","time":20003.758936529,"data":"round 8 v19|kprune:qnli:seed7 {1: 68.433, 32: 1722.136}\n"}
+,{"stream_name":"stdout","time":20003.758941074,"data":"round 8 v19|unpruned {1: 125.793, 32: 3607.649}\n"}
+,{"stream_name":"stdout","time":20003.758945618,"data":"round 8 v19|kprune:mnli:seed7 {1: 68.614, 32: 1708.042}\n"}
+,{"stream_name":"stdout","time":20003.758950155,"data":"round 8 v19|kwon:mrpc:seed7 {1: 67.993, 32: 1713.025}\n"}
+,{"stream_name":"stdout","time":20003.758954734,"data":"round 8 v19|kwon:mnli:seed7 {1: 67.92, 32: 1711.231}\n"}
+,{"stream_name":"stdout","time":20003.758959262,"data":"round 8 h18b|kwon:mnli:seed7 {1: 136.508, 32: 3439.206}\n"}
+,{"stream_name":"stdout","time":20003.758963404,"data":"round 8 v19|kprune:sst2:seed7 {1: 68.651, 32: 1710.743}\n"}
+,{"stream_name":"stdout","time":20003.758968116,"data":"round 8 v19|kwon:stsb:seed7 {1: 68.743, 32: 1729.649}\n"}
+,{"stream_name":"stdout","time":20003.758971892,"data":"round 9 h18b|kprune:mnli:seed7 {1: 134.694, 32: 3369.405}\n"}
+,{"stream_name":"stdout","time":20003.758976458,"data":"round 9 v19|kprune:qqp:seed7 {1: 67.661, 32: 1723.28}\n"}
+,{"stream_name":"stdout","time":20003.758980674,"data":"round 9 v19|kwon:stsb:seed7 {1: 68.825, 32: 1731.91}\n"}
+,{"stream_name":"stdout","time":20003.758985055,"data":"round 9 v19|kprune:stsb:seed7 {1: 69.856, 32: 1737.33}\n"}
+,{"stream_name":"stdout","time":20003.758989451,"data":"round 9 v19|kwon:mrpc:seed7 {1: 69.913, 32: 1721.34}\n"}
+,{"stream_name":"stdout","time":20003.758994022,"data":"round 9 h18b|kwon:qnli:seed7 {1: 139.793, 32: 3478.417}\n"}
+,{"stream_name":"stdout","time":20003.758998282,"data":"round 9 v19|kwon:sst2:seed7 {1: 69.38, 32: 1729.185}\n"}
+,{"stream_name":"stdout","time":20003.759002718,"data":"round 9 v19|unpruned {1: 128.36, 32: 3623.522}\n"}
+,{"stream_name":"stdout","time":20003.75900708,"data":"round 9 v19|kprune:qnli:seed7 {1: 70.704, 32: 1724.7}\n"}
+,{"stream_name":"stdout","time":20003.759011596,"data":"round 9 h18b|kwon:mnli:seed7 {1: 135.235, 32: 3430.015}\n"}
+,{"stream_name":"stdout","time":20003.759016141,"data":"round 9 h18b|unpruned {1: 251.294, 32: 7365.642}\n"}
+,{"stream_name":"stdout","time":20003.759020669,"data":"round 9 v19|kwon:mnli:seed7 {1: 68.462, 32: 1722.064}\n"}
+,{"stream_name":"stdout","time":20003.759026184,"data":"round 9 h18b|kprune:qqp:seed7 {1: 133.38, 32: 3403.853}\n"}
+,{"stream_name":"stdout","time":20003.759031271,"data":"round 9 h18b|kprune:qnli:seed7 {1: 136.928, 32: 3402.735}\n"}
+,{"stream_name":"stdout","time":20003.759035797,"data":"round 9 v19|kprune:sst2:seed7 {1: 68.065, 32: 1710.551}\n"}
+,{"stream_name":"stdout","time":20003.759040352,"data":"round 9 v19|kwon:qnli:seed7 {1: 69.389, 32: 1718.594}\n"}
+,{"stream_name":"stdout","time":20003.759048764,"data":"round 9 v19|kprune:mnli:seed7 {1: 67.766, 32: 1727.145}\n"}
+,{"stream_name":"stdout","time":20003.759053409,"data":"round 9 v19|kprune:mrpc:seed7 {1: 70.576, 32: 1728.514}\n"}
+,{"stream_name":"stdout","time":20003.759057886,"data":"round 9 h18b|kwon:qqp:seed7 {1: 136.262, 32: 3432.635}\n"}
+,{"stream_name":"stdout","time":20003.759062437,"data":"round 9 v19|kwon:qqp:seed7 {1: 67.963, 32: 1730.823}\n"}
+,{"stream_name":"stdout","time":20003.759066889,"data":"h18b|unpruned {'median_ms_b1': 254.251, 'median_ms_b32': 7332.637} 85054464\n"}
+,{"stream_name":"stdout","time":20003.759071451,"data":"h18b|kwon:qnli:seed7 {'median_ms_b1': 138.506, 'median_ms_b32': 3467.731} 42236783\n"}
+,{"stream_name":"stdout","time":20003.759076209,"data":"h18b|kwon:mnli:seed7 {'median_ms_b1': 136.483, 'median_ms_b32': 3434.185} 42346999\n"}
+,{"stream_name":"stdout","time":20003.759080802,"data":"h18b|kwon:qqp:seed7 {'median_ms_b1': 137.396, 'median_ms_b32': 3452.922} 42381005\n"}
+,{"stream_name":"stdout","time":20003.759085571,"data":"h18b|kprune:qnli:seed7 {'median_ms_b1': 136.893, 'median_ms_b32': 3399.911} 42431599\n"}
+,{"stream_name":"stdout","time":20003.759090037,"data":"h18b|kprune:mnli:seed7 {'median_ms_b1': 134.484, 'median_ms_b32': 3368.948} 42494168\n"}
+,{"stream_name":"stdout","time":20003.759094534,"data":"h18b|kprune:qqp:seed7 {'median_ms_b1': 135.998, 'median_ms_b32': 3396.705} 42495897\n"}
+,{"stream_name":"stdout","time":20003.759099172,"data":"v19|unpruned {'median_ms_b1': 127.916, 'median_ms_b32': 3625.146} 42527232\n"}
+,{"stream_name":"stdout","time":20003.759103936,"data":"v19|kwon:mrpc:seed7 {'median_ms_b1': 69.631, 'median_ms_b32': 1738.047} 21108433\n"}
+,{"stream_name":"stdout","time":20003.759108635,"data":"v19|kwon:sst2:seed7 {'median_ms_b1': 69.09, 'median_ms_b32': 1718.057} 21209619\n"}
+,{"stream_name":"stdout","time":20003.759113284,"data":"v19|kwon:stsb:seed7 {'median_ms_b1': 69.265, 'median_ms_b32': 1736.549} 21170041\n"}
+,{"stream_name":"stdout","time":20003.759118102,"data":"v19|kwon:qnli:seed7 {'median_ms_b1': 69.413, 'median_ms_b32': 1721.986} 21128286\n"}
+,{"stream_name":"stdout","time":20003.759122757,"data":"v19|kwon:mnli:seed7 {'median_ms_b1': 68.992, 'median_ms_b32': 1735.63} 21148459\n"}
+,{"stream_name":"stdout","time":20003.759127429,"data":"v19|kwon:qqp:seed7 {'median_ms_b1': 69.518, 'median_ms_b32': 1746.74} 21188229\n"}
+,{"stream_name":"stdout","time":20003.759132135,"data":"v19|kprune:mrpc:seed7 {'median_ms_b1': 68.415, 'median_ms_b32': 1728.845} 21087107\n"}
+,{"stream_name":"stdout","time":20003.759136856,"data":"v19|kprune:sst2:seed7 {'median_ms_b1': 69.43, 'median_ms_b32': 1712.396} 21220186\n"}
+,{"stream_name":"stdout","time":20003.759141578,"data":"v19|kprune:stsb:seed7 {'median_ms_b1': 69.261, 'median_ms_b32': 1736.12} 21160947\n"}
+,{"stream_name":"stdout","time":20003.759146434,"data":"v19|kprune:qnli:seed7 {'median_ms_b1': 68.649, 'median_ms_b32': 1726.514} 21102413\n"}
+,{"stream_name":"stdout","time":20003.759151136,"data":"v19|kprune:mnli:seed7 {'median_ms_b1': 69.129, 'median_ms_b32': 1724.806} 21163637\n"}
+,{"stream_name":"stdout","time":20003.759155722,"data":"v19|kprune:qqp:seed7 {'median_ms_b1': 69.122, 'median_ms_b32': 1731.794} 21173115\n"}
+,{"stream_name":"stdout","time":20003.759160844,"data":"total 72\n"}
+,{"stream_name":"stdout","time":20003.759165022,"data":"drwxr-xr-x 2 root root  4096 Nov 18 15:29 .\n"}
+,{"stream_name":"stdout","time":20003.759169409,"data":"drwxr-xr-x 8 root root  4096 Nov 18 09:55 ..\n"}
+,{"stream_name":"stdout","time":20003.759173997,"data":"-rw-r--r-- 1 root root   172 Nov 18 09:56 commit.txt\n"}
+,{"stream_name":"stdout","time":20003.759178474,"data":"-rw-r--r-- 1 root root    20 Nov 18 09:56 env.txt\n"}
+,{"stream_name":"stdout","time":20003.759187124,"data":"-rw-r--r-- 1 root root 28814 Nov 18 15:29 latency_cpu_rounds.json\n"}
+,{"stream_name":"stdout","time":20003.759191862,"data":"-rw-r--r-- 1 root root 12784 Nov 18 15:29 log.txt\n"}
+,{"stream_name":"stdout","time":20003.759226361,"data":"-rw-r--r-- 1 root root  3127 Nov 18 09:56 lscpu.txt\n"}
+,{"stream_name":"stdout","time":20003.759231611,"data":"-rw-r--r-- 1 root root  2478 Nov 18 09:56 __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":20007.597881936,"data":"/usr/local/lib/python3.13/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\\|'\n"}
+,{"stream_name":"stderr","time":20007.597924827,"data":"  cells[i][c] = re.sub('\\\\\\\\\\|', '|', cell)\n"}
+,{"stream_name":"stderr","time":20007.849186386,"data":"/usr/local/lib/python3.13/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\\_'\n"}
+,{"stream_name":"stderr","time":20007.849248146,"data":"  text = re.sub(r'_', '\\_', text) # Escape underscores in display text\n"}
+,{"stream_name":"stderr","time":20008.931427887,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to notebook\n"}
+,{"stream_name":"stderr","time":20009.0280546,"data":"[NbConvertApp] Writing 23026 bytes to __notebook__.ipynb\n"}
+,{"stream_name":"stderr","time":20012.602520957,"data":"[NbConvertApp] Converting notebook __notebook__.ipynb to html\n"}
+,{"stream_name":"stderr","time":20012.842718096,"data":"[NbConvertApp] Writing 294558 bytes to __results__.html\n"}
+]

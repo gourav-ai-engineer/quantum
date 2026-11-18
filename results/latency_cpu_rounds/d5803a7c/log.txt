@@ -1,0 +1,222 @@
+I0000 00:00:1794995825.682265     128 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+I0000 00:00:1794995844.127171     128 cudart_stub.cc:31] Could not find cuda drivers on your machine, GPU will not be used.
+round 0 v19|kwon:mnli:seed7 {1: 72.333, 32: 1970.611}
+round 0 v19|kwon:qqp:seed7 {1: 75.658, 32: 1913.872}
+round 0 h18b|kwon:qnli:seed7 {1: 141.399, 32: 3708.625}
+round 0 v19|kwon:mrpc:seed7 {1: 79.18, 32: 1861.833}
+round 0 v19|kprune:sst2:seed7 {1: 79.331, 32: 2000.797}
+round 0 h18b|kprune:qqp:seed7 {1: 177.648, 32: 4203.6}
+round 0 v19|kprune:qqp:seed7 {1: 98.863, 32: 2091.728}
+round 0 h18b|kprune:qnli:seed7 {1: 158.979, 32: 3356.263}
+round 0 v19|unpruned {1: 124.542, 32: 3576.208}
+round 0 h18b|kprune:mnli:seed7 {1: 132.76, 32: 3347.073}
+round 0 v19|kwon:sst2:seed7 {1: 67.293, 32: 1721.092}
+round 0 h18b|kwon:qqp:seed7 {1: 137.415, 32: 3439.929}
+round 0 h18b|kwon:mnli:seed7 {1: 136.905, 32: 3438.356}
+round 0 v19|kwon:qnli:seed7 {1: 67.862, 32: 1711.668}
+round 0 v19|kprune:qnli:seed7 {1: 68.781, 32: 1728.328}
+round 0 h18b|unpruned {1: 255.029, 32: 7333.289}
+round 0 v19|kprune:mrpc:seed7 {1: 68.312, 32: 1721.155}
+round 0 v19|kprune:stsb:seed7 {1: 68.058, 32: 1734.909}
+round 0 v19|kprune:mnli:seed7 {1: 68.34, 32: 1722.466}
+round 0 v19|kwon:stsb:seed7 {1: 68.797, 32: 1736.173}
+round 1 h18b|kwon:qqp:seed7 {1: 137.378, 32: 3507.855}
+round 1 h18b|kwon:mnli:seed7 {1: 139.254, 32: 3471.29}
+round 1 v19|kwon:stsb:seed7 {1: 69.574, 32: 1750.755}
+round 1 v19|kprune:sst2:seed7 {1: 70.209, 32: 1714.05}
+round 1 v19|kprune:qqp:seed7 {1: 70.337, 32: 1735.214}
+round 1 h18b|kprune:mnli:seed7 {1: 132.829, 32: 3349.288}
+round 1 h18b|kprune:qqp:seed7 {1: 132.528, 32: 3364.051}
+round 1 v19|kprune:mrpc:seed7 {1: 67.702, 32: 1716.363}
+round 1 v19|kwon:sst2:seed7 {1: 68.023, 32: 1707.271}
+round 1 v19|kprune:qnli:seed7 {1: 68.517, 32: 1718.162}
+round 1 v19|kprune:stsb:seed7 {1: 67.941, 32: 1722.813}
+round 1 v19|kwon:mrpc:seed7 {1: 69.256, 32: 1758.772}
+round 1 v19|unpruned {1: 129.52, 32: 3631.402}
+round 1 v19|kwon:qnli:seed7 {1: 68.685, 32: 1709.201}
+round 1 h18b|kprune:qnli:seed7 {1: 134.597, 32: 3429.295}
+round 1 v19|kprune:mnli:seed7 {1: 70.45, 32: 1729.338}
+round 1 h18b|unpruned {1: 252.031, 32: 7331.986}
+round 1 v19|kwon:mnli:seed7 {1: 68.554, 32: 1746.731}
+round 1 v19|kwon:qqp:seed7 {1: 80.972, 32: 1917.546}
+round 1 h18b|kwon:qnli:seed7 {1: 162.893, 32: 3857.852}
+round 2 v19|kwon:mnli:seed7 {1: 74.412, 32: 1751.551}
+round 2 h18b|unpruned {1: 265.136, 32: 7599.137}
+round 2 v19|kprune:sst2:seed7 {1: 72.696, 32: 1790.315}
+round 2 v19|kwon:stsb:seed7 {1: 72.235, 32: 1768.545}
+round 2 v19|unpruned {1: 133.407, 32: 3651.085}
+round 2 v19|kwon:qnli:seed7 {1: 67.576, 32: 1755.055}
+round 2 h18b|kprune:mnli:seed7 {1: 141.141, 32: 3476.659}
+round 2 v19|kprune:mrpc:seed7 {1: 69.841, 32: 1759.452}
+round 2 h18b|kwon:qnli:seed7 {1: 136.036, 32: 3554.289}
+round 2 h18b|kwon:qqp:seed7 {1: 142.513, 32: 3537.727}
+round 2 v19|kwon:sst2:seed7 {1: 70.241, 32: 1772.219}
+round 2 v19|kprune:stsb:seed7 {1: 72.476, 32: 1768.254}
+round 2 v19|kwon:mrpc:seed7 {1: 70.734, 32: 1757.654}
+round 2 h18b|kprune:qqp:seed7 {1: 138.17, 32: 3466.898}
+round 2 v19|kprune:qqp:seed7 {1: 71.916, 32: 1799.911}
+round 2 h18b|kprune:qnli:seed7 {1: 140.333, 32: 3649.417}
+round 2 v19|kprune:qnli:seed7 {1: 77.763, 32: 1926.872}
+round 2 v19|kprune:mnli:seed7 {1: 89.169, 32: 1897.937}
+round 2 h18b|kwon:mnli:seed7 {1: 153.489, 32: 3688.796}
+round 2 v19|kwon:qqp:seed7 {1: 79.832, 32: 1856.917}
+round 3 v19|kprune:stsb:seed7 {1: 78.022, 32: 1845.416}
+round 3 v19|kprune:sst2:seed7 {1: 77.115, 32: 1880.876}
+round 3 h18b|kwon:qqp:seed7 {1: 151.325, 32: 3488.012}
+round 3 v19|kwon:sst2:seed7 {1: 70.428, 32: 1750.85}
+round 3 v19|kprune:qqp:seed7 {1: 71.082, 32: 1800.592}
+round 3 v19|kwon:qnli:seed7 {1: 75.652, 32: 1765.69}
+round 3 h18b|kwon:qnli:seed7 {1: 148.889, 32: 3485.763}
+round 3 v19|kwon:mrpc:seed7 {1: 69.35, 32: 1722.147}
+round 3 h18b|kprune:mnli:seed7 {1: 134.064, 32: 3368.492}
+round 3 v19|kwon:mnli:seed7 {1: 74.247, 32: 1765.712}
+round 3 v19|kprune:qnli:seed7 {1: 69.889, 32: 1769.441}
+round 3 v19|kwon:stsb:seed7 {1: 71.548, 32: 1745.2}
+round 3 h18b|kprune:qnli:seed7 {1: 146.065, 32: 3527.249}
+round 3 v19|kprune:mnli:seed7 {1: 73.381, 32: 1770.606}
+round 3 h18b|unpruned {1: 257.594, 32: 7534.86}
+round 3 v19|unpruned {1: 131.232, 32: 3683.992}
+round 3 h18b|kprune:qqp:seed7 {1: 139.192, 32: 3406.099}
+round 3 v19|kwon:qqp:seed7 {1: 68.417, 32: 1720.434}
+round 3 v19|kprune:mrpc:seed7 {1: 67.971, 32: 1715.735}
+round 3 h18b|kwon:mnli:seed7 {1: 135.488, 32: 3404.076}
+round 4 h18b|kprune:mnli:seed7 {1: 133.512, 32: 3355.39}
+round 4 h18b|kprune:qqp:seed7 {1: 132.939, 32: 3367.496}
+round 4 v19|kprune:qqp:seed7 {1: 67.846, 32: 1728.818}
+round 4 h18b|kwon:qnli:seed7 {1: 136.212, 32: 3448.249}
+round 4 v19|kwon:mrpc:seed7 {1: 70.964, 32: 1731.205}
+round 4 v19|unpruned {1: 127.471, 32: 3597.366}
+round 4 v19|kprune:stsb:seed7 {1: 68.522, 32: 1728.66}
+round 4 v19|kwon:qqp:seed7 {1: 67.658, 32: 1715.212}
+round 4 v19|kwon:stsb:seed7 {1: 68.403, 32: 1722.582}
+round 4 h18b|kwon:mnli:seed7 {1: 135.267, 32: 3421.796}
+round 4 v19|kwon:qnli:seed7 {1: 68.48, 32: 1718.737}
+round 4 h18b|unpruned {1: 252.574, 32: 7330.708}
+round 4 v19|kwon:mnli:seed7 {1: 68.584, 32: 1715.479}
+round 4 v19|kprune:qnli:seed7 {1: 68.38, 32: 1721.296}
+round 4 h18b|kprune:qnli:seed7 {1: 135.294, 32: 3372.773}
+round 4 h18b|kwon:qqp:seed7 {1: 136.297, 32: 3423.562}
+round 4 v19|kwon:sst2:seed7 {1: 68.661, 32: 1707.321}
+round 4 v19|kprune:mnli:seed7 {1: 68.392, 32: 1709.566}
+round 4 v19|kprune:sst2:seed7 {1: 67.415, 32: 1698.378}
+round 4 v19|kprune:mrpc:seed7 {1: 68.477, 32: 1746.385}
+round 5 v19|kprune:mnli:seed7 {1: 71.182, 32: 1764.661}
+round 5 v19|kwon:qqp:seed7 {1: 70.618, 32: 1779.185}
+round 5 v19|kwon:mrpc:seed7 {1: 73.037, 32: 1763.323}
+round 5 v19|kprune:mrpc:seed7 {1: 69.423, 32: 1768.117}
+round 5 v19|kprune:sst2:seed7 {1: 73.339, 32: 1746.751}
+round 5 v19|kwon:stsb:seed7 {1: 69.945, 32: 1757.678}
+round 5 v19|kprune:stsb:seed7 {1: 70.503, 32: 1757.783}
+round 5 v19|kwon:qnli:seed7 {1: 70.359, 32: 1745.68}
+round 5 h18b|kprune:mnli:seed7 {1: 134.736, 32: 3436.277}
+round 5 h18b|kwon:qnli:seed7 {1: 141.177, 32: 3450.691}
+round 5 v19|kwon:mnli:seed7 {1: 68.58, 32: 1724.528}
+round 5 v19|kprune:qqp:seed7 {1: 68.706, 32: 1734.77}
+round 5 v19|unpruned {1: 127.207, 32: 3626.769}
+round 5 h18b|kprune:qnli:seed7 {1: 136.858, 32: 3398.563}
+round 5 v19|kwon:sst2:seed7 {1: 69.343, 32: 1732.914}
+round 5 h18b|kwon:mnli:seed7 {1: 138.398, 32: 3725.979}
+round 5 v19|kprune:qnli:seed7 {1: 72.958, 32: 1900.745}
+round 5 h18b|unpruned {1: 264.116, 32: 7550.038}
+round 5 h18b|kprune:qqp:seed7 {1: 140.605, 32: 3507.575}
+round 5 h18b|kwon:qqp:seed7 {1: 150.984, 32: 3492.328}
+round 6 h18b|kwon:qqp:seed7 {1: 139.899, 32: 3465.915}
+round 6 v19|unpruned {1: 132.909, 32: 3642.076}
+round 6 v19|kwon:qnli:seed7 {1: 70.834, 32: 1737.792}
+round 6 h18b|kprune:mnli:seed7 {1: 140.376, 32: 3448.573}
+round 6 v19|kwon:stsb:seed7 {1: 70.543, 32: 1736.924}
+round 6 h18b|kprune:qqp:seed7 {1: 136.277, 32: 3389.558}
+round 6 v19|kwon:qqp:seed7 {1: 68.298, 32: 1726.693}
+round 6 h18b|unpruned {1: 254.591, 32: 7211.41}
+round 6 h18b|kwon:qnli:seed7 {1: 137.218, 32: 3427.136}
+round 6 h18b|kwon:mnli:seed7 {1: 136.457, 32: 3421.5}
+round 6 v19|kprune:qqp:seed7 {1: 69.172, 32: 1722.221}
+round 6 v19|kwon:mnli:seed7 {1: 69.399, 32: 1719.547}
+round 6 v19|kprune:qnli:seed7 {1: 67.886, 32: 1720.792}
+round 6 v19|kwon:mrpc:seed7 {1: 68.989, 32: 1715.965}
+round 6 v19|kprune:mrpc:seed7 {1: 68.354, 32: 1720.07}
+round 6 v19|kprune:mnli:seed7 {1: 69.593, 32: 1713.249}
+round 6 v19|kprune:stsb:seed7 {1: 68.666, 32: 1725.588}
+round 6 h18b|kprune:qnli:seed7 {1: 135.284, 32: 3376.439}
+round 6 v19|kwon:sst2:seed7 {1: 69.306, 32: 1707.123}
+round 6 v19|kprune:sst2:seed7 {1: 68.407, 32: 1701.552}
+round 7 h18b|kwon:qqp:seed7 {1: 135.763, 32: 3429.521}
+round 7 h18b|kwon:qnli:seed7 {1: 134.779, 32: 3439.435}
+round 7 h18b|unpruned {1: 252.343, 32: 7195.879}
+round 7 h18b|kprune:qqp:seed7 {1: 135.25, 32: 3380.913}
+round 7 h18b|kprune:mnli:seed7 {1: 134.731, 32: 3363.911}
+round 7 v19|kwon:qnli:seed7 {1: 69.437, 32: 1709.1}
+round 7 v19|kprune:mnli:seed7 {1: 68.665, 32: 1713.126}
+round 7 v19|unpruned {1: 125.573, 32: 3587.161}
+round 7 v19|kprune:qqp:seed7 {1: 68.806, 32: 1721.99}
+round 7 v19|kprune:qnli:seed7 {1: 68.272, 32: 1732.949}
+round 7 v19|kwon:stsb:seed7 {1: 68.957, 32: 1726.614}
+round 7 v19|kwon:mrpc:seed7 {1: 68.774, 32: 1744.89}
+round 7 v19|kprune:stsb:seed7 {1: 72.201, 32: 1744.338}
+round 7 h18b|kprune:qnli:seed7 {1: 137.431, 32: 3393.696}
+round 7 v19|kwon:sst2:seed7 {1: 68.874, 32: 1715.022}
+round 7 h18b|kwon:mnli:seed7 {1: 134.829, 32: 3422.957}
+round 7 v19|kprune:sst2:seed7 {1: 67.836, 32: 1705.681}
+round 7 v19|kprune:mrpc:seed7 {1: 68.863, 32: 1733.271}
+round 7 v19|kwon:mnli:seed7 {1: 72.572, 32: 1783.874}
+round 7 v19|kwon:qqp:seed7 {1: 71.493, 32: 1762.657}
+round 8 v19|kwon:qnli:seed7 {1: 70.772, 32: 1725.234}
+round 8 v19|kwon:qqp:seed7 {1: 68.372, 32: 1719.153}
+round 8 h18b|kprune:mnli:seed7 {1: 134.275, 32: 3392.795}
+round 8 h18b|kwon:qnli:seed7 {1: 136.032, 32: 3457.044}
+round 8 v19|kprune:mrpc:seed7 {1: 68.327, 32: 1729.176}
+round 8 h18b|unpruned {1: 253.91, 32: 7184.673}
+round 8 v19|kwon:sst2:seed7 {1: 68.286, 32: 1714.554}
+round 8 v19|kprune:stsb:seed7 {1: 68.64, 32: 1722.614}
+round 8 v19|kprune:qqp:seed7 {1: 69.072, 32: 1722.329}
+round 8 h18b|kprune:qqp:seed7 {1: 135.719, 32: 3376.909}
+round 8 h18b|kwon:qqp:seed7 {1: 136.224, 32: 3439.318}
+round 8 h18b|kprune:qnli:seed7 {1: 136.215, 32: 3401.259}
+round 8 v19|kprune:qnli:seed7 {1: 68.433, 32: 1722.136}
+round 8 v19|unpruned {1: 125.793, 32: 3607.649}
+round 8 v19|kprune:mnli:seed7 {1: 68.614, 32: 1708.042}
+round 8 v19|kwon:mrpc:seed7 {1: 67.993, 32: 1713.025}
+round 8 v19|kwon:mnli:seed7 {1: 67.92, 32: 1711.231}
+round 8 h18b|kwon:mnli:seed7 {1: 136.508, 32: 3439.206}
+round 8 v19|kprune:sst2:seed7 {1: 68.651, 32: 1710.743}
+round 8 v19|kwon:stsb:seed7 {1: 68.743, 32: 1729.649}
+round 9 h18b|kprune:mnli:seed7 {1: 134.694, 32: 3369.405}
+round 9 v19|kprune:qqp:seed7 {1: 67.661, 32: 1723.28}
+round 9 v19|kwon:stsb:seed7 {1: 68.825, 32: 1731.91}
+round 9 v19|kprune:stsb:seed7 {1: 69.856, 32: 1737.33}
+round 9 v19|kwon:mrpc:seed7 {1: 69.913, 32: 1721.34}
+round 9 h18b|kwon:qnli:seed7 {1: 139.793, 32: 3478.417}
+round 9 v19|kwon:sst2:seed7 {1: 69.38, 32: 1729.185}
+round 9 v19|unpruned {1: 128.36, 32: 3623.522}
+round 9 v19|kprune:qnli:seed7 {1: 70.704, 32: 1724.7}
+round 9 h18b|kwon:mnli:seed7 {1: 135.235, 32: 3430.015}
+round 9 h18b|unpruned {1: 251.294, 32: 7365.642}
+round 9 v19|kwon:mnli:seed7 {1: 68.462, 32: 1722.064}
+round 9 h18b|kprune:qqp:seed7 {1: 133.38, 32: 3403.853}
+round 9 h18b|kprune:qnli:seed7 {1: 136.928, 32: 3402.735}
+round 9 v19|kprune:sst2:seed7 {1: 68.065, 32: 1710.551}
+round 9 v19|kwon:qnli:seed7 {1: 69.389, 32: 1718.594}
+round 9 v19|kprune:mnli:seed7 {1: 67.766, 32: 1727.145}
+round 9 v19|kprune:mrpc:seed7 {1: 70.576, 32: 1728.514}
+round 9 h18b|kwon:qqp:seed7 {1: 136.262, 32: 3432.635}
+round 9 v19|kwon:qqp:seed7 {1: 67.963, 32: 1730.823}
+h18b|unpruned {'median_ms_b1': 254.251, 'median_ms_b32': 7332.637} 85054464
+h18b|kwon:qnli:seed7 {'median_ms_b1': 138.506, 'median_ms_b32': 3467.731} 42236783
+h18b|kwon:mnli:seed7 {'median_ms_b1': 136.483, 'median_ms_b32': 3434.185} 42346999
+h18b|kwon:qqp:seed7 {'median_ms_b1': 137.396, 'median_ms_b32': 3452.922} 42381005
+h18b|kprune:qnli:seed7 {'median_ms_b1': 136.893, 'median_ms_b32': 3399.911} 42431599
+h18b|kprune:mnli:seed7 {'median_ms_b1': 134.484, 'median_ms_b32': 3368.948} 42494168
+h18b|kprune:qqp:seed7 {'median_ms_b1': 135.998, 'median_ms_b32': 3396.705} 42495897
+v19|unpruned {'median_ms_b1': 127.916, 'median_ms_b32': 3625.146} 42527232
+v19|kwon:mrpc:seed7 {'median_ms_b1': 69.631, 'median_ms_b32': 1738.047} 21108433
+v19|kwon:sst2:seed7 {'median_ms_b1': 69.09, 'median_ms_b32': 1718.057} 21209619
+v19|kwon:stsb:seed7 {'median_ms_b1': 69.265, 'median_ms_b32': 1736.549} 21170041
+v19|kwon:qnli:seed7 {'median_ms_b1': 69.413, 'median_ms_b32': 1721.986} 21128286
+v19|kwon:mnli:seed7 {'median_ms_b1': 68.992, 'median_ms_b32': 1735.63} 21148459
+v19|kwon:qqp:seed7 {'median_ms_b1': 69.518, 'median_ms_b32': 1746.74} 21188229
+v19|kprune:mrpc:seed7 {'median_ms_b1': 68.415, 'median_ms_b32': 1728.845} 21087107
+v19|kprune:sst2:seed7 {'median_ms_b1': 69.43, 'median_ms_b32': 1712.396} 21220186
+v19|kprune:stsb:seed7 {'median_ms_b1': 69.261, 'median_ms_b32': 1736.12} 21160947
+v19|kprune:qnli:seed7 {'median_ms_b1': 68.649, 'median_ms_b32': 1726.514} 21102413
+v19|kprune:mnli:seed7 {'median_ms_b1': 69.129, 'median_ms_b32': 1724.806} 21163637
+v19|kprune:qqp:seed7 {'median_ms_b1': 69.122, 'median_ms_b32': 1731.794} 21173115

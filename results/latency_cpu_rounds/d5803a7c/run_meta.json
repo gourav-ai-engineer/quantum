@@ -1,0 +1,34 @@
+{
+ "commit": "d5803a7c",
+ "branch": "paper/analysis-v2",
+ "kernel": "gouravcseai/cpu-latency-rounds",
+ "date_utc": "2026-11-18",
+ "device": "cpu: Intel(R) Xeon(R) CPU @ 2.20GHz, 4 logical cpus, torch threads 4",
+ "torch": "2.11.0+cpu",
+ "transformers": "4.51.3 (asserted in kernel)",
+ "args": {
+  "seq_len": 128,
+  "dtype": "fp32",
+  "runs": 30,
+  "warmup": 5,
+  "rounds": 10,
+  "order_seed": 0,
+  "torch_threads": 4
+ },
+ "batches": [
+  1,
+  32
+ ],
+ "validity_rule": "INVALID if either unpruned control has per-round max/min > 1.10 at b1 or b32 (docs/PROJECT_STATE.md, written before the run)",
+ "validity": {
+  "h18b|unpruned": {
+   "1": 1.055079914712098,
+   "32": 1.057687233565491
+  },
+  "v19|unpruned": {
+   "1": 1.0711794092445095,
+   "32": 1.0301392067647483
+  }
+ },
+ "valid": true
+}

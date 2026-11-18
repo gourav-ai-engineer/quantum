@@ -944,7 +944,7 @@ curves, ablations (fidelity vs HS vs cosine), limitations.
 - Scope: the existing analysis paper (V14-V18, title and quantum-representation framing unchanged), extended with V19. Section `sec:v19` + Table `tab:v19` added; every number is copied from `results/v19/final/v19_analysis.json`. The abstract, contributions, disclosure and limitations were updated. Non-inferiority is stated for V19 only; V18 stays a descriptive tie (no equivalence test registered).
 - V20 is NOT in the paper: its pre-registration says pilot numbers are never paper results (rule 12). A multilingual extension needs a new V21 pre-registration on the reserved IndicXNLI/XNLI test splits before any code. It is blocked on Kwon/MuRIL loading parity and needs the owner's GPU go.
 - Open items:
-  - H19c latency of the 6-layer shapes was pre-registered but has no valid measurement yet (`\todo` in the paper). GPU needs a Kaggle run.
+  - H19c latency of the 6-layer shapes: CPU now measured (valid run below); GPU still has no measurement (`\todo` in the paper) and needs a Kaggle run with the owner's go.
   - H19c CPU attempts, 2026-11-18, all INVALID (engineering record only, no number is used):
     - Setup: `results/v19_latency/`, `scripts/v15_latency.py`, seed-7 shapes, FP32, seq 128, 30 runs after 5 warm-up runs, torch 2.6.0+cpu, transformers 4.51.3.
     - Shapes: from `C:/v19fix/roots/conf_<task>` (the analysis roots). The K-prune shapes equal d2i-RI's kept units in the committed `results/v19/final/raw/*/beat/*seed7*.json`, checked by assert.
@@ -960,6 +960,13 @@ curves, ablations (fidelity vs HS vs cosine), limitations.
     - The H18b CPU table in the paper came from this same machine and the same fixed-order loop, so it carries the same unquantified drift risk. It is rerun here.
     - Settings: Kaggle CPU kernel `kaggle/cpu_latency_rounds` (no GPU), FP32, seq 128, batch 1 and 32, 30 runs after 5 warm-up runs per round, R = 10, S = 0, T = all of the kernel's logical CPUs. torch, transformers 4.51.3 (asserted) and the CPU model are recorded.
     - **Validity rule (fixed now).** The run is INVALID if, for either unpruned control at either batch size, the per-round medians have max/min > 1.10. An invalid run is archived as an engineering record, and no number from it is used. A valid run replaces the H18b CPU table and fills the H19c CPU part. The paper reports the median over rounds and the max/min range.
+    - **Outcome (2026-11-18): VALID.** Kernel `gouravcseai/cpu-latency-rounds`, code d5803a7c; output `results/latency_cpu_rounds/d5803a7c/` (`latency_cpu_rounds.json`, `run_meta.json`, logs, lscpu). Intel Xeon @ 2.20 GHz, 4 logical CPUs, torch threads 4, torch 2.11.0+cpu (recorded, not 2.6.0), transformers 4.51.3.
+      - Unpruned per-round max/min: H18b 1.055 (b1), 1.058 (b32); V19 1.071 (b1), 1.030 (b32). All ≤ 1.10.
+      - Pruned shapes are noisier (max/min up to 1.46, V19 K-prune QQP b1). The rule gates only on the unpruned controls, so this is reported, not filtered.
+      - H18b: unpruned 254.3 / 7333 ms (b1 / b32); pruned 134.5–138.5 / 3369–3468 ms; speed-up 1.84–1.89× (b1), 2.11–2.18× (b32). K-prune medians 1.0–2.0% below Kwon on every task, inside the round spread: no ordering claim. The old i7 table's 47.7 vs 57.6 ms gap did not reproduce.
+      - V19: unpruned 127.9 / 3625 ms; pruned 68.4–69.6 / 1712–1747 ms; speed-up 1.84–1.87× (b1), 2.08–2.12× (b32); Kwon vs K-prune within ±1.8%, both directions.
+      - Paper updated: Table `tab:lat` replaced, H18b CPU text rewritten (the "opposite ordering, depends on hardware" sentence removed), H19c CPU part filled, GPU `\todo` kept, Limitations updated. `results/h18b_latency/latency_cpu.json` (i7-13700, fixed order) is SUPERSEDED and no longer cited.
+      - No ledger row: `scripts/make_ledger_row.py` refuses CPU runs by design.
   - The owner confirmed on 2026-11-18 to keep the name "DistilBERT", with the 6-layer BERT-format fact stated.
   - Rule 11 independent check of V18/V19 numbers and of the proofs.
   - No PDF compiled (no LaTeX on this machine).

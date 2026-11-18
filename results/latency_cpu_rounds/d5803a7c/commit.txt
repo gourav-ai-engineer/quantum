@@ -1,0 +1,1 @@
+d5803a7 CPU latency: shuffled rounds (--rounds/--order-seed/--threads) + test; V19+H18b seed-7 shapes; Kaggle CPU kernel; protocol and validity rule written before the run
