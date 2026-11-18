@@ -95,3 +95,42 @@ def test_h10_gate_synthetic(tmp_path, monkeypatch):
     m.main()
     out = json.loads((tmp_path / "v15_h10_verdict.json").read_text())
     assert out["complete"] and out["verdict"] == "supported"
+
+
+def test_addon_extra_eval_uses_same_path_as_validation(tmp_path, monkeypatch):
+    """V21 E5: V21_EXTRA_EVAL sets go through the validation code path; a copy of validation gives identical logits."""
+    import datasets
+    m = _mod("v15_official_addon")
+    val = {"premise": ["a b", "c", "d e f"], "hypothesis": ["x", "y z", "w"], "label": [0, 2, 1]}
+    train = datasets.Dataset.from_dict({k: v * 2 for k, v in val.items()})
+    monkeypatch.setattr(datasets, "load_dataset", lambda *a, **k: {
+        "train": train, "validation_matched": datasets.Dataset.from_dict(val)})
+
+    class Tok:
+        def __call__(self, p, h, **kw):
+            ids = [[len(a.split()) + 10 * len(b.split())] for a, b in zip(p, h)]
+            return {"input_ids": torch.tensor(ids)}
+
+    class Model(torch.nn.Module):
+        def __init__(self):
+            super().__init__()
+            self.w = torch.nn.Parameter(torch.tensor([1.0, -1.0, 0.5]))
+
+        def forward(self, input_ids, **kw):
+            return type("O", (), {"logits": input_ids.float() * self.w})()
+
+    idx = tmp_path / "idx.json"
+    idx.write_text(json.dumps({"calibration": [0], "heldout": [1, 2]}))
+    extra = tmp_path / "extra.json"
+    extra.write_text(json.dumps({"mnli_m": val, "as": {**val, "label": [1, 1, 1]}}))
+    monkeypatch.setenv("V15_INDEX_FILE", str(idx))
+    monkeypatch.setenv("V21_EXTRA_EVAL", str(extra))
+    m.v15_dump(Model(), Tok(), "mnli", None, None, str(tmp_path), "student")
+    v = torch.load(tmp_path / "v15_student_validation.pt")
+    x = torch.load(tmp_path / "v15_student_x_mnli_m.pt")
+    assert torch.equal(v["logits"], x["logits"]) and torch.equal(v["labels"], x["labels"])
+    assert torch.load(tmp_path / "v15_student_x_as.pt")["labels"].tolist() == [1, 1, 1]
+    monkeypatch.delenv("V21_EXTRA_EVAL")
+    (tmp_path / "v15_student_x_as.pt").unlink()
+    m.v15_dump(Model(), Tok(), "mnli", None, None, str(tmp_path), "student")
+    assert not (tmp_path / "v15_student_x_as.pt").exists()  # unset -> original behaviour

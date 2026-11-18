@@ -210,5 +210,50 @@ beat)
   (cd "$REPO" && PYTHONPATH=scripts hf_retry "$OUT/beat/beat.log" python scripts/beat_run.py $BEAT_ARGS --output-dir "$OUT/beat") || { tail -40 "$OUT/beat/beat.log"; exit 1; }
   grep -v -i warn "$OUT/beat/beat.log" | tail -60
   ;;
+v21e1)
+  # V21 pre-freeze gates E1/E2/E5 (docs/V21_PREREG_DRAFT_2026-11-18.md). VALIDATION data only; engineering checks, never
+  # results. V21_TEACHER_DIR = the V20 MuRIL teacher (sha256-checked by the kernel), V21_V20_IN = V20 kernel output root.
+  SKIP_KP_CKPT=1 bash "$REPO/scripts/v15_kaggle.sh" setup "$W" "$OUT"
+  IN21=$W/v21e1in; E=$W/v21e1; mkdir -p "$E"
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/v21_e1_prep.py --out "$IN21")
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/v15_prepare_baselines.py --tasks mrpc --out "$W/inputs")
+  # The official codes use --model_name only for AutoTokenizer.from_pretrained and their output path, so the local
+  # tokenizer dirs are linked under a RELATIVE name into both working dirs (an absolute path would hijack os.path.join).
+  for d in "$IN21"/tok/*; do k=$(basename "$d"); ln -sfn "$d" "$W/kwon/v21tok_$k"; ln -sfn "$d" "$W/kprune/src/v21tok_$k"; done
+  for d in "$IN21"/tok/*; do k=$(basename "$d")
+    (cd "$W/kwon" && "$W/env_kwon/bin/python" "$REPO/scripts/v21_tok_ids.py" "v21tok_$k" "$IN21/pairs.json" "$E/tok_kwon_$k.json")
+    (cd "$W/kprune/src" && "$W/env_kprune/bin/python" "$REPO/scripts/v21_tok_ids.py" "v21tok_$k" "$IN21/pairs.json" "$E/tok_kprune_$k.json")
+  done
+  for k in bert-base-uncased google/muril-base-cased bert-base-multilingual-cased; do n=$(echo $k | tr / _)
+    (cd "$W/kwon" && "$W/env_kwon/bin/python" "$REPO/scripts/v21_tok_ids.py" "$k" "$IN21/pairs.json" "$E/tokhub_kwon_$n.json") || true
+    (cd "$W/kprune/src" && "$W/env_kprune/bin/python" "$REPO/scripts/v21_tok_ids.py" "$k" "$IN21/pairs.json" "$E/tokhub_kprune_$n.json") || true
+  done
+  pick() { (cd "$REPO" && python scripts/v21_e1_report.py choose "$E" "$IN21" "$1" "$2") || true; }  # prints a dir name or NONE
+  # run_pair <name> <model_name for kwon> <model_name for kprune> <task> <ckpt dir>: one Kwon and one K-prune run, c 0.5
+  run_pair() { local name=$1 mk=$2 mp=$3 t=$4 ck=$5
+    if [ "$mk" != NONE ]; then MODEL_NAME=$mk; o=$E/kwon_$name; mkdir -p "$o"
+      hf_retry "$o.log" kwon --task_name $t --ckpt_dir "$ck" --constraint 0.5 --seed 0 --output_dir "$o" || echo "FAIL $o"; fi
+    if [ "$mp" != NONE ]; then MODEL_NAME=$mp; e=v21e1/kprune_$name; kp=$W/kprune/src/outputs/$mp/$e
+      hf_retry "$E/kprune_$name.log" kprune --task_name $t --ckpt_dir "$ck" --exp_name $e --seed 0 --constraint 0.5 || echo "FAIL $e"
+      rm -f "$kp/model.ckpt"; mkdir -p "$E/kprune_$name"; cp -r "$kp/." "$E/kprune_$name/" 2>/dev/null || true; fi
+    MODEL_NAME=bert-base-uncased; }
+  # 1. same-kernel A/B on BERT-base MRPC, seed 7: hub id vs local dir (+ a hub rerun for GPU determinism)
+  export V15_INDEX_FILE=$W/inputs/indices/mrpc_seed7.json
+  run_pair mrpc_hub bert-base-uncased bert-base-uncased mrpc "$W/inputs/ckpt/mrpc"
+  run_pair mrpc_hub2 bert-base-uncased bert-base-uncased mrpc "$W/inputs/ckpt/mrpc"
+  run_pair mrpc_local "$(pick kwon bert)" "$(pick kprune bert)" mrpc "$W/inputs/ckpt/mrpc"
+  # 2. V20 MuRIL teacher, MNLI seed 7 (the V20 calibration index), with the E5 extra validation sets
+  export V15_INDEX_FILE=$V21_V20_IN/inputs/indices/mnli_seed7.json V21_EXTRA_EVAL=$IN21/extra_eval.json
+  run_pair muril_local "$(pick kwon muril)" "$(pick kprune muril)" mnli "$V21_TEACHER_DIR"
+  run_pair muril_hub NONE google/muril-base-cased mnli "$V21_TEACHER_DIR"
+  unset V21_EXTRA_EVAL
+  # 3. mBERT with a seeded random head: vocabulary/loading/MAC check only
+  run_pair mbert_local "$(pick kwon mbert)" "$(pick kprune mbert)" mnli "$IN21/ckpt_mbert_rand"
+  unset V15_INDEX_FILE
+  mkdir -p "$OUT/v21e1"
+  (cd "$REPO" && PYTHONPATH=scripts python scripts/v21_e1_report.py report "$E" "$IN21" --v20-npz "$V21_V20_IN/bl/kprune_masks.npz" \
+    --v15-dir "$REPO/results/v15_h10/c43dd3e/h10_logits" --out "$OUT/v21e1/e1_e5.json") || echo REPORT_FAILED
+  cp "$IN21/prep_meta.json" "$OUT/v21e1/"; cp -r "$E" "$OUT/v21e1/runs"
+  ;;
 *) echo "unknown stage $STAGE"; exit 1 ;;
 esac

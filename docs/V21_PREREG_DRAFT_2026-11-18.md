@@ -154,7 +154,11 @@ Both parts must hold:
   - Under transformers 4.12, the hub id `google/muril-base-cased` failed with an invalid relative-URL redirect.
   - The legacy `bert-base-multilingual-cased` id also redirects (to `google-bert/...`).
 - **Tokenizer files.** If transformers 4.12 cannot parse a `tokenizer.json` written by 4.51.3, the directory ships only `vocab.txt`, `tokenizer_config.json` and `special_tokens_map.json`. The tokenization of a fixed sentence set must then be identical under both environments.
-- **Parity check (decisive).** A same-kernel A/B on BERT-base MRPC, seed 7, c 0.5, for both official codes: hub-id load versus local-directory load, on the same GPU and in the same environment. The head and neuron masks must be identical.
+- **Parity check (decisive).** A same-kernel A/B on BERT-base MRPC, seed 7, c 0.5, for both official codes: hub-id load versus local-directory load, on the same GPU and in the same environment.
+  - Decisive: the token ids of the local directory equal those of our env's pinned hub tokenizer, in both official environments, for BERT-base, MuRIL and mBERT; and the A/B gives identical head/neuron keep patterns and identical validation predictions.
+  - Reported, not decisive: raw mask values, and a hub-versus-hub rerun that measures GPU run-to-run determinism.
+  - Also reported: K-prune's MuRIL masks under the hub id versus the local directory, and versus the V20 seed-7 masks.
+  - Implementation: stage `v21e1` of `scripts/v15_kaggle.sh`; report `scripts/v21_e1_report.py`; kernel `kaggle/v21_e1`.
 - **Cross-environment comparison (reported, not decisive).** The masks are also compared against the committed V18-era output. That run used a different environment (the libcublas fix, a different torch), so a mismatch there is not interpretable as a loading bug.
 - **Multilingual load.** One Kwon job runs on the V20 MuRIL teacher, seed 7, c 0.5, to show that it loads and produces masks with MAC ratio 0.500.
 - **No algorithm change.** Kwon's algorithm is not touched. If parity fails, H21-4(ii) is "not run".
@@ -185,9 +189,10 @@ Both parts must hold:
 Conditions 2 (K-prune official) and 3 (Kwon official) need each official tuned student's per-example predictions on XNLI-en and IndicXNLI.
 
 - **The gap.** Today the add-on dumps predictions only on the task's own dev set (`v15_student_validation.pt`), and V20 ran with `BL_SKIP_CKPT=1`, so no tuned student was saved.
-- **Route.** Chosen when E5 is built and recorded here before the freeze. Either:
-  - extend the add-on to predict on extra evaluation sets inside the official environment; or
-  - save each tuned student and evaluate it in our pinned environment.
+- **Route (chosen 2026-11-18).** The add-on predicts on extra evaluation sets inside the official environment.
+  - `V21_EXTRA_EVAL` names a JSON `{name: {premise, hypothesis, label}}`. `v15_dump` evaluates every set through the same model and mask path as validation and writes `v15_<tag>_x_<name>.pt`.
+  - With the variable unset, the add-on is unchanged (`tests/test_v15_analysis.py`).
+  - The alternative (save students, evaluate in our env) was rejected: Kwon's tuned real-valued masks would have to be re-applied outside the official code.
 - **Parity gate.** The chosen route's predictions on MNLI-m validation must equal the existing add-on dump row for row.
 - **Scope.** E5 is smoke-tested on validation slices only. No test split is read.
 

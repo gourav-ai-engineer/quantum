@@ -106,6 +106,12 @@ def v15_dump(model, tokenizer, task, head_mask, neuron_mask, out_dir, tag):
     splits = {"heldout": (raw["train"].select(spec["heldout"]), spec["heldout"]),
               "validation": (raw["validation_matched" if task == "mnli" else "validation"], None)}
     k1, k2 = TASK_TO_KEYS[task]
+    extra = os.environ.get("V21_EXTRA_EVAL")  # V21 E5: {name: {premise, hypothesis, label}} -> v15_<tag>_x_<name>.pt
+    if extra and task == "mnli":
+        from datasets import Dataset
+        for name, cols in json.load(open(extra, encoding="utf-8")).items():
+            splits["x_" + name] = (Dataset.from_dict({k1: cols["premise"], k2: cols["hypothesis"],
+                                                      "label": cols["label"]}), None)
     handles = _neuron_hooks(model, neuron_mask)
     model.eval()
     device = next(model.parameters()).device

@@ -1,0 +1,123 @@
+{
+ "E2": {
+  "google/muril-base-cased": {
+   "legacy_id": "google/muril-base-cased",
+   "resolved_id": "google/muril-base-cased",
+   "pinned_revision": "afd9f36c7923d54e97903922ff1b260d091d202f",
+   "hub_head_revision": "afd9f36c7923d54e97903922ff1b260d091d202f",
+   "head_equals_pin": true,
+   "vocab_size": 197285,
+   "hidden_size": 768,
+   "num_hidden_layers": 12,
+   "num_attention_heads": 12,
+   "intermediate_size": 3072,
+   "model_type": "bert"
+  },
+  "google-bert/bert-base-multilingual-cased": {
+   "legacy_id": "bert-base-multilingual-cased",
+   "resolved_id": "google-bert/bert-base-multilingual-cased",
+   "pinned_revision": "3f076fdb1ab68d5b2880cb87a0886f315b8146f8",
+   "hub_head_revision": "3f076fdb1ab68d5b2880cb87a0886f315b8146f8",
+   "head_equals_pin": true,
+   "vocab_size": 119547,
+   "hidden_size": 768,
+   "num_hidden_layers": 12,
+   "num_attention_heads": 12,
+   "intermediate_size": 3072,
+   "model_type": "bert"
+  },
+  "same_mac_accounting": true
+ },
+ "E3": {
+  "xnli": [
+   "facebook/xnli",
+   "b8dd5d7af51114dbda02c0e3f6133f332186418e"
+  ],
+  "indicxnli": [
+   "Divyanshu/indicxnli",
+   "7092c27872e919f31d0496fb8b9c47bd2cba3f6c"
+  ],
+  "file_sha256": {
+   "en": "8f0fd1e105091e0f11cd37f9b2bc382f16de9949aa9471e1366b2605ba037167",
+   "as": "057cd608e590b59adca553481d7102080fcbeb146503754b1496f7d3f2f02093",
+   "bn": "b1211c8da0942d2722a6906b8ce0ff98677012526eec187715acc9f55517ea3d",
+   "gu": "b724bccaa2dc31d94bcf8f685f9ecb10d744add1b3840a39a1eaadef18757d22",
+   "hi": "8a03e83b031802bb8e2134e9d0ba76097a06f03daf9b70131e3b20b7e508d350",
+   "kn": "5ffcc34dc2e439a555c96b5e70b9c71d22ed46ab1483d3eef400c78b913149ce",
+   "ml": "99db2432723cb8e34f99b59e062d85bf1294c1137123b6c299a2fe7d0786aebb",
+   "mr": "2994d1068fc0928af02bac765892793ab7e568b089670cee3ee71757742d7419",
+   "or": "3a8a5e7943245714bd32f4df4f31c8dcf9515ee6eb0e53ce35b80f2a4a702dc3",
+   "pa": "305359c9539a1e36d13b278bbffa5faa441914083da57fb23a12a66586ef5e90",
+   "ta": "1555195c9ead494b179e11dc498b0d79c70be499d25049332e258453ab567148",
+   "te": "dbffe3450857bc39e6f25fd28827049d0ef313e8caa02909f0988298e7b2c722"
+  },
+  "per_language": {
+   "en": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "as": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "bn": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "gu": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "hi": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "kn": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "ml": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "mr": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "or": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "pa": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "ta": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   },
+   "te": {
+    "rows": 5010,
+    "extra_rows": 0,
+    "parallel": true
+   }
+  },
+  "label_counts_en": {
+   "0": 1670,
+   "1": 1670,
+   "2": 1670
+  },
+  "all_parallel": true
+ }
+}

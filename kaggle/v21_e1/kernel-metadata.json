@@ -1,0 +1,15 @@
+{
+ "id": "gouravcseai/v21-e1",
+ "title": "v21 e1",
+ "code_file": "v21_e1.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": [
+  "gouravcseai/v20-pilot"
+ ]
+}
