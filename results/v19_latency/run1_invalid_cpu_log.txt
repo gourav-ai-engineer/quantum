@@ -1,0 +1,13 @@
+unpruned {'median_ms_b1': 114.117, 'median_ms_b32': 2411.781} 42527232
+kwon:mrpc:seed7 {'median_ms_b1': 83.35, 'median_ms_b32': 1350.643} 21108433
+kwon:sst2:seed7 {'median_ms_b1': 90.816, 'median_ms_b32': 1300.893} 21209619
+kwon:stsb:seed7 {'median_ms_b1': 67.292, 'median_ms_b32': 1297.058} 21170041
+kwon:qnli:seed7 {'median_ms_b1': 69.568, 'median_ms_b32': 1320.515} 21128286
+kwon:mnli:seed7 {'median_ms_b1': 67.224, 'median_ms_b32': 1318.227} 21148459
+kwon:qqp:seed7 {'median_ms_b1': 70.503, 'median_ms_b32': 1320.682} 21188229
+kprune:mrpc:seed7 {'median_ms_b1': 67.426, 'median_ms_b32': 1313.693} 21087107
+kprune:sst2:seed7 {'median_ms_b1': 66.738, 'median_ms_b32': 1312.567} 21220186
+kprune:stsb:seed7 {'median_ms_b1': 72.489, 'median_ms_b32': 1252.372} 21160947
+kprune:qnli:seed7 {'median_ms_b1': 45.245, 'median_ms_b32': 759.674} 21102413
+kprune:mnli:seed7 {'median_ms_b1': 35.166, 'median_ms_b32': 723.025} 21163637
+kprune:qqp:seed7 {'median_ms_b1': 36.549, 'median_ms_b32': 748.309} 21173115

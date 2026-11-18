@@ -944,7 +944,17 @@ curves, ablations (fidelity vs HS vs cosine), limitations.
 - Scope: the existing analysis paper (V14-V18, title and quantum-representation framing unchanged), extended with V19. Section `sec:v19` + Table `tab:v19` added; every number is copied from `results/v19/final/v19_analysis.json`. The abstract, contributions, disclosure and limitations were updated. Non-inferiority is stated for V19 only; V18 stays a descriptive tie (no equivalence test registered).
 - V20 is NOT in the paper: its pre-registration says pilot numbers are never paper results (rule 12). A multilingual extension needs a new V21 pre-registration on the reserved IndicXNLI/XNLI test splits before any code. It is blocked on Kwon/MuRIL loading parity and needs the owner's GPU go.
 - Open items:
-  - H19c latency of the 6-layer shapes was pre-registered but has not been run (`\todo` in the paper). CPU can run locally; GPU needs a Kaggle run.
+  - H19c latency of the 6-layer shapes was pre-registered but has no valid measurement yet (`\todo` in the paper). GPU needs a Kaggle run.
+  - H19c CPU attempts, 2026-11-18, all INVALID (engineering record only, no number is used):
+    - Setup: `results/v19_latency/`, `scripts/v15_latency.py`, seed-7 shapes, FP32, seq 128, 30 runs after 5 warm-up runs, torch 2.6.0+cpu, transformers 4.51.3.
+    - Shapes: from `C:/v19fix/roots/conf_<task>` (the analysis roots). The K-prune shapes equal d2i-RI's kept units in the committed `results/v19/final/raw/*/beat/*seed7*.json`, checked by assert.
+    - Run 1: the 6-layer unpruned model (114 ms at batch 1) was slower than the 12-layer H18b model (79.7 ms), and the speed jumped mid-run.
+    - Run 2: an unpruned control shape was added at the start and at the end. It measured 79.8 ms at the start and 113 ms at the end.
+    - Run 3: the process was pinned to the P-core threads (affinity 0xFFFF) at high priority. The control measured 60 ms at the start and 114 ms at the end, and a step change occurred partway through the Kwon shapes.
+    - Cause: not identified. Other desktop applications were running, and thermal or power-state changes are possible.
+    - Why the runs cannot be used: shapes are timed in a fixed order, so the drift biases the Kwon-versus-K-prune comparison.
+    - Fix needed before rerunning: an engineering change, to be documented before it is run. Repeat all shapes in R rounds in a shuffled order, report the median of the per-round medians, and keep the unpruned drift control. Run on an otherwise idle machine, or in a Kaggle CPU kernel. The archived files are `run1_invalid_*`, `run2_drift_*` and run 3's `latency_cpu.json` + `cpu_log.txt`.
+  - The owner confirmed on 2026-11-18 to keep the name "DistilBERT", with the 6-layer BERT-format fact stated.
   - Rule 11 independent check of V18/V19 numbers and of the proofs.
   - No PDF compiled (no LaTeX on this machine).
 

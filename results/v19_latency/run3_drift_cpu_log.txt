@@ -1,0 +1,14 @@
+unpruned_start {'median_ms_b1': 60.064, 'median_ms_b32': 1335.498} 42527232
+kwon:mrpc:seed7 {'median_ms_b1': 35.998, 'median_ms_b32': 779.596} 21108433
+kwon:sst2:seed7 {'median_ms_b1': 35.953, 'median_ms_b32': 782.529} 21209619
+kwon:stsb:seed7 {'median_ms_b1': 37.173, 'median_ms_b32': 771.982} 21170041
+kwon:qnli:seed7 {'median_ms_b1': 35.908, 'median_ms_b32': 767.294} 21128286
+kwon:mnli:seed7 {'median_ms_b1': 36.894, 'median_ms_b32': 783.95} 21148459
+kwon:qqp:seed7 {'median_ms_b1': 36.504, 'median_ms_b32': 1396.257} 21188229
+kprune:mrpc:seed7 {'median_ms_b1': 71.638, 'median_ms_b32': 1431.428} 21087107
+kprune:sst2:seed7 {'median_ms_b1': 69.37, 'median_ms_b32': 1385.449} 21220186
+kprune:stsb:seed7 {'median_ms_b1': 70.484, 'median_ms_b32': 1409.367} 21160947
+kprune:qnli:seed7 {'median_ms_b1': 68.026, 'median_ms_b32': 1423.522} 21102413
+kprune:mnli:seed7 {'median_ms_b1': 66.844, 'median_ms_b32': 1262.766} 21163637
+kprune:qqp:seed7 {'median_ms_b1': 64.015, 'median_ms_b32': 1275.808} 21173115
+unpruned_end {'median_ms_b1': 113.775, 'median_ms_b32': 2252.075} 42527232
