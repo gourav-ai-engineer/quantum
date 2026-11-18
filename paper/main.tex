@@ -411,6 +411,8 @@ K-prune (= d2i-RI), QNLI / MNLI-m / QQP & 47.7 / 48.3 / 48.4 & 815 / 814 / 820 &
 to the fine-tuned DistilBERT checkpoints released in the official K-prune folder. These are 6-layer models stored in BERT format (they load as a 6-layer
 BERT with no missing or unexpected weights); we call them DistilBERT after their source, and the official codes and our pipeline feed them the DistilBERT tokenizer.
 Both official baselines run on the original checkpoints (verified by SHA-256), with the same seeds and calibration rows. V19 does not reopen or pool with V18.
+Unlike V15 (Appendix~\ref{app:repro}), no reproduction of the baselines' published DistilBERT numbers was run; the only checks were the integrity gate per task and seed
+(identical labels and evaluation sizes, our teacher within two examples of the official teacher, d2i-RI's kept units equal to K-prune's masks).
 \paragraph{Hypotheses.} H19a (primary): d2i-RI exceeds K-prune (fixed in advance as the comparator) with Holm-adjusted one-sided $p<0.05$ and CI lower bound $>0$ on at
 least two thirds of the tasks, and no Holm-significant loss to either baseline. H19b (secondary): non-inferiority to K-prune with a margin of 1.5 points, required on
 every task (CI lower bound $>-1.5$ points and Holm-adjusted one-sided $p<0.05$ for $H_0\colon\delta\le-1.5$). Same paired cluster bootstrap as V18.
