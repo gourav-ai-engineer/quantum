@@ -1,5 +1,7 @@
 # Q1 gap research 2026-11-17: retraining-free structured compression of multilingual encoders for low-resource Indian languages
 
+> **SUPERSEDED STATUS UPDATE (2026-11-18):** This earlier note's claim that no multilingual structured pruning exists and its H20b repair-disparity hypothesis must not be used as current conclusions. The project ledger records V20 H20b as **NO-GO** (wrong sign); ACL 2022 already studies structured pruning on multilingual XLM-R; Shapley Head Pruning already studies target-language-specific heads; and subsequent papers cover multilingual pruning, calibration, and encoder vocabulary/structure compression. See [RESEARCH_DIRECTION_AUDIT_2026-11-18.md](RESEARCH_DIRECTION_AUDIT_2026-11-18.md) for the updated primary-source audit and narrower candidate.
+
 **Status: CANDIDATE, not a confirmed gap.** It is written after V19 closed (parity, `results/v19/final`). Nothing below is a result. Two blocking checks are still open (section 7): the remaining keyword citation searches and the pilot. No code has been written and no GPU has been used for this.
 
 Source grades: `[full]` means primary text read (HTML/PDF) by me; `[partial]` means part of the primary text was read; `[abstract]` means an abstract or record only; `[summary]` means a search-engine summary only (not trusted; the 2026-11-12 sweep showed summaries can be wrong).

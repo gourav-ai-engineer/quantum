@@ -17,9 +17,10 @@ reconstruction** that must be positioned against (and ideally run as baselines):
   **CAUTION: 85.71 is a cross-protocol number (their checkpoints, param ratio, GLUE average) — it is context, NOT a bar
   we can compare to directly.** A real bar needs LIAR's code run on OUR checkpoints, calibration rows and MAC budget.
   Code existence not verified.
-- **STAT** — "Shrinking Transformers After Training", arXiv 2406.00061. **[binary]** (PDF unreadable; earlier snippet:
-  prunes heads+neurons, compensates by **updating subsequent layers** — directly adjacent to our mechanism). MUST be
-  read in full before any novelty claim.
+- **STAT** — "Shrinking Transformers After Training", arXiv 2406.00061. **[summary — via WebFetch summarizer, not full text]**
+  The summary reports head+neuron pruning and compensation by **updating subsequent layers** — directly adjacent to
+  our mechanism. The exact objective and whether it corrects accumulated drift remain unverified; read the paper in
+  full before any novelty claim.
 - **G-Pruner** — CoNLL 2024, aclanthology 2024.conll-1.5. **[abstract]** Retraining-free head+FFN masking, global
   optimization; claims to beat other retraining-free frameworks and some retraining ones on GLUE/SQuAD, BERT-base +
   DistilBERT.
@@ -79,7 +80,7 @@ No Q1 result is promised; the evidence does not yet support one.
 
 ## Open full-text reads still needed (in priority order)
 two-stage ESWA (ResearchGate 393443189) · G-Pruner (2024.conll-1.5) · SNOWS (2411.18376) ·
-OSSCAR applicability to BERT-base. (STAT now read in full — see Part 2.)
+OSSCAR applicability to BERT-base · STAT (2406.00061; summary-read, not full text).
 
 ---
 
@@ -137,7 +138,8 @@ thresholds fixed before data; selection on held-out train only; paired cluster b
 checkpoints/calibration/budget for every method; physical pruning + per-task latency (V18). Few pruning papers do
 this. Even if a raw SOTA win is thin, a **rigorous, pre-registered, reproducible comparison with an honest
 analysis of what actually matters (selection vs compensation vs allocation)** is itself a defensible contribution for a
-methods-and-reproducibility-friendly Q1 venue. Pair it with the iterative/multi-layer idea for the method claim.
+methods-and-reproducibility-friendly Q1 venue. Pair it with the multi-layer reconstruction idea for the method claim;
+iterative pruning alone is not a novelty claim.
 
 ## 10. Go/no-go for the NEXT implementation (corrected 2026-11-12 after reading V18 freeze)
 **V18 (d2i-RI) is frozen and is the real next step, not V19.** It beats both baselines on the three exploration tasks
