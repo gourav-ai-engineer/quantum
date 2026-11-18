@@ -1488,3 +1488,37 @@ Recorded 2026-11-18. The owner's words: "mBERT, 3 seeds, go for pre-freeze check
    - They need a separate go after the freeze.
 4. **"Use Kaggle CPU"** answers the latency question, not a V21 item. The V19/H18b CPU latency is rerun on a Kaggle CPU kernel with shuffled rounds.
 5. **"freeze + go" (2026-11-18, after E1–E5 passed).** The owner approved this text without edits, which freezes it. The owner also gave the GPU go for the 5 new teacher fine-tunes and the 6 confirmatory kernels.
+
+### V21 freeze audit (2026-11-18, before any V21 statistic was seen)
+
+An external source audit (ChatGPT) of the `v21-freeze` files was run with the prompt in `docs/CHATGPT_VERIFY_V21_PROMPT.md`. It read no V21 output. Each finding was checked against the code. None of them changes the design or the code. The two running kernels (`v21-muril-t42`, `v21-mbert-t42`) were not stopped.
+
+1. **"d2i-RI kept units are compared by count only."**
+   - True of the check itself. But every condition is built by one call, `repair()` → `qfc.grp.prune_model(teacher, heads, neurons)`.
+   - `heads` and `neurons` are the K-prune npz masks for that seed (`beat_run.kprune_masks`), so the kept identities equal K-prune's by construction.
+   - The per-layer count check guards the physical shapes.
+   - No change.
+2. **"A missing Kwon entry fails `gate_pass`."**
+   - Intended: `gate_pass` reports every failure.
+   - The frozen text (section 5, "Kwon missing") decides how such a unit is used. When the integrity files are read, a unit whose only failing item is `official.kwon_*: "missing"` is used for everything except H21-4(ii).
+   - No change.
+3. **"`--ft-meta` is optional."**
+   - Every frozen kernel passes `--ft-meta`.
+   - When the integrity files are read, a unit counts as passing only if `teacher_val_en` is present and `ok`; an absent field is a failure.
+   - No change.
+4. **"The bootstrap p-value is a tail fraction."**
+   - `bootstrap_p_le` is the percentile-bootstrap p-value, (1 + #draws ≤ margin) / (B + 1). That is the CI-inversion p, the same definition as in V18/V19.
+   - Every secondary decision also requires the 95% CI bound, which is stricter than p < 0.05 alone.
+   - Frozen as is. The paper names it a percentile-bootstrap p-value.
+5. **"Pairing is checked by labels only."**
+   - All our conditions predict on one in-memory `ev` in the same process.
+   - The official codes predict on `extra_test.json`, written from the same loader at the pinned revisions in the same kernel.
+   - The integrity check also requires the official teacher's per-row argmax to match ours in all but at most 2 rows per language. A row reorder would break that on about 1/3 of the rows or more, so content order is checked end to end for the official outputs.
+   - Cross-language pairing by row index is the dataset's own n-way parallel design, and E3 checked it through labels.
+   - No change.
+6. **"MAC 0.500 is checked after rounding to 3 decimals."**
+   - That is the meaning of "0.500" in section 5: equal at 3 decimals, |ratio − 0.5| < 0.0005. E1 measured 0.49999–0.50000.
+   - No change.
+7. **"With 2 passing teachers, is the sign rule over 2?"**
+   - Already decided in section 2: the sign rule runs over the teachers that passed, and fewer than 2 means "not run".
+   - No change.
