@@ -5,7 +5,7 @@
 The draft is frozen only when all of the following hold:
 
 1. The owner confirms or edits the text before any run.
-2. The engineering gates E1–E4 below pass. They read no test split.
+2. The engineering gates E1–E5 below pass. They read no test split, except E3, which reads labels only.
 3. A commit copies the frozen text into `docs/PROJECT_STATE.md` and is tagged `v21-freeze`.
 
 Until then, any part may change, because no V21 number exists. After the freeze, rule 12 applies.
@@ -150,8 +150,13 @@ Both parts must hold:
 
 ### E1: Kwon loads the multilingual checkpoints unchanged
 
-- **Fix.** Pass the official Kwon code a local directory with the pinned config, tokenizer and weights, instead of the hub id that failed under transformers 4.12.
-- **Parity check.** With the same loading change, Kwon on BERT-base MRPC, seed 7, c 0.5 must reproduce the committed V18-era output exactly.
+- **Fix.** Pass both official codes a local directory with the pinned config, tokenizer and weights for each model, instead of a hub id.
+  - Under transformers 4.12, the hub id `google/muril-base-cased` failed with an invalid relative-URL redirect.
+  - The legacy `bert-base-multilingual-cased` id also redirects (to `google-bert/...`).
+- **Tokenizer files.** If transformers 4.12 cannot parse a `tokenizer.json` written by 4.51.3, the directory ships only `vocab.txt`, `tokenizer_config.json` and `special_tokens_map.json`. The tokenization of a fixed sentence set must then be identical under both environments.
+- **Parity check (decisive).** A same-kernel A/B on BERT-base MRPC, seed 7, c 0.5, for both official codes: hub-id load versus local-directory load, on the same GPU and in the same environment. The head and neuron masks must be identical.
+- **Cross-environment comparison (reported, not decisive).** The masks are also compared against the committed V18-era output. That run used a different environment (the libcublas fix, a different torch), so a mismatch there is not interpretable as a loading bug.
+- **Multilingual load.** One Kwon job runs on the V20 MuRIL teacher, seed 7, c 0.5, to show that it loads and produces masks with MAC ratio 0.500.
 - **No algorithm change.** Kwon's algorithm is not touched. If parity fails, H21-4(ii) is "not run".
 
 ### E2: model compatibility
@@ -172,7 +177,19 @@ Both parts must hold:
 ### E4: smoke test
 
 - CPU `--smoke --allow-cpu` on tiny validation slices.
+- It covers E5's prediction path, the extended fine-tune script and the analysis script.
 - This is an engineering check only, not a result (rule 9).
+
+### E5: official tuned students predict on the multilingual sets
+
+Conditions 2 (K-prune official) and 3 (Kwon official) need each official tuned student's per-example predictions on XNLI-en and IndicXNLI.
+
+- **The gap.** Today the add-on dumps predictions only on the task's own dev set (`v15_student_validation.pt`), and V20 ran with `BL_SKIP_CKPT=1`, so no tuned student was saved.
+- **Route.** Chosen when E5 is built and recorded here before the freeze. Either:
+  - extend the add-on to predict on extra evaluation sets inside the official environment; or
+  - save each tuned student and evaluate it in our pinned environment.
+- **Parity gate.** The chosen route's predictions on MNLI-m validation must equal the existing add-on dump row for row.
+- **Scope.** E5 is smoke-tested on validation slices only. No test split is read.
 
 ## 5. Compute and execution
 
@@ -199,8 +216,13 @@ Both parts must hold:
 - No speed claim beyond the measured CPU numbers. Whole-model size reduction is reported including embeddings.
 - No claim that V20's validation numbers are results. V21 replaces them.
 
-## 7. Owner decisions needed before the freeze
+## 7. Owner decisions
 
-1. mBERT as the second model, or IndicBERTv2 instead. IndicBERTv2 would need its own E2 compatibility check.
-2. Three fine-tuning seeds per model. The budget allows 3; 5 would exceed one week of quota.
-3. GPU go: first for E1–E3 (CPU or a small GPU slot), then for the 6 kernels.
+Recorded 2026-11-18. The owner's words: "mBERT, 3 seeds, go for pre-freeze checks, use Kaggle CPU".
+
+1. **Second model: mBERT.** IndicBERTv2 is out of scope.
+2. **Teachers: three fine-tuning seeds per model** (42, 43, 44).
+3. **GPU go for the pre-freeze gates only.** This covers E1–E5, including small GPU kernels where a gate needs them.
+   - The 6 confirmatory kernels and the 5 new teacher fine-tunes are NOT yet approved.
+   - They need a separate go after the freeze.
+4. **"Use Kaggle CPU"** answers the latency question, not a V21 item. The V19/H18b CPU latency is rerun on a Kaggle CPU kernel with shuffled rounds.
