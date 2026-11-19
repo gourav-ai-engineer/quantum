@@ -1,0 +1,143 @@
+{
+ "unit": "muril_t42",
+ "split": "test",
+ "mode": "full",
+ "teacher_val_en": {
+  "ours": 0.8349397778511047,
+  "ft_meta": 0.8349397778511047,
+  "ok": true
+ },
+ "evaluation_size": 5010,
+ "unpruned_accuracy": {
+  "en": 0.8425149917602539,
+  "as": 0.6934131979942322,
+  "bn": 0.7514970302581787,
+  "gu": 0.7175648808479309,
+  "hi": 0.7636726498603821,
+  "kn": 0.7381237745285034,
+  "ml": 0.7239521145820618,
+  "mr": 0.7039920091629028,
+  "or": 0.7101796269416809,
+  "pa": 0.7502993941307068,
+  "ta": 0.7281436920166016,
+  "te": 0.7113772630691528
+ },
+ "mac_ratio": {
+  "7": 0.4999917809267289,
+  "42": 0.4999917809267289,
+  "77": 0.49999633877645194
+ },
+ "kept_equal_kprune": {
+  "mask_only_seed7": true,
+  "d2i_r_en_seed7": true,
+  "d2i_r_mixed_seed7": true,
+  "d2i_ri_en_seed7": true,
+  "mask_only_seed42": true,
+  "d2i_r_en_seed42": true,
+  "d2i_r_mixed_seed42": true,
+  "d2i_ri_en_seed42": true,
+  "mask_only_seed77": true,
+  "d2i_r_en_seed77": true,
+  "d2i_r_mixed_seed77": true,
+  "d2i_ri_en_seed77": true
+ },
+ "official": {
+  "kprune_seed7": {
+   "teacher_rows_differing": {
+    "en": 0,
+    "as": 0,
+    "bn": 0,
+    "gu": 0,
+    "hi": 0,
+    "kn": 0,
+    "ml": 0,
+    "mr": 0,
+    "or": 0,
+    "pa": 0,
+    "ta": 0,
+    "te": 0
+   }
+  },
+  "kwon_seed7": {
+   "teacher_rows_differing": {
+    "en": 0,
+    "as": 0,
+    "bn": 0,
+    "gu": 0,
+    "hi": 0,
+    "kn": 0,
+    "ml": 0,
+    "mr": 0,
+    "or": 0,
+    "pa": 0,
+    "ta": 0,
+    "te": 0
+   }
+  },
+  "kprune_seed42": {
+   "teacher_rows_differing": {
+    "en": 0,
+    "as": 0,
+    "bn": 0,
+    "gu": 0,
+    "hi": 0,
+    "kn": 0,
+    "ml": 0,
+    "mr": 0,
+    "or": 0,
+    "pa": 0,
+    "ta": 0,
+    "te": 0
+   }
+  },
+  "kwon_seed42": {
+   "teacher_rows_differing": {
+    "en": 0,
+    "as": 0,
+    "bn": 0,
+    "gu": 0,
+    "hi": 0,
+    "kn": 0,
+    "ml": 0,
+    "mr": 0,
+    "or": 0,
+    "pa": 0,
+    "ta": 0,
+    "te": 0
+   }
+  },
+  "kprune_seed77": {
+   "teacher_rows_differing": {
+    "en": 0,
+    "as": 0,
+    "bn": 0,
+    "gu": 0,
+    "hi": 0,
+    "kn": 0,
+    "ml": 0,
+    "mr": 0,
+    "or": 0,
+    "pa": 0,
+    "ta": 0,
+    "te": 0
+   }
+  },
+  "kwon_seed77": {
+   "teacher_rows_differing": {
+    "en": 0,
+    "as": 0,
+    "bn": 0,
+    "gu": 0,
+    "hi": 0,
+    "kn": 0,
+    "ml": 0,
+    "mr": 0,
+    "or": 0,
+    "pa": 0,
+    "ta": 0,
+    "te": 0
+   }
+  }
+ },
+ "gate_pass": true
+}

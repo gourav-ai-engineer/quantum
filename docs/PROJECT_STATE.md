@@ -1544,3 +1544,16 @@ Verdict: option A (finish V21 as frozen), no parallel new direction. Each point 
   post-hoc, and is declared here BEFORE any V21 result is read; it cannot rescue or overturn H21-1.
 - **Venue (reviewer-VERIFIED):** SCImago lists Neurocomputing 2025 SJR 1.465, Q1 (provider-specific). Elsevier requires a generative-AI
   disclosure for manuscript preparation; AI used in research goes in Methods.
+
+### V21 integrity gates, first two units (2026-11-19; read only `units/<unit>/integrity.json` and the kernel stdout integrity line)
+Selective download (file pattern integrity/commit/env/ft_meta/run.log) into `results/v21_confirm/sel_<unit>/`. Both kernels ran
+commit 746330d (tag `v21-freeze`), torch 2.6.0+cu124, transformers 4.51.3, test split, evaluation size 5010 per language, 12 languages.
+- **muril_t42: PASS.** teacher val-en 0.8349 = ft_meta 0.8349; MAC ratio 0.49999/0.49999/0.50000 (seeds 7/42/77); kept units equal
+  K-prune 12/12; official K-prune and Kwon teacher rows differing 0 in every language and seed; Kwon present.
+- **mbert_t42: PASS.** teacher val-en 0.8257 vs ft_meta 0.8261 (ok); MAC ratio 0.49999 x3; kept 12/12; official rows differing all 0;
+  Kwon present.
+- Disclosure: by design `integrity.json` also stores the UNPRUNED teacher's test accuracy per language; those were seen. No pruned-
+  condition number was read. Observed: mBERT unpruned Odia (`or`) = 0.341, at chance for 3-class XNLI (floor case for D2). Nothing changes.
+- Launched 2026-11-19 (owner "freeze + go" + "launch remaining kernels"): `v21-muril-t43`, `v21-mbert-t43`. `v21-muril-t44`,
+  `v21-mbert-t44` were refused by Kaggle ("Maximum batch GPU session count of 2 reached") and are pushed by
+  `results/v21_confirm/push_t44.py` (polls every 20 min) when a slot frees. Analysis runs once, after all six units pass.
