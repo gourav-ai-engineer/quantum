@@ -1522,3 +1522,25 @@ An external source audit (ChatGPT) of the `v21-freeze` files was run with the pr
 7. **"With 2 passing teachers, is the sign rule over 2?"**
    - Already decided in section 2: the sign rule runs over the teachers that passed, and fewer than 2 means "not run".
    - No change.
+
+### External review 2 (ChatGPT, 2026-11-19; prompt `docs/CHATGPT_PROMPT_2026-11-19.md`; no V21 output read by it or by us)
+Verdict: option A (finish V21 as frozen), no parallel new direction. Each point checked against the code; no design or code change.
+- **Gate "defects" restated** (count-only kept-unit check; strict `gate_pass` vs the Kwon-missing rule): the same two items as the
+  freeze audit (points 1 and 2 there), same disposition. Identity of kept units holds by construction (`repair()` -> `prune_model`
+  with the K-prune npz masks of that seed); the Kwon-missing rule is applied when `integrity.json` is read. Unchanged.
+- **Blinding check done here:** `scripts/v21_run.py` prints per-condition `acc=` lines, but the frozen kernels redirect that output to
+  `$O/run_<unit>.log` and send only the `integrity` line to stdout. Rule for reading downloaded outputs: open `units/<unit>/integrity.json`
+  and the integrity line only; never `run_<unit>.log` or the per-condition JSONs before all six units pass.
+- **Literature (reviewer-VERIFIED, primary sources):** Ogueji et al., EMNLP 2022 (mBERT NER, 40 languages, magnitude pruning during
+  fine-tuning; moderate sparsity can help low-resource languages, severe sparsity can amplify disparity); Li et al., "Probing Structured
+  Pruning on Multilingual Pre-trained Models", ACL 2022 long.130 (= arXiv 2204.02601; XLM-R, XTREME, structured heads/FFN, includes the
+  English-source cross-lingual setting); Ma et al., ACL 2021 (multilingual head pruning). Consequence: H21-1 is a confirmatory
+  re-examination in a specific setting (post-training structured masks + closed-form repair, English-selected masks, MuRIL/mBERT, IndicXNLI),
+  NOT a new phenomenon. The paper must cite all three and word it so.
+- **Statistics:** with 3 teachers, the all-positive sign rule has minimum one-sided p = 1/8; it is a consistency safeguard, not a test
+  over teachers. Paper reports per-teacher estimates and states the CI excludes teacher variance. H21-1 "overall = MuRIL" stays a
+  model-specific claim; no combined "multilingual models" claim.
+- **Floor effect (D2):** primary statistic unchanged. A headroom-scaled descriptive check (U-X)/(U-chance) may be reported, labelled
+  post-hoc, and is declared here BEFORE any V21 result is read; it cannot rescue or overturn H21-1.
+- **Venue (reviewer-VERIFIED):** SCImago lists Neurocomputing 2025 SJR 1.465, Q1 (provider-specific). Elsevier requires a generative-AI
+  disclosure for manuscript preparation; AI used in research goes in Methods.
