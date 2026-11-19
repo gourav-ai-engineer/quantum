@@ -1603,3 +1603,18 @@ integrity gates. No V21 pruned-condition output was read for this change.
 - **Analysis guard committed with tests** (engineering fix, before any pruned-condition statistic): `analyse_model` reports "not run" when
   fewer than two passing units are supplied; both preregistered models stay in the output. Tests: `test_fewer_than_two_passing_teachers_is_not_run`,
   `test_model_with_no_passing_unit_is_still_reported` (8 passed). Tag `v21-analysis-fix1`; kernels still clone `v21-freeze`.
+
+### V21 status 2026-11-20 01:21 (gate-only read)
+- **mbert_t43: COMPLETE, integrity PASS** (`results/v21_confirm/sel_mbert_t43/`): teacher val-en 0.8181 vs ft_meta 0.8185 (ok); MAC ratio
+  0.49999/0.50000/0.49999; kept units equal K-prune 12/12; official K-prune and Kwon teacher rows differing 0; commit 746330d, torch 2.6.0,
+  transformers 4.51.3. **Four of six units pass.** muril_t44 and mbert_t44 wait for the weekly GPU quota (watcher running).
+
+### Paper repositioning (2026-11-20; wording only, no result changed)
+Per the strategy audit (`docs/STRATEGY_AUDIT_2026-11-19.md`) and its external check: "statistically indistinguishable" / "barely matters"
+replaced in `paper/main.tex` (abstract, introduction, contributions) by "no statistically significant difference is detected ... a null result
+at the available power, not a demonstrated equivalence; no equivalence test was registered". Positioning paragraph now cites Free Lunch
+(arXiv 2510.14444 §3(iv), read in full), GRAIL (CPAL 2026, abstract), Tyr-the-Pruner (arXiv 2503.09657 §2.2-2.4, read in full) and K-prune's
+own Table 2 ablation (74.16 -> 16.50 SQuAD F1 at 80% FLOPs reduction without weight tuning; §4.2: its gap grows with compression), and states
+that our selection-vs-compensation evidence is a pre-registered confirmation in fine-tuned encoders, not a new insight. Checks: the only new
+numeric token is the cited 16.50; cite keys resolve; braces balance; no undefined refs. Local pdflatex stalls at a MiKTeX package-install
+prompt (not installed); compile on Overleaf.

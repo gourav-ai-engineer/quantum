@@ -25,14 +25,14 @@ calls near-identical have dissimilar outputs. Moving the density operator to the
 Procrustes merge residual of two heads and their purified distance, and from it a coverage bound on the merge error that ranks
 subsets like the true merge error while overestimating it about threefold. The quantum-information view is diagnostic: it does not by
 itself yield a better selector. (ii) At 50\% of heads per layer, once the kept heads are refit by LS,
-four selectors (output coverage, Fisher, magnitude, greedy LS) are statistically indistinguishable, while attention-pattern coverage stays clearly worse; compensation, not selection, carries the recovery. (iii) A global,
+no statistically significant difference is detected among four selectors (output coverage, Fisher, magnitude, greedy LS), a null result at the available power rather than a demonstrated equivalence, while attention-pattern coverage stays clearly worse; compensation, not selection, carries most of the recovery. (iii) A global,
 refit-aware allocation over heads and neurons (GRP) lowers the logit KL to the teacher well below official K-prune on
 SST-2 but not on MRPC, so its pre-registered calibration gate fails and no accuracy comparison was run. (iv) K-prune's
 advantage over a module-output refit is reproduced to within 3\% by a drift-corrected least-squares target (a post-hoc finding on development tasks); with that
 compensation held equal, which selection rule wins depends on the task. (v) Finally, a pre-registered confirmatory test on
 three tasks never used in development (QNLI, MNLI-m, QQP; five calibration seeds, 50\% of MACs) asks whether a combination of K-prune's masks,
 input-side alignment and the drift-corrected refit (d2i-RI) beats both official baselines. The hypothesis is \emph{not}
-supported: d2i-RI is statistically indistinguishable from K-prune on QNLI and MNLI-m and ahead by 0.13 points on QQP (not enough to meet the
+supported: no significant difference between d2i-RI and K-prune is detected on QNLI and MNLI-m and ahead by 0.13 points on QQP (not enough to meet the
 pre-registered bar of two of three tasks), and it beats the method of Kwon et al.\ by 2.8--8.1 points on all three. We make no claim of improved accuracy
 over the state of the art. Because d2i-RI keeps K-prune's masks, its pruned shapes, and so its latency, are K-prune's; latency is reported
 descriptively from physically pruned shapes. Results (iii)--(v) use no quantum quantity. The quantum-information quantities are
@@ -56,7 +56,7 @@ head pairs that it calls near-identical produce dissimilar outputs (Section~\ref
 gives an exact identity between the scaled-orthogonal Procrustes merge residual and the purified distance
 (Proposition~\ref{prop:proc}), and from it a coverage bound on the merge error that ranks subsets well (Theorem~\ref{thm:bound}), yet in a pre-registered
 factorial over five GLUE tasks and five calibration seeds, once the remaining heads are refit by least squares the
-choice among four of the five selectors barely matters at 50\% of heads per layer (Section~\ref{sec:v14}). We then asked whether a global,
+no significant difference is detected among four of the five selectors at 50\% of heads per layer (Section~\ref{sec:v14}). We then asked whether a global,
 refit-aware allocation over heads and FFN neurons (GRP) lowers the held-out logit KL relative to the two official retraining-free baselines
 (Section~\ref{sec:v15}). It does so on SST-2 but not on MRPC, and a transplant analysis shows that K-prune's own
 advantage over a module-output refit is a drift-corrected least-squares target (Section~\ref{sec:v16}); after
@@ -72,8 +72,8 @@ Uhlmann fidelity, purified distance) and a characterization of when attention-pa
 a proposition and a measurement on BERT-base. (ii) An identity linking the scaled-orthogonal Procrustes merge residual of two
 heads to the purified distance between their output density operators, and the resulting output-space coverage bound for merging
 pruned heads into kept heads, with its tightness measured. (iii) A pre-registered selector $\times$ compensation factorial showing that, at
-moderate sparsity, closed-form compensation explains most of the retraining-free recovery and selectors are
-statistically indistinguishable after it (attention-pattern coverage excepted). (iv) A pre-registered calibration gate for a global refit-aware allocation (GRP) against reproduced official Kwon et
+moderate sparsity, closed-form compensation explains most of the retraining-free recovery and no significant difference among selectors is
+detected after it (attention-pattern coverage excepted; no equivalence test was registered). (iv) A pre-registered calibration gate for a global refit-aware allocation (GRP) against reproduced official Kwon et
 al.\ and K-prune code, with the task-dependent outcome; (v) a decomposition showing that K-prune's compensation is
 reproduced to within 3\% by a drift-corrected LS refit (post-hoc, on development tasks), and a selection $\times$ compensation table that holds compensation fixed;
 (vi) a pre-registered confirmatory test (QNLI, MNLI-m, QQP) of a frozen combination against both official baselines, whose outcome is a tie with K-prune and a
@@ -119,7 +119,13 @@ it is a metric on states~\citep{tomamichel2010duality}. Quantum-inspired methods
 CompactifAI decomposes the weight matrices of large language models into tensor networks (matrix product operators) from
 quantum many-body physics, followed by brief retraining~\citep{tomut2025compactifai}. We use the formalism differently, as an
 analysis tool for redundancy between heads rather than as a compression operator, and all computations are classical.
-\paragraph{Positioning.} Removal costs from least-squares downdates and closed-form compensation are each known. Our
+\paragraph{Positioning.} Removal costs from least-squares downdates and closed-form compensation are each known. That mask
+selection matters less once a reconstruction step is applied has been reported for decoder LLMs~\citep{wagner2025freelunch}, and
+selector-agnostic linear compensation has been proposed for vision and decoder models~\citep{tang2026grail}. K-prune's own
+ablation shows that removing its weight tuning lowers SQuAD F1 at an 80\% FLOPs reduction from 74.16 to 16.50, and that its
+advantage over other retraining-free methods grows with the compression ratio~\citep{park2024kprune}; global sparsity-distribution
+search with closed-form weight adjustment exists for decoder LLMs~\citep{li2025tyr}. Our selection-versus-compensation evidence is
+therefore a pre-registered confirmation in fine-tuned encoders, not a new insight. Our
 claims are (a) an analysis of which redundancy notion matters, (b) controlled, pre-registered evidence on the relative
 roles of selection and compensation, (c) a negative result for a global refit-aware allocation, together with the identification of K-prune's
 compensation mechanism, and (d) a pre-registered confirmation that a strong combination ties K-prune, the strongest baseline we reproduced, on three held-out tasks without beating it (a published, un-reproduced G-Pruner claim of lower degradation than K-prune is discussed in Section~\ref{sec:rw}).
