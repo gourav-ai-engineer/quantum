@@ -110,3 +110,19 @@ Headroom context (teacher minus K-prune accuracy at 0.5 MACs, mean of 5 seeds): 
 (dev, from baselines_v15.json); QNLI 1.27, MNLI-m 2.43, QQP 1.56 pp (from the V18 dumps, descriptive, after the verdict).
 At 0.5 MACs any retraining-free method can gain at most ~0-2.4 pp over K-prune, so "beats K-prune everywhere" at this
 budget is bounded by headroom, not by method quality.
+
+**E4 | 2026-11-20 | method-direction screen (literature + one arithmetic kill check; no run, no new data).** Seven directions screened for
+a new retraining-free structured-pruning method on fine-tuned BERT encoders:
+1. Guaranteed / risk-controlled choice of the pruning budget: occupied (Pareto Testing, arXiv 2210.07913, applies Learn-then-Test to
+   Transformer head and token pruning; "Confident magnitude-based neural network pruning", arXiv 2408.04759).
+2. Training-free depth pruning with a closed-form linear block replacement: occupied for decoder LLMs (ReplaceMe, arXiv 2505.02819);
+   dropping layers of fine-tuned BERT without retraining: Sajjad et al. 2020 (arXiv 2004.03844).
+3. Latency-aware hybrid depth/width one-shot pruning of BERT: occupied (ZipLM, arXiv 2302.04089, §4.3 one-shot BERT-base, §3.1 removes
+   whole attention/FFN modules, §3.2 latency tables).
+4-6. Selection-vs-compensation, allocation search, multi-layer repair: occupied (see `docs/STRATEGY_AUDIT_2026-11-19.md` §4-5).
+7. Optimism-corrected (GCV / leave-one-sentence-out) refit-aware removal cost, motivated by V14's calibration overfitting (overfitting
+   itself is published: arXiv 2410.17711). **Killed by an arithmetic check before any code:** ridge optimism grows as features /
+   effective calibration tokens; with 2048 rows, SST-2 (25.16 tokens/example, `AVG_SEQ_LEN`) has about half MRPC's (53.24) tokens, so
+   more optimism, yet GRP wins on SST-2 and loses on MRPC. Optimism cannot explain the failure the correction targets.
+Conclusion: in this exact setting (retraining-free structured pruning of fine-tuned BERT-family encoders), novelty, not compute, is the
+binding constraint. A method paper would need a different setting; that choice is the owner's. No GPU used; V21 t44 keeps queue priority.
