@@ -117,6 +117,14 @@ def pooled(units, names, stat, langs, n_boot, index):
 
 
 def analyse_model(units, names, n_boot, index):
+    if len(names) < 2:
+        return {"units": names, "stats": {s: None for s in NEEDS},
+                **{"H21-1": {"run": False, "supported": False},
+                   "H21-2": {"run": False}, "H21-3(i)": {"run": False},
+                   "H21-3(ii)": {"run": False}, "H21-4(i)": {"run": False},
+                   "H21-4(ii)": {"run": False},
+                   "H21-3": {"supported": False}, "robustness": {},
+                   "descriptive": {}, "worst_language_residual": {}}}
     have = lambda stat: all(all(c in units[u]["cond"] for c in NEEDS[stat]) for u in names)
     st = {s: (pooled(units, names, s, T, n_boot, index) if have(s) else None) for s in NEEDS}
     signs = lambda s: all(v > 0 for v in st[s]["per_unit"].values())
@@ -161,7 +169,10 @@ def analyse_model(units, names, n_boot, index):
 def analyse(root, n_boot=10000):
     units = load(root)
     index = {u: i for i, u in enumerate(sorted(units))}
-    models = sorted({model_of(u) for u in units})
+    # Keep both preregistered models in the report, including a model with no
+    # gate-passing unit folders. The caller supplies only units that passed
+    # the integrity/teacher gates.
+    models = sorted({"muril", "mbert"} | {model_of(u) for u in units})
     res = {m: analyse_model(units, sorted(u for u in units if model_of(u) == m), n_boot, index) for m in models}
     muril = next((m for m in models if "muril" in m), None)
     res["H21-1_overall"] = {"decisive_model": muril, "supported": bool(muril and res[muril]["H21-1"]["supported"])}

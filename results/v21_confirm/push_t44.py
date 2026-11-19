@@ -1,10 +1,10 @@
-"""Push v21 t44 kernels when a Kaggle GPU slot frees (max 2 concurrent). Polls every 20 min, gives up after 16 h."""
+"""Push v21 t44 kernels when a Kaggle GPU slot frees (max 2 concurrent). Polls every 30 min (slots or weekly quota), gives up after 60 h."""
 import time
 from kaggle.api.kaggle_api_extended import KaggleApi
 a = KaggleApi(); a.authenticate()
 todo = ["muril_t44", "mbert_t44"]
 t0 = time.time()
-while todo and time.time() - t0 < 16 * 3600:
+while todo and time.time() - t0 < 60 * 3600:
     k = todo[0]
     r = a.kernels_push("kaggle/v21_" + k, acc="NvidiaTeslaT4")
     err = getattr(r, "error", None) or ""
@@ -13,5 +13,5 @@ while todo and time.time() - t0 < 16 * 3600:
         todo.pop(0)
         continue
     print(time.strftime("%H:%M"), "waiting:", k, err[:80], flush=True)
-    time.sleep(1200)
+    time.sleep(1800)
 print("done; not pushed:", todo, flush=True)

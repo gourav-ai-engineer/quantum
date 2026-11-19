@@ -1,0 +1,1 @@
+746330d V21 FREEZE: owner "freeze + go" (2026-11-18); frozen text copied into PROJECT_STATE

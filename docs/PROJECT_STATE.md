@@ -1541,7 +1541,8 @@ Verdict: option A (finish V21 as frozen), no parallel new direction. Each point 
   over teachers. Paper reports per-teacher estimates and states the CI excludes teacher variance. H21-1 "overall = MuRIL" stays a
   model-specific claim; no combined "multilingual models" claim.
 - **Floor effect (D2):** primary statistic unchanged. A headroom-scaled descriptive check (U-X)/(U-chance) may be reported, labelled
-  post-hoc, and is declared here BEFORE any V21 result is read; it cannot rescue or overturn H21-1.
+  post-hoc. At that point, no V21 result had been read. This timing statement is superseded by the dated sensitivity note below:
+  t42 unpruned-teacher-only test accuracies were subsequently inspected, before any pruned-condition metric.
 - **Venue (reviewer-VERIFIED):** SCImago lists Neurocomputing 2025 SJR 1.465, Q1 (provider-specific). Elsevier requires a generative-AI
   disclosure for manuscript preparation; AI used in research goes in Methods.
 
@@ -1557,3 +1558,48 @@ commit 746330d (tag `v21-freeze`), torch 2.6.0+cu124, transformers 4.51.3, test 
 - Launched 2026-11-19 (owner "freeze + go" + "launch remaining kernels"): `v21-muril-t43`, `v21-mbert-t43`. `v21-muril-t44`,
   `v21-mbert-t44` were refused by Kaggle ("Maximum batch GPU session count of 2 reached") and are pushed by
   `results/v21_confirm/push_t44.py` (polls every 20 min) when a slot frees. Analysis runs once, after all six units pass.
+
+### V21 floor-effect descriptive sensitivity (declared 2026-11-19; post-hoc, before any pruned-condition metric)
+
+This note records an exploratory reporting rule after the unpruned teacher-only test accuracies for `muril_t42` and `mbert_t42`
+were inspected. It does not amend the frozen preregistration or the confirmatory statistic. No pruned-condition accuracy or
+statistic was inspected at the time of this declaration.
+
+- Let chance be `c = 1/3`. Set `delta = 0.05` accuracy (5 percentage points) as an operational headroom threshold. For each model,
+  flag language `L` if `U(L) < c + delta = 0.3833...` in **any** teacher that passes its frozen teacher gate. Apply this
+  model-level language flag to all passing teachers so that descriptive comparisons use the same target-language set. This is
+  a transparent sensitivity convention, not a validated universal definition of a floor effect.
+- Under the owner-reported t42 integrity disclosure, mBERT Odia (`or`) has unpruned accuracy 0.341 and is already a flagged
+  floor-risk language; its final model-level flag status is determined from unpruned accuracies of all passing teachers.
+  No MuRIL target in t42 is flagged (reported range 0.693–0.764). These are unpruned-only values, not pruning outcomes.
+- Keep frozen `S` and its decision rule unchanged. Additionally report (i) per-model `S` recalculated over unflagged targets,
+  explicitly descriptive and using the same bootstrap; (ii) per-language `U`, mask-only `X`, residual `r=U-X`, and disparity
+  `r(L)-r(en)`; (iii) `q=(U-X)/(U-c)` where `U-c >= 0.05`, otherwise `NA` (unstable denominator); do not clip `q>1`, report
+  it and explain that mask-only accuracy is below chance; and (iv) the same per-language and floor-excluded descriptive views
+  for H21-2 residuals, H21-3(i) target gains, and H21-4 pooled target comparisons. H21-3(ii) is English-only and receives no
+  floor adjustment. No adjusted descriptive value changes a confirmatory verdict.
+- Interpretation: if frozen `S` and floor-excluded `S` differ, that indicates sensitivity of the pooled contrast to near-chance
+  language headroom; neither statistic replaces the preregistered `S`.
+- Accurate paper timing language: “These floor-sensitivity analyses were specified on 19 November 2026 after inspection of the
+  unpruned teacher-only test accuracies for t42, but before any pruned-condition V21 accuracy or statistic was inspected. They
+  are post-hoc-labelled descriptive checks, do not change the registered hypotheses, and cannot rescue or overturn H21-1.”
+
+### V21 analysis guard (engineering fix, 2026-11-19)
+
+`scripts/v21_analysis.py` now reports a model's hypotheses as not run when fewer than two gate-passing teacher units are supplied,
+matching the frozen rule in section 2. It retains both preregistered models in the output even if one has no passing unit folder.
+This does not change any statistic or test the script. The caller must still supply only units that passed the teacher and
+integrity gates. No V21 pruned-condition output was read for this change.
+
+### V21 status 2026-11-19 16:57 (gate-only reads; no pruned-condition number read)
+- **muril_t43: COMPLETE, integrity PASS** (`results/v21_confirm/sel_muril_t43/`): teacher val-en 0.8305 = ft_meta; MAC ratio 0.5000/0.5000/0.49998;
+  kept units equal K-prune 12/12; official K-prune and Kwon teacher rows differing 0 everywhere; commit 746330d, torch 2.6.0, transformers 4.51.3.
+- **mbert_t43: RUNNING.** **muril_t44, mbert_t44: NOT RUN.** Push of `v21-muril-t44` at 16:57 was refused: "Maximum weekly GPU quota of
+  30.00 hours reached" (earlier refusals were the 2-concurrent-session limit). A watcher (`results/v21_confirm/push_t44.py`, polls every 30 min,
+  60 h window) retries; quota resets weekly (observed Saturday 00:00 UTC in October; confirm at kaggle.com/settings). Platform quota is not
+  a design change. Decision for the owner: wait for the quota reset to run the registered 3 teachers per model (about 1.5 days plus
+  6-10 h per kernel), or analyse with 2 teachers per model (frozen rule: signs over the teachers that passed; fewer than 2 = not run;
+  with 2, the all-teachers sign rule is weaker and H21 claims are weaker). Recommendation: wait; do not analyse early.
+- **Analysis guard committed with tests** (engineering fix, before any pruned-condition statistic): `analyse_model` reports "not run" when
+  fewer than two passing units are supplied; both preregistered models stay in the output. Tests: `test_fewer_than_two_passing_teachers_is_not_run`,
+  `test_model_with_no_passing_unit_is_still_reported` (8 passed). Tag `v21-analysis-fix1`; kernels still clone `v21-freeze`.

@@ -92,3 +92,25 @@ def test_pooled_ci_averages_independent_unit_draws(tmp_path):
     p = va.pooled(units, names, "S_mask", va.T, 200, idx)
     assert p["observed"] == pytest.approx(np.mean(list(p["per_unit"].values())))
     assert p["ci_low"] < p["observed"] < p["ci_high"]
+
+
+def test_fewer_than_two_passing_teachers_is_not_run(tmp_path):
+    """Frozen section 2: the sign rule runs over the teachers that passed; fewer than 2 means 'not run'."""
+    _unit(tmp_path, "muril_t42", BASE)
+    _unit(tmp_path, "mbert_t42", BASE)
+    _unit(tmp_path, "mbert_t43", BASE)
+    r = va.analyse(str(tmp_path), n_boot=200)
+    assert r["muril"]["units"] == ["muril_t42"]
+    assert r["muril"]["H21-1"] == {"run": False, "supported": False}
+    assert not r["H21-1_overall"]["supported"]  # decisive model not run
+    assert r["muril"]["stats"]["S_mask"] is None
+    assert r["mbert"]["H21-1"].get("run") is not False  # two passing units: run
+    assert r["mbert"]["stats"]["S_mask"] is not None
+
+
+def test_model_with_no_passing_unit_is_still_reported(tmp_path):
+    _unit(tmp_path, "mbert_t42", BASE)
+    _unit(tmp_path, "mbert_t43", BASE)
+    r = va.analyse(str(tmp_path), n_boot=200)
+    assert r["muril"]["units"] == [] and r["muril"]["H21-1"]["run"] is False
+    assert r["H21-1_overall"]["decisive_model"] == "muril" and not r["H21-1_overall"]["supported"]
