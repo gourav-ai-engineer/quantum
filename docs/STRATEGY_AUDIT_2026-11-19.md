@@ -11,13 +11,14 @@ they are ledger records, not recomputed here.
 The strategy failed for one dominant reason that the project's own data showed early: in retraining-free structured
 pruning of fine-tuned BERT encoders at 50% MACs, the closed-form repair carries the recovery and the remaining headroom over
 K-prune is tiny (teacher minus K-prune accuracy 0.01-2.43 pp across six tasks, `EXPLORATION_LOG.md` E3), yet the project kept
-building new selectors and repair variants to "beat" K-prune at exactly that operating point. V14 (selectors indistinguishable
-after LS repair) and K-prune's own ablation (VERIFIED: K-prune arXiv 2308.03449 §4.5 Table 2, removing weight-tuning drops
+building new selectors and repair variants to "beat" K-prune at exactly that operating point. V14 (no significant selector
+difference detected after LS repair; a null result, not shown equivalence) and K-prune's own ablation (VERIFIED: K-prune arXiv 2308.03449 §4.5 Table 2, removing weight-tuning drops
 SQuAD F1 at 80% compression from 74.16 to 16.50) both said "repair dominates" before V15-V18 were run. Novelty checks were
 also done after building, not before (STAT's next-layer correction, SNOWS's multi-layer loss and the multilingual prior art were
 found after the corresponding experiments were designed). V21 should be finished as frozen, because three of six units already
 passed, the remaining cost is two kernels, and abandoning it would leave an incomplete registered study. But it is a bounded
-confirmatory re-examination, not the paper's centre. No new head-pruning algorithm survives the novelty-and-headroom screen
+confirmatory re-examination, not the paper's centre. (Remaining: mbert_t43 is still running; muril_t44 and mbert_t44 have
+not started.) No new head-pruning algorithm survives the novelty-and-headroom screen
 (section 5). **Single recommended next action: get the analysis paper through the Rule 11 independent audit and the supervisor's
 proof check now (zero GPU), while V21 waits for the Kaggle quota.**
 
@@ -31,7 +32,7 @@ proof check now (zero GPU), while V21 waits for the Kaggle quota.**
 | 1 | QFC fidelity coverage (V4-V10) | Fidelity-coverage subset selection beats VNE/Michel/Random | Not consistently better; fidelity did not beat cosine or Hilbert-Schmidt (V8); input-conditioned QFC failed on full validation (V10) (owner-reported; no V8/V10 JSON committed) | Scientific | Attention-pattern similarity is the wrong redundancy object (later proved: Prop. 1) | Submodularity guarantees the objective, not accuracy | Closed |
 | 2 | V12 baseline bugs | n/a | Random kept all heads; Shannon NaN under padding (all heads 0..k-1) | Engineering (baseline) | Unvalidated baselines | All earlier Random/Shannon numbers invalid; selectors must assert k distinct heads | Fixed |
 | 3 | V13 diversity vs importance | IWQFC beats Michel | INCONCLUSIVE: MRPC 2/3 seeds CI > 0, SST-2 0/3 (`PROJECT_STATE` V13 row) | Scientific (null) | Effect, if any, task-dependent and small | Task dependence is the norm, not the exception | Closed |
-| 4 | V14 BCM output-space coverage + compensation | Output coverage selector + merge/LS beats classical selectors | Pre-registered factorial: after LS refit four selectors statistically indistinguishable; attention-pattern coverage clearly worse; H9b/c/d not supported. Diagnostics: attention-blindness 72-97% (20% CoLA); bound ranks subsets (Spearman 0.915-0.955) but ~3x loose | Scientific (informative negative) | Repair absorbs selection differences at 50% heads/layer | **The decisive finding of the project**: selection is a poor lever under LS repair | Closed; core of paper |
+| 4 | V14 BCM output-space coverage + compensation | Output coverage selector + merge/LS beats classical selectors | Pre-registered factorial: after sequential LS refit no Holm-significant difference among BCM, Fisher and Greedy-LS (H9b, H9c not supported; every CI includes zero, e.g. QNLI BCM vs Greedy-LS +0.25 [-0.26, +0.78]; `PROJECT_STATE` V14 verdict). This is a failure to detect a difference at this power (MRPC n = 408, SST-2 near ceiling), not a demonstrated equivalence; no equivalence test was registered. Attention-pattern coverage clearly worse (e.g. MRPC 0.7328 vs BCM 0.8564). H9d not supported. Diagnostics: attention-blindness 72-97% (20% CoLA); bound ranks subsets (Spearman 0.915-0.955) but ~3x loose | Scientific (informative negative) | Repair appears to absorb selection differences at 50% heads/layer (no difference detected) | **The decisive finding of the project**: no detectable selection effect under LS repair at the available power; selection looked a poor lever | Closed; core of paper |
 | 5 | V15 GRP (global refit-aware allocation, heads + FFN) | Lower held-out-train KL than both official baselines at >=2 of 4 budgets on both dev tasks (H10) | Gate failed: SST-2 4/4 (KL 40-75% below K-prune), MRPC 0/4; registered accuracy test (H11) not run. Baseline reproduction passed (K-prune MRPC 0.8485 vs 84.80; SQuAD F1 74.20 vs 74.16). Engineering: gdown, missing sklearn, MRPC index gaps, disk full, quota | Scientific (gate) + engineering | Refit target lacked drift correction; allocation effect task-dependent | A calibration-side gate is not an accuracy result in either direction | Closed |
 | 6 | V16 Stage A diagnosis | Locate why GRP is task-dependent | Branch A-3: GRP refit on K-prune masks 34-60% WORSE than K-prune's tuning; mechanism found by reading K-prune code: drift-corrected LS target | Scientific (diagnostic) | Our repair was weaker than the baseline's | The baseline's repair, not its selector, is its strength | Closed |
 | 7 | V17 GRP-R (GRP + drift-corrected refit) | GRP-R <= 1.0x K-prune KL on MRPC and <= 0.9x on SST-2 | Fails: MRPC 1.19/1.29x; SST-2 0.31/0.50x. K-prune masks + drift refit = 0.97-1.00x K-prune. Registered AFTER V15/V16 dev data were seen | Scientific + statistical (post-hoc registration) | Allocation still task-dependent; repair equalised | Equal repair -> selection winner is task-dependent | Closed |
@@ -46,7 +47,7 @@ proof check now (zero GPU), while V21 waits for the Kaggle quota.**
 | 16 | Process | n/a | Novelty found after design (STAT, SNOWS, multilingual "no study found" claim in `Q1_GAP_RESEARCH` later closed by the 11-18 audit); failures hidden by `|| echo` and `tail` (V19 failure 1); concurrent sessions and an external assistant editing the working tree (2026-11-19: an uncommitted edit to the frozen `v21_analysis.py`, accepted only after new tests) | Project-management | No prior-art gate before design; shared mutable tree | Prior-art screen and headroom check BEFORE any design; one writer per tree | Ongoing risk |
 
 ### 2.2 The most consequential wrong strategic choices
-1. **Selector-first after V14.** Reasonable at the start (QFC was the founding idea); wrong once V14 showed selectors indistinguishable after LS repair. V15 (GRP) and V17 (GRP-R) still targeted selection/allocation.
+1. **Selector-first after V14.** Reasonable at the start (QFC was the founding idea); questionable once V14 detected no selector difference after LS repair. V15 (GRP) and V17 (GRP-R) still targeted selection/allocation.
 2. **Fixing the operating point at 50% MACs without computing headroom.** The headroom (0.01-2.43 pp) was first computed in E3 on 2026-11-16, after V18/V19. At this budget a "beat K-prune everywhere" goal was bounded by arithmetic.
 3. **Choosing a same-mask candidate (d2i-RI) for the confirmatory slot** while the owner's goal was "runs on a smaller machine". Identical shapes guarantee zero compression or latency gain relative to K-prune.
 4. **Prior-art search after building.** STAT's correction and Llama least-squares re-run (VERIFIED: arXiv 2406.00061 §3.1-3.2), SNOWS's multi-layer loss, GRAIL's selector-agnostic compensation and the multilingual literature were each found after the experiment they undercut was designed.
@@ -64,7 +65,7 @@ Reasonable at the time and still defensible: V15 as a theory-motivated test with
 - Do not let more than one writer change the tree, and never let an external assistant edit frozen code uncommitted (2026-11-19).
 
 ### 2.4 Which negatives strengthen the paper, which thin it
-Strengthen: the pre-registered V14 factorial (encoder evidence that selection matters little after repair, matching decoder and
+Strengthen: the pre-registered V14 factorial (encoder evidence of no detected selection effect after repair, consistent with decoder and
 vision reports: Free Lunch §3(iv), GRAIL abstract); the attention-blindness proposition plus its measurement; V18/V19 parity
 against official baselines with integrity gates; the headroom table; the latency reality (no GPU batch-1 speedup).
 Thin or unfocus it: the V15-V17 GRP narrative (development-only, gate failures, mechanism already in K-prune's Eq. 10-11 and in
@@ -86,7 +87,7 @@ multilingual storyline (V20/V21) that asks a different question.
 |---|---|---|---|---|---|
 | 1 | Rule 11 independent human audit + supervisor proof check of the analysis paper | 0 | 3-7 days (supervisor) | Low | Unblocks submission |
 | 2 | Reposition the paper: compact V15-V17 into one "what failed" section; cite GRAIL, Free Lunch, STAT (no K-prune comparison), K-prune Table 2, NAACL 2021 attention redundancy; keep claims bounded | 0 | 2-3 days | Low | Removes the main novelty objections |
-| 3 | Finish V21 (muril_t44, mbert_t44 after quota reset; wait for mbert_t43) and run its single analysis | about 12-20 | 2-4 days after reset | Medium (platform) | Completes a registered study; decides V21 placement |
+| 3 | Finish V21: mbert_t43 is already running (this week's quota); muril_t44 and mbert_t44 start after the quota reset; then the single analysis | about 12-20 for the two t44 kernels only (planning estimate) | 2-4 days after reset | Medium (platform) | Completes a registered study; decides V21 placement |
 | 4 | CPU latency and parameter counts for the multilingual shapes (registered descriptive) | 0 | 1 day | Low | Honest efficiency reporting |
 | 5 | Optional high-compression dev kill test (section 3.3), only if a method paper is still wanted | about 8-12 | 1 week after V21 | High (likely NO-GO) | Decides the method line |
 
@@ -95,7 +96,7 @@ multilingual storyline (V20/V21) that asks a different question.
 - After V21's single analysis:
   - H21-1 supported for MuRIL and the pre-declared floor checks agree -> V21 as a separate short confirmatory paper (or a bounded section if the supervisor prefers one paper).
   - Otherwise -> one paragraph plus appendix in the analysis paper; no multilingual claim.
-- Method line: run the kill test only if the owner still wants a method paper. If it fails -> close the method line permanently and write that in `PROJECT_STATE`.
+- Method line: run the kill test only if the owner still wants a method paper. If it fails -> close this specific path (GRP-RI-type allocation vs K-prune at c = 0.3/0.2 on these tasks) and record it in `PROJECT_STATE`. It does not rule out other method directions; each would need its own prior-art and headroom screen. A pass still requires fresh confirmatory evidence.
 
 ### 3.3 Development-only kill test (only for deciding the method line; no new method is involved)
 - Question: is there any selection/allocation effect beyond K-prune once headroom exists?
@@ -103,7 +104,7 @@ multilingual storyline (V20/V21) that asks a different question.
 - Arms: official K-prune and Kwon (unmodified, new constraint only); GRP-RI (existing code, different allocation); d2i-RI (existing code, K-prune masks: measures repair headroom only, cannot count as a compression win).
 - Metric: validation accuracy (Pearson for STS-B), mean of 5 seeds, plus held-out-train KL; physical MAC ratio checked.
 - Pass (all must hold, fixed now): teacher minus K-prune headroom >= 3 pp at that budget; GRP-RI beats K-prune by >= 1.0 pp (STS-B >= 0.010 Pearson) on ALL three tasks at the same budget, with >= 4 of 5 seed wins per task; no task where GRP-RI loses.
-- Fail -> stop the method line. Expected outcome: fail (MRPC already lost at 0.5/0.4).
+- Fail -> stop this path (only what was tested: this allocation family, these budgets, tasks and thresholds). Expected outcome: fail (MRPC already lost at 0.5/0.4).
 - Confirmation if it passed: BERT-base SQuAD v1.1 (unspent; K-prune ran SQuAD on a T4 in V15 Phase 1) plus newly fine-tuned teacher seeds; official baselines; physical-shape latency CPU and GPU. Caveat: every GLUE validation split has been used for some hypothesis; fresh confirmatory capacity is the binding constraint for any new claim (the official codes support GLUE and SQuAD loaders only).
 
 ### 3.4 Guards
@@ -138,22 +139,23 @@ similarity ...", "STAT ... github code; Global-Pruner ... github"; full-text rea
 | Global-Pruner (CoNLL 2024) | PPO mask refinement from Fisher masks + CG^2MT LS mask tuning; K-prune as a baseline | No STAT comparison; not reproduced by us | Fig. 2, §5.2, Table 1, §5.1 (2,000 samples, 10 seeds, transformers 4.12.0) | VERIFIED | High | A published claim of lower degradation than K-prune exists; cite in its own units |
 | GRAIL (CPAL 2026) | Selector-agnostic post-hoc ridge compensation absorbed into downstream weights | ResNet/ViT/decoder LLMs, not fine-tuned BERT encoders | arXiv 2602.23795 abstract | PLAUSIBLE | High for the selection-vs-compensation framing | Our V14 factorial is an encoder confirmation, not a new insight |
 | Free Lunch (arXiv 2510.14444) | Local reconstruction; "mask selection becomes negligible" | Decoder LLMs; structured only in App. F | §1 contributions; §3(iv), Table 4, Fig. 8 | VERIFIED | High | Same direction as V14; cite as corroboration |
-| SNOWS (ICLR 2025) | Multi-downstream-operation reconstruction loss | 2:4 masks on ViTs; no BERT heads | §4 Eq. 3 (per `V19_PRIOR_ART.md`, external reviewer) | PLAUSIBLE | High for multi-layer repair | Closes multi-layer repair as a novelty |
-| Týr-the-Pruner (arXiv 2503.09657) | Supernet of local pruning at several sparsities; evolutionary sparsity-distribution search; closed-form adjustment; heads + FFN | Decoder LLMs only | §2.2-2.4, Eq. 5-6, Alg. 3-4; §3.1 | VERIFIED | High for allocation search | Closes "repair-aware allocation search" as a novelty |
+| SNOWS (ICLR 2025) | Multi-downstream-operation reconstruction loss | 2:4 masks on ViTs; no BERT heads | §4 Eq. 3 (per `V19_PRIOR_ART.md`, external reviewer) | PLAUSIBLE | High for multi-layer repair | Makes multi-layer repair unlikely as a novelty (not read in full by me) |
+| Týr-the-Pruner (arXiv 2503.09657) | Supernet of local pruning at several sparsities; evolutionary sparsity-distribution search; closed-form adjustment; heads + FFN | Decoder LLMs only | §2.2-2.4, Eq. 5-6, Alg. 3-4; §3.1 | VERIFIED | High for allocation search | Occupies repair-aware allocation search for decoder LLMs; a BERT-encoder transfer would be a combination of known pieces, not a new principle |
 | CORP (arXiv 2602.05243) | Closed-form ridge compensation, selection vs compensation | Vision | `Q1_GAP_RESEARCH` ([full] read by another session) | PLAUSIBLE | Medium-high | Same as GRAIL |
-| OSSCAR (ICML 2024) | Layer-wise combinatorial local search with reconstruction | Layer-wise objective | Abstract | PLAUSIBLE | Medium | Closes local-search mask refinement |
+| OSSCAR (ICML 2024) | Layer-wise combinatorial local search with reconstruction | Layer-wise objective | Abstract | PLAUSIBLE | Medium | Likely occupies local-search mask refinement (abstract only) |
 | SoBP (EMNLP 2024) | Global importance + local greedy refinement + module-wise reconstruction, heads + FFN | Not read | Search summary | UNVERIFIED | Medium | Must be read before any allocation claim |
 | Li et al. (ACL 2022) | Structured multilingual pruning of XLM-R, English-source transfer; per-language pruning not better | Retraining-based settings | Record + ChatGPT round 2 (VERIFIED by it) | PLAUSIBLE | High for multilingual | H21-1 is a re-examination |
 | Ogueji et al. (EMNLP 2022) | Compression effect on 40 languages | Unstructured, during fine-tuning | ChatGPT round 2 (VERIFIED by it) | PLAUSIBLE | Medium | Disparity is not a new phenomenon |
-| Shapley Head Pruning (EACL 2023) | Language-specific interfering heads pruned for a target language | Details unread | Abstract | PLAUSIBLE | High for target-language head selection | Closes Direction A novelty |
-| M-Wanda (EMNLP 2025), Kurz et al. (TACL 2026), MBS (LREC-COLING 2024) | Multilingual calibration / language-aware pruning statistics | Mostly decoder LLMs (unverified detail) | Records (`RESEARCH_DIRECTION_AUDIT` §10) | PLAUSIBLE | Medium-high | Closes calibration-language novelty |
+| Shapley Head Pruning (EACL 2023) | Language-specific interfering heads pruned for a target language | Details unread | Abstract | PLAUSIBLE | High for target-language head selection | Likely occupies Direction A (abstract only) |
+| M-Wanda (EMNLP 2025), Kurz et al. (TACL 2026), MBS (LREC-COLING 2024) | Multilingual calibration / language-aware pruning statistics | Mostly decoder LLMs (unverified detail) | Records (`RESEARCH_DIRECTION_AUDIT` §10) | PLAUSIBLE | Medium-high | Likely occupies calibration-language novelty (records only) |
 | NAACL 2021 attention redundancy (BERT) | Pairwise Jensen-Shannon distance between attention maps | Does not compare with head-output similarity (per search summary) | Search summary | UNVERIFIED | Medium | Prop. 1 + measurement may still be a modest contribution; read before claiming |
 | CompactifAI (ESANN 2025), OBC (NeurIPS 2022), ZipLM (NeurIPS 2023) | Quantum-inspired MPO compression; joint post-training pruning + quantization | n/a | arXiv 2401.14109 abstract; ChatGPT round 2 | PLAUSIBLE | High | "Prune + quantize" or "add MPO" is not novel by itself |
 
 Novelty verdict (calibrated, not certainty): new pruning algorithm in this space: **low novelty, high confidence**. The analysis
 paper: **low-to-medium novelty, medium confidence**. Its defensible pieces are the pre-registered encoder evidence with official
 baselines and integrity gates, the attention-blindness proposition plus measurement (pending a read of the NAACL 2021 paper), and
-the confirmatory parity results. "Not found in this search" is not "proven novel".
+the confirmatory parity results. "Not found in this search" is not "proven novel", and "close prior art" for the rows labelled
+PLAUSIBLE or UNVERIFIED is a likely, not a confirmed, overlap until their full texts are read (section 7, item 4).
 
 ## 5. Candidate method: none passes
 
@@ -171,8 +173,10 @@ Candidates screened and rejected:
    refit it feeds. Reject.
 5. **Quantum-inspired add-ons (MPO, fidelity selection).** CompactifAI; QFC failed empirically. Reject.
 
-Verdict: **no defensible new algorithm emerged.** Best alternative: the analysis paper now; V21 finished as registered; the
-kill test in 3.3 only if the owner insists on testing the method line, with "stop" as the expected and accepted outcome.
+Verdict: **no defensible new algorithm emerged from this screen.** Candidates 2, 3 and 5 rest on full-text reads (Týr, Free Lunch,
+STAT, K-prune); candidates 1 and parts of 3 rest partly on abstract-level or other-session readings, so their rejection is likely
+but not confirmed. Best alternative: the analysis paper now; V21 finished as registered; the kill test in 3.3 only if the owner
+insists on testing that path, with "stop this path" as the expected and accepted outcome.
 
 ## 6. Q1 readiness
 - Paper type: (a) analysis / negative results on BERT encoders, quantum-information analysis as a diagnostic lens.
@@ -184,7 +188,8 @@ kill test in 3.3 only if the owner insists on testing the method line, with "sto
 - Journal fit: Neurocomputing lists 2025 SJR 1.465, Q1 (SCImago; provider-specific; reported VERIFIED by ChatGPT round 2). TMLR's
   scope fits analysis/reproducibility but its Q1 status is not established here. A negative/analysis paper faces "limited
   novelty" objections at any venue.
-- Realistic readiness: submittable about 1-2 weeks after the supervisor's check. Acceptance is not predictable.
+- Realistic readiness: a planning guess (not an evidence-based forecast) of about 1-2 weeks after the supervisor's check.
+  Acceptance is not predictable.
 
 ## 7. Evidence gaps (things not in the repository)
 1. Supervisor's proof comments (Prop. 1 scope, Prop. 2, Theorem, purified-distance remark).
@@ -196,8 +201,9 @@ kill test in 3.3 only if the owner insists on testing the method line, with "sto
 
 ## 8. Blunt summary
 Stop building selectors, repairs or allocation variants aimed at beating K-prune at 50% MACs: the headroom is too small, the
-repair is already the baseline's strength, and every component idea is occupied in the literature. Stop opening new research
-questions to find a gap. Finish V21 as frozen and the analysis paper through Rule 11 and the supervisor. The single experiment
-that most efficiently decides whether a new-method paper is worth pursuing is the development-only high-compression kill test
-(section 3.3, about 8-12 GPU-hours, after V21): unless an allocation that differs from K-prune beats it by at least 1 point on all
-three development tasks where headroom is at least 3 points, close the method line for good.
+repair is already the baseline's strength, and each broad direction screened has close prior art (exact novelty unverified for
+the items not read in full). Stop opening new research questions to find a gap. Finish V21 as frozen and the analysis paper
+through Rule 11 and the supervisor. The single experiment that most efficiently decides whether the allocation path is worth
+pursuing is the development-only high-compression kill test (section 3.3, about 8-12 GPU-hours, after V21): unless an allocation
+that differs from K-prune beats it by at least 1 point on all three development tasks where headroom is at least 3 points, stop
+that path. That would not rule out every future method; a pass would still need fresh confirmatory evidence.
