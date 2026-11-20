@@ -127,7 +127,7 @@ def run(args):
     calib = json.loads((RES / "calibration.json").read_text())
     assert sha256(RES / "calibration.json") == inputs["uniref"]["calibration_sha256"]
     commit = git("rev-parse", "--short", "HEAD")
-    dirty = bool(git("status", "--porcelain", "--", "src", "scripts", "tests", "docs/EXPLORATION_LOG.md", ":(exclude)*.pyc"))
+    dirty = bool(git("status", "--porcelain", "--untracked-files=no", "--", "src", "scripts", "tests", "docs/EXPLORATION_LOG.md", ":(exclude)*.pyc"))
     out = RES / ("_smoke" if args.smoke else commit)
     out.mkdir(parents=True, exist_ok=True)
     shutil.copy(RES / "inputs.json", out / "inputs.json")
