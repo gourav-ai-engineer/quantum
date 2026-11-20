@@ -120,7 +120,6 @@ def load_models(inputs):
 
 
 def run(args):
-    from scipy.stats import spearmanr
     from qfc import esm_pilot as ep, grp
     torch.set_num_threads(args.threads)
     inputs = json.loads((RES / "inputs.json").read_text())
@@ -148,7 +147,7 @@ def run(args):
         rho, scores = {}, {}
         for a, (wt, muts, y) in assay_data.items():
             s = ep.wt_marginal_scores(model, tok, wt, muts)
-            rho[a], scores[a] = float(spearmanr(s, y).statistic), np.round(s, 4).tolist()
+            rho[a], scores[a] = float(np.corrcoef(pd.Series(s).rank().to_numpy(), pd.Series(y).rank().to_numpy())[0, 1]), np.round(s, 4).tolist()  # Spearman = Pearson of average ranks
         r = {"rho": rho, "mean_rho": float(np.mean(list(rho.values()))),
              "n_variants": {a: len(v[1]) for a, v in assay_data.items()}, **(extra or {})}
         if counted:
