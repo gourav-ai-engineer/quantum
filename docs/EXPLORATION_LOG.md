@@ -126,3 +126,21 @@ a new retraining-free structured-pruning method on fine-tuned BERT encoders:
    more optimism, yet GRP wins on SST-2 and loses on MRPC. Optimism cannot explain the failure the correction targets.
 Conclusion: in this exact setting (retraining-free structured pruning of fine-tuned BERT-family encoders), novelty, not compute, is the
 binding constraint. A method paper would need a different setting; that choice is the owner's. No GPU used; V21 t44 keeps queue priority.
+
+**E5 | 2026-11-20 | domain screen for a different setting (literature only; no run).** Protein LMs (ESM-2), genomic LMs, time-series
+foundation models, speech SSL and Whisper screened for retraining-free structured head/FFN pruning with closed-form repair.
+- Crowded: time-series FMs (structured pruning + fine-tune across seven models, NeurIPS 2025; data-free stable-rank head pruning,
+  arXiv 2602.01605); Whisper / speech (arXiv 2609.27980, 2509.26207, data-free clustering 2606.11836; Interspeech 2026 per external
+  check); genomic LMs (layer pruning with fine-tuning, Genes 2025, doi 10.3390/genes16111358).
+- Least crowded: protein LMs (ESM-2). Known efficiency work: 8/4-bit quantization (bioRxiv 2024.10.22.619563), ESME efficiency study
+  (PMC12481099, per external check), co-distillation for accuracy (Nature Methods 2026). External check (ChatGPT) reports a close item:
+  Vinod et al. 2026, PLOS Comput. Biol., learned sparse subnetworks across ESM-2 layers (UNVERIFIED here: not found in my search; open
+  its link before relying on it). Gap = "not found in targeted searches", not proven.
+- Also flagged by the external check and VERIFIED here at search level: AutoDFP (arXiv 2403.08204; Neurocomputing version), data-free
+  structured pruning with channel-similarity reconstruction on CNNs. Relevant to the analysis paper's positioning in Neurocomputing.
+- Corrections to my earlier message: the "1-2 day CPU pilot" estimate was not supported (ProteinGym scoring cost depends on the assay
+  subset and implementation), and the "95% Spearman retention" kill threshold was not derived from evidence. Any ESM-2 pilot needs its
+  assay set, comparisons (unpruned, pruning without repair, pruning with repair, plus existing efficiency baselines such as quantization)
+  and thresholds fixed before results, with measured CPU latency.
+- Joint conclusion (Claude + external check): the fastest route to a submission is the existing BERT analysis paper (Rule 11, supervisor
+  proofs, missing raw baseline records, AutoDFP in positioning); ESM-2 is a separate, slower study. Q1 acceptance cannot be guaranteed.
