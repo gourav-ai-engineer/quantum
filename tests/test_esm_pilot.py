@@ -121,6 +121,20 @@ def test_mac_ratio_equals_budget_to_three_decimals():
             assert 0 <= c - ratio < 1e-3
 
 
+def test_memmapped_grams_equal_in_ram_grams(tmp_path):
+    t = tiny()
+    bs = batches(32, 24)
+    a = grp.collect_grams(t, bs, "cpu")
+    (tmp_path / "g1").mkdir()
+    (tmp_path / "g2").mkdir()
+    b = grp.collect_grams(t, bs, "cpu", store_dir=tmp_path / "g1")
+    assert a.keys() == b.keys()
+    for k in a:
+        assert a[k].dtype == b[k].dtype == torch.float64
+        assert float((a[k] - b[k]).abs().max()) == 0.0
+    assert grp.teacher_stats(t, bs, "cpu", store_dir=tmp_path / "g2")["sens"] == grp.teacher_stats(t, bs, "cpu")["sens"]
+
+
 def test_mac_ratio_of_real_esm2_shapes_is_0_225():
     def mac(L, d, H, I):
         return grp.model_mac([H] * L, [I] * L, 1, d, d // H, False)

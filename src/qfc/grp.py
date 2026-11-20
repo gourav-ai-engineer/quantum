@@ -11,7 +11,9 @@ from __future__ import annotations
 import copy
 import math
 from contextlib import contextmanager
+from pathlib import Path
 
+import numpy as np
 import torch
 from torch import nn
 
@@ -153,8 +155,11 @@ def _batch_inputs(batch, device):
 
 
 @torch.no_grad()
-def collect_grams(model, batches, device: str) -> dict:
-    """Teacher Grams per layer: att (H*d+1)^2 and ffn (I+1)^2, float64 on CPU, over non-pad tokens."""
+def collect_grams(model, batches, device: str, store_dir=None) -> dict:
+    """Teacher Grams per layer: att (H*d+1)^2 and ffn (I+1)^2, float64 on CPU, over non-pad tokens.
+
+    store_dir (memory only): accumulate each Gram in place into a disk-backed float64 memmap there instead of RAM; the
+    additions happen in the same order, so the values are bitwise identical to the in-RAM result."""
     model.eval()
     L = len(_layers(model))
     G = {(l, k): None for l in range(L) for k in ("att", "ffn")}
@@ -167,7 +172,15 @@ def collect_grams(model, batches, device: str) -> dict:
             for key in G:
                 x = _aug(st[key][m].double())
                 g = (x.T @ x).cpu()
-                G[key] = g if G[key] is None else G[key] + g
+                if store_dir is None:
+                    G[key] = g if G[key] is None else G[key] + g
+                elif G[key] is None:
+                    mm = np.lib.format.open_memmap(Path(store_dir) / f"gram_{key[0]}_{key[1]}.npy", mode="w+",
+                                                   dtype=np.float64, shape=tuple(g.shape))
+                    G[key] = torch.from_numpy(mm)
+                    G[key].copy_(g)
+                else:
+                    G[key].add_(g)
     return G
 
 
@@ -488,10 +501,10 @@ def sequential_refit(student, teacher, batches, device: str, ridge_rel: float = 
             ht[i] = layer_forward(teacher, lt, ht[i], ext[i])
 
 
-def teacher_stats(teacher, batches, device: str, seed: int = 0) -> dict:
+def teacher_stats(teacher, batches, device: str, seed: int = 0, store_dir=None) -> dict:
     """Budget-independent statistics (computed once per calibration set): Grams, teacher weights, sensitivities."""
     L = len(_layers(teacher))
-    return {"G": collect_grams(teacher, batches, device),
+    return {"G": collect_grams(teacher, batches, device, store_dir),
             "W": {(l, k): teacher_weight(teacher, l, k) for l in range(L) for k in ("att", "ffn")},
             "sens": module_sensitivity(teacher, batches, device, seed)}
 

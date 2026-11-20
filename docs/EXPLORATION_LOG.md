@@ -202,3 +202,12 @@ and shards are not length-homogeneous: of the first 8 drawn with `random.Random(
 ~498k). Rule: shards are taken in the order of `random.Random(7).sample(all_shards, len(all_shards))`; a shard is skipped if it has fewer than 100,000 eligible
 sequences (post-filter, post-exclusion); the first 8 kept shards are used, 128 sequences each (same RNG). Skipped shards are recorded in inputs.json.
 Calibration is therefore a shard-level sample whose length distribution is whatever those shards hold; no length rebalancing.
+
+**E6-A3 | 2026-11-20 | Amendment, memory only, written before any pruned arm (A or B) was scored.** The first full run (commit c47bda36) scored the dense arms
+D, C, E (mean rho 0.4054, 0.3107, 0.4016) and was then killed by the harness for low system memory (15.7 GB machine, ~5.5 GB free) during the teacher-statistics /
+selection stage, before any selector output. Fix: `grp.collect_grams(..., store_dir=...)` accumulates each Gram in place into a disk-backed float64 memmap
+instead of RAM. Nothing numeric changes: Grams stay float64; the calibration rows, their order and the batch size (8) are the same; additions happen in the same order
+(first batch assigned, later batches added) so the Grams are bitwise identical to the in-RAM ones (unit test: max abs diff 0); ridge_rel 1e-4, the sensitivity
+sampling (one label per non-pad token, generator seed 0) and every selector and refit setting are unchanged. Numbers are unaffected; only where the Grams live changes.
+Resume: arms D, C, E are carried over from the killed run's results.json (not recomputed as results); their per-variant scores, which that run had not yet written, are
+re-derived by re-scoring and checked against the carried rho (max abs diff recorded). Only arms A and B are newly run. The tracked-source dirty check now ignores `*.pyc`.

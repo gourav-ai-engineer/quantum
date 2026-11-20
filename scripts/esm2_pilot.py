@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import copy
+import gc
 import gzip
 import hashlib
 import json
@@ -126,7 +127,7 @@ def run(args):
     calib = json.loads((RES / "calibration.json").read_text())
     assert sha256(RES / "calibration.json") == inputs["uniref"]["calibration_sha256"]
     commit = git("rev-parse", "--short", "HEAD")
-    dirty = bool(git("status", "--porcelain", "--", "src", "scripts", "tests", "docs/EXPLORATION_LOG.md"))
+    dirty = bool(git("status", "--porcelain", "--", "src", "scripts", "tests", "docs/EXPLORATION_LOG.md", ":(exclude)*.pyc"))
     out = RES / ("_smoke" if args.smoke else commit)
     out.mkdir(parents=True, exist_ok=True)
     shutil.copy(RES / "inputs.json", out / "inputs.json")
@@ -143,11 +144,25 @@ def run(args):
     res, all_scores = {"meta": meta, "arms": {}}, {}
     t150 = ep.mac_per_token(teacher)
 
+    carried = {}
+    if args.resume_from:  # E6-A3: D, C, E carried over from the killed run; per-variant scores re-derived and checked
+        prev = json.loads((Path(args.resume_from) / "results.json").read_text())
+        carried = {k: v for k, v in prev["arms"].items() if k in ("D_dense150M", "C_dense35M", "E_int8_150M")}
+        assert len(carried) == 3 and prev["meta"]["n_assays"] == len(ids) and not prev["meta"]["smoke"]
+        meta["carried_from"] = {"commit": prev["meta"]["commit"], "arms": sorted(carried)}
+
     def record(name, model, extra=None, counted=True):
         rho, scores = {}, {}
         for a, (wt, muts, y) in assay_data.items():
             s = ep.wt_marginal_scores(model, tok, wt, muts)
             rho[a], scores[a] = float(np.corrcoef(pd.Series(s).rank().to_numpy(), pd.Series(y).rank().to_numpy())[0, 1]), np.round(s, 4).tolist()  # Spearman = Pearson of average ranks
+        if name in carried:
+            r = dict(carried[name])
+            r["rescore_max_abs_diff"] = max(abs(rho[a] - r["rho"][a]) for a in rho)
+            res["arms"][name], all_scores[name] = r, scores
+            (out / "results.json").write_text(json.dumps(res, indent=1))
+            print(f"{name:24s} carried mean rho {r['mean_rho']:.4f}  rescore diff {r['rescore_max_abs_diff']:.2e}", flush=True)
+            return
         r = {"rho": rho, "mean_rho": float(np.mean(list(rho.values()))),
              "n_variants": {a: len(v[1]) for a, v in assay_data.items()}, **(extra or {})}
         if counted:
@@ -164,10 +179,7 @@ def run(args):
     cache = Path(tempfile.mkdtemp(prefix="esm2_grams_"))
     try:
         print("teacher stats ...", flush=True)
-        stats = grp.teacher_stats(teacher, batches, "cpu", seed=0)
-        for k in list(stats["G"]):
-            torch.save(stats["G"][k], cache / f"{k[0]}_{k[1]}.pt")
-            stats["G"][k] = torch.load(cache / f"{k[0]}_{k[1]}.pt", mmap=True, weights_only=True)
+        stats = grp.teacher_stats(teacher, batches, "cpu", seed=0, store_dir=cache)  # E6-A3: Grams on disk, same numbers
         res["sensitivity"] = {f"{l}:{k}": v for (l, k), v in stats["sens"].items()}
         for sel in SELECTORS:
             for b in BUDGETS:
@@ -185,6 +197,8 @@ def run(args):
                 record(f"B|{sel}|{b}", student, extra)
                 del student
     finally:
+        stats = None  # release the memmaps before deleting the files
+        gc.collect()
         shutil.rmtree(cache, ignore_errors=True)
     meta["end"] = time.strftime("%F %T")
     (out / "results.json").write_text(json.dumps(res, indent=1))
@@ -236,5 +250,6 @@ if __name__ == "__main__":
     ap.add_argument("cmd", choices=["prepare", "run", "latency"])
     ap.add_argument("--smoke", action="store_true")
     ap.add_argument("--threads", type=int, default=8)
+    ap.add_argument("--resume-from", default=None, help="results dir of the killed run; carries over arms D, C, E")
     a = ap.parse_args()
     {"prepare": prepare, "run": run, "latency": latency}[a.cmd](a)
