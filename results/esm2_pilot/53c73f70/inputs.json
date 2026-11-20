@@ -1,0 +1,177 @@
+{
+ "models": {
+  "150M": {
+   "id": "facebook/esm2_t30_150M_UR50D",
+   "revision": "a695f6045e2e32885fa60af20c13cb35398ce30c"
+  },
+  "35M": {
+   "id": "facebook/esm2_t12_35M_UR50D",
+   "revision": "6fbf070e65b0b7291e7bbcd451118c216cff79d8"
+  }
+ },
+ "proteingym": {
+  "repo": "OATML-Markslab/ProteinGym_v1",
+  "revision": "1ea2aa10a328cc085b64328e790c54755fe32b10",
+  "files": {
+   "DMS_substitutions/train-00000-of-00005.parquet": "878ebe8029ead3ad76e0a5d082a67d32fa504128354c306983c79035576c9ba1",
+   "DMS_substitutions/train-00001-of-00005.parquet": "62e6ffb6f99400361c2a056ed3e88d8dfe7adcc4aa96f745cb5f89e73a4e19dc",
+   "DMS_substitutions/train-00002-of-00005.parquet": "a6ab95532f613aeab7db71f6264646c77d12f37dcda131dd5dd0b8b18abca4f2",
+   "DMS_substitutions/train-00003-of-00005.parquet": "cec079f4dc3f40efc1e7b87b5157f03ebd34a6b4193fc59532c7aa4f27c75e65",
+   "DMS_substitutions/train-00004-of-00005.parquet": "aba5c14a7a9b2abdf90ced45ea5aa9140e5726237ef47825294d08e7b7bc2cef"
+  }
+ },
+ "reference": {
+  "url": "https://raw.githubusercontent.com/OATML-Markslab/ProteinGym/144fe22b07dfaeec2b366f2346203a9838a55b4c/reference_files/DMS_substitutions.csv",
+  "github_commit": "144fe22b07dfaeec2b366f2346203a9838a55b4c",
+  "sha256": "a8f498011532a74aa9fe556a50555a75e928c5837d19c06a87592ae04049b308"
+ },
+ "assays": [
+  {
+   "DMS_id": "A0A1I9GEU1_NEIME_Kennouche_2019",
+   "UniProt_ID": "A0A1I9GEU1_NEIME",
+   "length": 161,
+   "n_single": 922
+  },
+  {
+   "DMS_id": "A0A247D711_LISMN_Stadelmann_2021",
+   "UniProt_ID": "A0A247D711_LISMN",
+   "length": 87,
+   "n_single": 1653
+  },
+  {
+   "DMS_id": "A4GRB6_PSEAI_Chen_2020",
+   "UniProt_ID": "A4GRB6_PSEAI",
+   "length": 266,
+   "n_single": 5004
+  },
+  {
+   "DMS_id": "AACC1_PSEAI_Dandage_2018",
+   "UniProt_ID": "AACC1_PSEAI",
+   "length": 177,
+   "n_single": 1801
+  },
+  {
+   "DMS_id": "AICDA_HUMAN_Gajula_2014_3cycles",
+   "UniProt_ID": "AICDA_HUMAN",
+   "length": 198,
+   "n_single": 209
+  },
+  {
+   "DMS_id": "AMFR_HUMAN_Tsuboyama_2023_4G3O",
+   "UniProt_ID": "AMFR_HUMAN",
+   "length": 47,
+   "n_single": 820
+  },
+  {
+   "DMS_id": "AMIE_PSEAE_Wrenbeck_2017",
+   "UniProt_ID": "AMIE_PSEAE",
+   "length": 346,
+   "n_single": 6227
+  },
+  {
+   "DMS_id": "ARGR_ECOLI_Tsuboyama_2023_1AOY",
+   "UniProt_ID": "ARGR_ECOLI",
+   "length": 69,
+   "n_single": 1287
+  },
+  {
+   "DMS_id": "B2L11_HUMAN_Dutta_2010_binding-Mcl-1",
+   "UniProt_ID": "B2L11_HUMAN",
+   "length": 198,
+   "n_single": 170
+  },
+  {
+   "DMS_id": "BBC1_YEAST_Tsuboyama_2023_1TG0",
+   "UniProt_ID": "BBC1_YEAST",
+   "length": 64,
+   "n_single": 1084
+  },
+  {
+   "DMS_id": "BCHB_CHLTE_Tsuboyama_2023_2KRU",
+   "UniProt_ID": "BCHB_CHLTE",
+   "length": 52,
+   "n_single": 890
+  },
+  {
+   "DMS_id": "BLAT_ECOLX_Deng_2012",
+   "UniProt_ID": "BLAT_ECOLX",
+   "length": 286,
+   "n_single": 4996
+  },
+  {
+   "DMS_id": "BLAT_ECOLX_Firnberg_2014",
+   "UniProt_ID": "BLAT_ECOLX",
+   "length": 286,
+   "n_single": 4783
+  },
+  {
+   "DMS_id": "BLAT_ECOLX_Jacquier_2013",
+   "UniProt_ID": "BLAT_ECOLX",
+   "length": 286,
+   "n_single": 989
+  },
+  {
+   "DMS_id": "BLAT_ECOLX_Stiffler_2015",
+   "UniProt_ID": "BLAT_ECOLX",
+   "length": 286,
+   "n_single": 4996
+  },
+  {
+   "DMS_id": "CALM1_HUMAN_Weile_2017",
+   "UniProt_ID": "CALM1_HUMAN",
+   "length": 149,
+   "n_single": 1813
+  },
+  {
+   "DMS_id": "CASP3_HUMAN_Roychowdhury_2020",
+   "UniProt_ID": "CASP3_HUMAN",
+   "length": 258,
+   "n_single": 1567
+  },
+  {
+   "DMS_id": "CASP7_HUMAN_Roychowdhury_2020",
+   "UniProt_ID": "CASP7_HUMAN",
+   "length": 281,
+   "n_single": 1680
+  },
+  {
+   "DMS_id": "CATR_CHLRE_Tsuboyama_2023_2AMI",
+   "UniProt_ID": "CATR_CHLRE",
+   "length": 72,
+   "n_single": 1340
+  },
+  {
+   "DMS_id": "CBPA2_HUMAN_Tsuboyama_2023_1O6X",
+   "UniProt_ID": "CBPA2_HUMAN",
+   "length": 72,
+   "n_single": 1357
+  }
+ ],
+ "uniref": {
+  "repo": "zpn/uniref50",
+  "revision": "c31a1cd0d33c4226a73830bb480cd8ec86788030",
+  "n_shards_total": 108,
+  "shards": [
+   "data/uniref50_39.parquet",
+   "data/uniref50_47.parquet",
+   "data/uniref50_77.parquet",
+   "data/uniref50_104.parquet",
+   "data/uniref50_63.parquet",
+   "data/uniref50_43.parquet",
+   "data/uniref50_69.parquet",
+   "data/uniref50_105.parquet"
+  ],
+  "skipped_shards": [
+   "data/uniref50_19.parquet",
+   "data/uniref50_107.parquet",
+   "data/uniref50_12.parquet"
+  ],
+  "n_sequences": 1024,
+  "excluded_before_sampling": {
+   "repid": 0,
+   "seq": 0
+  },
+  "calibration_sha256": "f6779a9e13458c12f9206256a4f25a4018ad54812c4bcdcef6eb5b9fa1e347b1"
+ },
+ "median_wt_length": 187
+}

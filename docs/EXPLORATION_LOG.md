@@ -211,3 +211,21 @@ instead of RAM. Nothing numeric changes: Grams stay float64; the calibration row
 sampling (one label per non-pad token, generator seed 0) and every selector and refit setting are unchanged. Numbers are unaffected; only where the Grams live changes.
 Resume: arms D, C, E are carried over from the killed run's results.json (not recomputed as results); their per-variant scores, which that run had not yet written, are
 re-derived by re-scoring and checked against the carried rho (max abs diff recorded). Only arms A and B are newly run. The tracked-source dirty check now ignores `*.pyc`.
+
+**E6-V | 2026-11-20 | VERDICT of the ESM-2 pilot: STOP (K2 fails). Development-only; not a paper result, not confirmatory.**
+Source: `results/esm2_pilot/53c73f70/` (code commit 53c73f70, tracked source clean, `dirty_tracked: false`; 20 assays, 1,024 calibration sequences, 8 threads). Numbers copied from
+`results.json`, `verdict.json`, `latency.json`. Arms D, C, E were carried over from the first run (c47bda36); their re-score differed by 0.0 (max abs). Percentile bootstrap
+over assays, 10,000 resamples, seed 1234. Budget 0.225, selector GRP (primary), mean Spearman rho over 20 assays:
+- A (pruned, no repair) -0.0416; B (pruned + drift-corrected refit) 0.1868; C (dense 35M) 0.3107; D (dense 150M) 0.4054; E (INT8 150M) 0.4016. Measured MAC ratio of A/B and C: 0.225.
+- K1 (repair matters): B - A = +0.2284, 95% CI [0.1465, 0.3079], B > A on 16 of 20 assays. Threshold >= 0.05 and >= 14 of 20: PASS.
+- K2 (practical value): B - C = -0.1240, 95% CI [-0.1967, -0.0519], B > C on 5 of 20. Needs mean(B) >= mean(C) and CI lower bound > -0.01: FAIL.
+- Decision rule: CONTINUE only if both pass; K2 fails, so the ESM-2 direction STOPS. Pruning ESM-2 150M to the encoder MACs of dense 35M, retraining-free, does not beat dense 35M on this protocol.
+- Descriptive: the repair is large and real (B - A positive at every setting: GRP 0.5 +0.0761 [0.0299, 0.1213], 17/20; magnitude 0.225 +0.2332 [0.1682, 0.2952], 18/20). GRP beats magnitude at
+  0.225 after repair (+0.0545 [0.0077, 0.1125], 14/20). B at 0.225 is below dense 150M by 0.2186 [-0.2953, -0.1452]. INT8 150M vs dense 150M: -0.0038 [-0.0099, 0.0030]. At budget 0.5, B(GRP) = 0.1287, below
+  C by 0.1820 [-0.2745, -0.0872] and, unexpectedly, below B(GRP) at 0.225 (0.1868); this non-monotonicity is unexplained and is not tuned or smoothed away here.
+- Latency, CPU, 8 threads, 189 tokens, median of 30 after 5 warm-ups (ms, batch 1 / batch 8): dense 150M 501.0 / 2343.5; dense 35M 44.6 / 641.4; INT8 150M 341.5 / 2125.7;
+  pruned 0.225 (A/B shape) 157.5 / 665.9; pruned 0.5 shape 245.0 / 1272.2. Parameters (total / excl. embeddings): dense 150M 148,796,794 / 148,775,674; dense 35M 33,993,874 / 33,978,034;
+  pruned 0.225 34,417,754 / 34,396,634; pruned 0.5 75,005,434 / 74,984,314 (INT8 not counted). Equal-MAC pruned 150M is ~3.5x slower than dense 35M at batch 1 and about equal at batch 8.
+- Incomplete (disclosed): the second run was again killed for low system memory during the refit of the last descriptive arm, so `B|magnitude|0.5` is missing, and `scores.json.gz`
+  and `run_meta.json` were not written (per-variant scores were not saved). K1 and K2 use only arms present. Per the instruction not to change the design, no further rerun was made.
+- Deviations: E6-A1/A2/A3 above (shard-level calibration sample, shard skipping, memory-only memmap change); sensitivity-weighted GRP as primary; Spearman via ranks (no scipy).

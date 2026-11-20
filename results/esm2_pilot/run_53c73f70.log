@@ -1,0 +1,21 @@
+D_dense150M              carried mean rho 0.4054  rescore diff 0.00e+00
+C_dense35M               carried mean rho 0.3107  rescore diff 0.00e+00
+E_int8_150M              carried mean rho 0.4016  rescore diff 0.00e+00
+teacher stats ...
+grp@0.225: heads/layer [2, 7, 4, 4, 2, 3, 2, 3, 3, 4, 4, 4, 6, 9, 12, 12, 14, 17, 17, 15, 16, 14, 13, 12, 9, 8, 7, 7, 8, 7]
+   neurons/layer [101, 55, 49, 43, 25, 24, 54, 103, 116, 114, 76, 149, 223, 387, 411, 574, 690, 703, 766, 794, 781, 810, 724, 648, 524, 403, 330, 261, 203, 99]
+A|grp|0.225              mean rho -0.0416
+B|grp|0.225              mean rho 0.1868
+grp@0.5: heads/layer [3, 7, 9, 7, 8, 8, 7, 8, 10, 10, 11, 10, 14, 17, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 17, 16, 13, 13, 12]
+   neurons/layer [196, 164, 177, 162, 131, 105, 223, 342, 369, 354, 269, 427, 559, 874, 1077, 1452, 1712, 1851, 2062, 2147, 2231, 2343, 2275, 2253, 2062, 1797, 1331, 882, 642, 251]
+A|grp|0.5                mean rho 0.0526
+B|grp|0.5                mean rho 0.1287
+magnitude@0.225: heads/layer [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7]
+   neurons/layer [34, 374, 202, 164, 341, 562, 746, 874, 926, 811, 891, 834, 509, 494, 510, 431, 388, 408, 398, 436, 499, 608, 698, 921, 1223, 1706, 2135, 2383, 2438, 2528]
+C:\Users\CS 08\quantum\.venv-ci\Lib\site-packages\torch\nn\init.py:511: UserWarning: Initializing zero-element tensors is a no-op
+  warnings.warn("Initializing zero-element tensors is a no-op")
+A|magnitude|0.225        mean rho -0.1010
+B|magnitude|0.225        mean rho 0.1323
+magnitude@0.5: heads/layer [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 5, 20]
+   neurons/layer [1073, 829, 374, 416, 697, 1012, 1180, 1241, 1265, 1244, 1364, 1335, 1524, 1929, 2189, 2466, 2540, 2547, 2555, 2548, 2548, 2552, 2549, 2554, 2555, 2555, 2559, 2558, 2555, 2559]
+A|magnitude|0.5          mean rho -0.0879

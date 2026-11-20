@@ -1,0 +1,45 @@
+{
+ "threads": 8,
+ "seq_len_tokens": 189,
+ "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+ "torch": "2.6.0+cpu",
+ "table": {
+  "D_dense150M": {
+   "params": {
+    "total": 148796794,
+    "excl_embeddings": 148775674
+   },
+   "batch1_ms_median": 500.98255000011704,
+   "batch8_ms_median": 2343.47169999819
+  },
+  "C_dense35M": {
+   "params": {
+    "total": 33993874,
+    "excl_embeddings": 33978034
+   },
+   "batch1_ms_median": 44.572600001629326,
+   "batch8_ms_median": 641.4073500000086
+  },
+  "E_int8_150M": {
+   "params": null,
+   "batch1_ms_median": 341.5209499999037,
+   "batch8_ms_median": 2125.701549999576
+  },
+  "AB_pruned_grp_0.225": {
+   "params": {
+    "total": 34417754,
+    "excl_embeddings": 34396634
+   },
+   "batch1_ms_median": 157.47240000018792,
+   "batch8_ms_median": 665.8978000014031
+  },
+  "AB_pruned_grp_0.5": {
+   "params": {
+    "total": 75005434,
+    "excl_embeddings": 74984314
+   },
+   "batch1_ms_median": 244.97359999804758,
+   "batch8_ms_median": 1272.1911000007822
+  }
+ }
+}
