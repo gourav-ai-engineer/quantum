@@ -144,3 +144,30 @@ foundation models, speech SSL and Whisper screened for retraining-free structure
   and thresholds fixed before results, with measured CPU latency.
 - Joint conclusion (Claude + external check): the fastest route to a submission is the existing BERT analysis paper (Rule 11, supervisor
   proofs, missing raw baseline records, AutoDFP in positioning); ESM-2 is a separate, slower study. Q1 acceptance cannot be guaranteed.
+
+**E6 | 2026-11-20 | ESM-2 pilot: written BEFORE any code, download or data (development-only kill test; not confirmatory).**
+Prior art update: Vinod, Amini, Crawford, Yang, PLOS Comput. Biol. 22(2):e1013925 (2026), VERIFIED (full text read via fetch):
+gradient-learned unstructured weight masks (Gumbel-softmax) on ESM-2 650M, <3% of weights, to suppress CATH structure categories;
+interpretability framing; no physical compression, no latency, no ProteinGym. Distinct from retraining-free structured pruning for
+efficiency; must be cited.
+- Question: can retraining-free structured pruning (attention heads + FFN neurons, physically removed) with closed-form LS repair make a
+  LARGER ESM-2 at least as good as the dense SMALLER ESM-2 of equal or lower encoder cost, on zero-shot variant-effect prediction?
+- Models: facebook/esm2_t30_150M_UR50D (pruned) vs facebook/esm2_t12_35M_UR50D (dense reference). Encoder MACs per token (projections
+  + FFN, attention-score term excluded): 35M/150M = 33.2M/147.5M = 0.225. Primary budget: keep <= 0.225 of 150M's encoder MACs.
+  Descriptive extra budget: 0.5.
+- Arms: (A) structured mask, no repair; (B) same mask + closed-form repair (drift-corrected refit ported to ESM-2's pre-LayerNorm
+  blocks); (C) dense 35M; (D) dense 150M (reference); (E) 150M with INT8 dynamic quantization (efficiency baseline). Mask selector:
+  fixed before data as GRP's refit-aware global greedy (existing code); a magnitude selector as a second, descriptive selector.
+- Scoring: wild-type-marginal log-ratio for single substitutions (one forward pass per assay), ProteinGym v1 DMS substitutions.
+- Assays (mechanical rule, fixed now): ProteinGym DMS substitution assays sorted by DMS_id, keep those whose wild-type length <= 400 and
+  that contain single mutants; take the first 20. Single mutants only.
+- Calibration: 1,024 unlabeled UniRef50 sequences, length 50-400, random sample (seed 7); any sequence whose UniProt ID matches an
+  assay protein is dropped. Disclosed: no homology filtering.
+- Primary statistic: per-assay Spearman rho; summaries are means over the 20 assays, paired by assay; 95% CIs by bootstrap over assays.
+- Kill rules (both must pass to continue; otherwise the ESM-2 direction stops):
+  K1 repair matters: at budget 0.225, mean rho(B) - mean rho(A) >= 0.05 and B > A on >= 14 of 20 assays.
+  K2 practical value: at budget 0.225, mean rho(B) >= mean rho(C) with the bootstrap 95% CI lower bound of (B - C) > -0.01.
+  If K2 fails, report "pruning 150M does not beat dense 35M" and stop.
+- Efficiency (descriptive): CPU latency, batch 1 and 8, median of 30 runs after 5 warm-ups, for A/B shapes, C, D, E; parameter
+  counts incl. and excl. embeddings.
+- Expected outcome stated in advance: K2 is more likely to fail than pass (keeping 22.5% of MACs without retraining is severe).
