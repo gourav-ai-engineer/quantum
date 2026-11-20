@@ -171,3 +171,34 @@ efficiency; must be cited.
 - Efficiency (descriptive): CPU latency, batch 1 and 8, median of 30 runs after 5 warm-ups, for A/B shapes, C, D, E; parameter
   counts incl. and excl. embeddings.
 - Expected outcome stated in advance: K2 is more likely to fail than pass (keeping 22.5% of MACs without retraining is severe).
+
+**E6-A1 | 2026-11-20 | Amendment, written before any data download, forward pass or score. Fills details E6 left open; changes none of E6's models, budgets, arms, scoring, assay rule or K1/K2.**
+- Calibration source (E6 allowed a named substitute): HF dataset `zpn/uniref50` (UniRef50 mirror; columns RepID, sequence; revision pinned in
+  inputs.json; UniRef release unknown). Two-stage sampling with `random.Random(7)`: pick 8 of the shards, then 128 sequences per shard,
+  after the length filter 50-400 and the exclusions below. This is not a uniform sample over UniRef50; it is a shard-level random sample.
+- Exclusions: drop a sequence if its RepID equals the UniProt_ID of any of the 20 assay proteins (UniProt_ID from the official ProteinGym
+  `reference_files/DMS_substitutions.csv`, pinned by commit and sha256), or if it is identical to an assay wild-type sequence. No homology filter (as E6).
+- Assay rule applied mechanically on the parquet `target_seq`: length <= 400, at least one single mutant (no ':' in `mutant`), non-NaN `DMS_score`;
+  sort by DMS_id lexicographically; first 20. Mutant position must index `target_seq` at the stated wild-type residue (asserted).
+- Scoring: ESM tokenizer, sequence `<cls> wt <eos>`, batch 1, no padding; score = log p(mut) - log p(wt) at token index = mutant position (1-based,
+  `<cls>` is index 0). Spearman between score and `DMS_score`, per assay.
+- GRP selector for ESM (primary): the existing `grp_select` (refit-aware global greedy, ridge_rel 1e-4, max_frac 0.01) with sensitivity weights, as the
+  BERT GRP default. MLM sensitivity: input is the unmasked sequence; for each non-pad token one label is sampled from the teacher's softmax,
+  log-probabilities are summed over non-pad tokens, gradients taken w.r.t. each module output, s_m = E||grad||^2 per token. MAC unit costs
+  exclude the attention-score term (flag `score_term=False`); per-head 4*s*d*hs, per-neuron 2*s*d. seq_len cancels in the budget ratio.
+- Magnitude selector (descriptive): unit score = squared Frobenius norm of the unit's output-projection columns (head: its head_size columns of
+  attention.output.dense; neuron: its column of output.dense) divided by the unit's MAC cost; remove globally in ascending order until the MAC budget is
+  met; keep >= 1 FFN neuron per layer. Heads may be removed from a layer entirely (both selectors).
+- Refit: `sequential_refit(drift_correct=True, ridge_rel=1e-4)`; the existing BERT hook path applies unchanged to ESM (EsmSelfOutput and EsmOutput take
+  (hidden, residual) and add the residual with no LayerNorm inside; the student's dense inputs come from its own pre-LayerNorm).
+- Arm A = physically pruned, no refit. Arm B = A + refit. Arm E = `torch.ao.quantization.quantize_dynamic` of every nn.Linear (including lm_head) of D, qint8.
+- Efficiency (descriptive): CPU, `torch.set_num_threads(8)`, input length = median wild-type length of the 20 assays, batch 1 and 8, median of 30 runs after 5
+  warm-ups, forward pass of the full model including lm_head; threads and length recorded.
+- Statistics: percentile bootstrap (2.5 / 97.5) over assays, 10,000 resamples, seed 1234. K1 counts strict B > A. K2 lower bound is of mean(B - C) per resample.
+- Engineering only: teacher Grams are stored on disk and memory-mapped (15.7 GB machine); no effect on numbers.
+
+**E6-A2 | 2026-11-20 | Amendment, written before any scoring (prepare crashed; no result exists).** The `zpn/uniref50` repo has 108 parquet shards, not 109,
+and shards are not length-homogeneous: of the first 8 drawn with `random.Random(7)` one has 0 and one has 40,263 sequences of length 50-400 (the rest
+~498k). Rule: shards are taken in the order of `random.Random(7).sample(all_shards, len(all_shards))`; a shard is skipped if it has fewer than 100,000 eligible
+sequences (post-filter, post-exclusion); the first 8 kept shards are used, 128 sequences each (same RNG). Skipped shards are recorded in inputs.json.
+Calibration is therefore a shard-level sample whose length distribution is whatever those shards hold; no length rebalancing.

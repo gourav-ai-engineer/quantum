@@ -20,16 +20,19 @@ AVG_SEQ_LEN = {"stsb": 31.47, "mrpc": 53.24, "rte": 64.59, "sst2": 25.16, "qqp":
                "cola": 11.67, "mnli": 39.05, "squad": 170.0}  # dev-set averages used by both official codes
 
 
-def mac_per_head(seq_len: float, hidden_size: int, head_size: int) -> float:
-    return 3 * seq_len * hidden_size * head_size + 2 * seq_len * seq_len * head_size + seq_len * head_size * hidden_size
+def mac_per_head(seq_len: float, hidden_size: int, head_size: int, score_term: bool = True) -> float:
+    """score_term=False drops the 2*s^2*d attention-score term (ESM-2 pilot E6: projections + FFN only)."""
+    return (3 * seq_len * hidden_size * head_size + (2 * seq_len * seq_len * head_size if score_term else 0)
+            + seq_len * head_size * hidden_size)
 
 
 def mac_per_neuron(seq_len: float, hidden_size: int) -> float:
     return 2 * seq_len * hidden_size
 
 
-def model_mac(heads_per_layer, neurons_per_layer, seq_len: float, hidden_size: int, head_size: int) -> float:
-    return sum(h * mac_per_head(seq_len, hidden_size, head_size) + n * mac_per_neuron(seq_len, hidden_size)
+def model_mac(heads_per_layer, neurons_per_layer, seq_len: float, hidden_size: int, head_size: int,
+              score_term: bool = True) -> float:
+    return sum(h * mac_per_head(seq_len, hidden_size, head_size, score_term) + n * mac_per_neuron(seq_len, hidden_size)
                for h, n in zip(heads_per_layer, neurons_per_layer))
 
 
@@ -80,6 +83,8 @@ def embed(model, batch):
     b = base_of(model)
     if is_distil(model):
         return b.embeddings(batch["input_ids"])
+    if model.base_model_prefix == "esm":  # ESM-2: rotary (no position table), no token types
+        return b.embeddings(input_ids=batch["input_ids"], attention_mask=batch["attention_mask"])
     return b.embeddings(input_ids=batch["input_ids"], token_type_ids=batch.get("token_type_ids"))
 
 
@@ -186,6 +191,13 @@ def module_sensitivity(model, batches, device: str, seed: int = 0) -> dict:
                  out.end_logits.masked_fill(b["attention_mask"] == 0, -1e4)]
             logp = 0.0
             for logits in heads:
+                if logits.dim() == 3 and "masked" in type(model).__name__.lower():  # MLM (ESM-2 pilot E6-A1)
+                    probs = logits.detach().float().softmax(-1).cpu()
+                    lab = torch.multinomial(probs.flatten(0, 1), 1, generator=gen).view(probs.shape[:2]).to(
+                        logits.device)
+                    lp = logits.log_softmax(-1).gather(2, lab[..., None]).squeeze(-1)
+                    logp = logp + (lp * b["attention_mask"]).sum()
+                    continue
                 if logits.shape[-1] == 1:  # regression (STS-B): y ~ N(f(x), 1), score = (y - f) df/dY, E|.|^2 = |df/dY|^2
                     logp = logp + logits.sum()
                     continue
@@ -281,7 +293,8 @@ class ModuleState:
 
 
 def grp_select(G: dict, weights: dict, sens: dict | None, L: int, num_heads: int, seq_len: float,
-               hidden_size: int, constraint: float, ridge_rel: float = 1e-4, max_frac: float = 0.01):
+               hidden_size: int, constraint: float, ridge_rel: float = 1e-4, max_frac: float = 0.01,
+               score_term: bool = True):
     """Global greedy elimination: repeatedly pick the module whose cheapest unit has the smallest
     s_m * DeltaE / MACs, remove its k = max(1, floor(max_frac * |kept|)) cheapest units (fewer if that would
     overshoot the budget), until total MACs <= constraint * original. sens=None gives s_m = 1.
@@ -290,8 +303,9 @@ def grp_select(G: dict, weights: dict, sens: dict | None, L: int, num_heads: int
     """
     intermediate = G[(0, "ffn")].shape[0] - 1
     head_size = (G[(0, "att")].shape[0] - 1) // num_heads
-    f_unit = {"att": mac_per_head(seq_len, hidden_size, head_size), "ffn": mac_per_neuron(seq_len, hidden_size)}
-    orig = model_mac([num_heads] * L, [intermediate] * L, seq_len, hidden_size, head_size)
+    f_unit = {"att": mac_per_head(seq_len, hidden_size, head_size, score_term),
+              "ffn": mac_per_neuron(seq_len, hidden_size)}
+    orig = model_mac([num_heads] * L, [intermediate] * L, seq_len, hidden_size, head_size, score_term)
     target, total = constraint * orig, orig
     states = {(l, k): ModuleState(G[(l, k)], weights[(l, k)], head_size if k == "att" else 1, ridge_rel)
               for l in range(L) for k in ("att", "ffn")}
