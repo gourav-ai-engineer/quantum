@@ -244,3 +244,14 @@ Interpretation, fixed now: S0 fail = nondeterminism, report and stop. S1 fail on
 complete model (bug or target problem in the pre-LN port). Either S1 failure means the E6 numbers may be affected by a bug; that is recorded
 here, and any repair is a NEW pre-registered pilot, never a rescue of E6. S1 and S2 pass = the pipeline behaves as intended near identity and the
 0.5/0.225 non-monotonicity is a property of the method on this protocol, not evidence of a bug. No other analysis is run on these numbers.
+
+**E6-S RESULT | 2026-11-25 | all three checks PASS; E6 verdict (STOP) unchanged.**
+Source `results/esm2_pilot/sanity_75bdf30c/results.json` + `run.log` (code 75bdf30c, `.venv-ci`, CPU 8 threads; 5 assays, 1,024 calibration sequences).
+First launch failed before any computation (Application Control blocked pyarrow `_parquet` DLL once; the same import succeeded seconds later; relaunched unchanged).
+- S0 PASS: A|0.5 and B|0.5 per-assay rho equal the pilot's exactly (max abs diff 0.0, 0.0).
+- S1 PASS: budget 1.0 keeps all 600 heads and 76,800 neurons; A|1.0 = D (diff 0.0); B|1.0 vs D max abs diff 0.0010.
+- S2 PASS: B|0.8 - B|0.5 = +0.0453, B|0.9 - B|0.5 = +0.1561.
+Mean rho over the 5 assays: D 0.2285; A/B at 0.9: 0.0936 / 0.2246; at 0.8: 0.0463 / 0.1138; at 0.5: -0.0304 / 0.0684.
+Reading per the pre-specified rule: the pipeline behaves as intended near identity; the E6 non-monotonicity (B|0.5 < B|0.225) is a property of the
+method on this protocol, not evidence of a bug. Descriptive only: without repair ESM-2 150M loses most of its zero-shot signal at a 10% MAC cut
+(0.2285 -> 0.0936); repair recovers it at 0.9 but not at 0.8 (on assay 5, B|0.8 = -0.2224 vs A|0.8 = 0.0423). No further analysis on these numbers.

@@ -1,0 +1,172 @@
+{
+ "assays": [
+  "A0A1I9GEU1_NEIME_Kennouche_2019",
+  "A0A247D711_LISMN_Stadelmann_2021",
+  "A4GRB6_PSEAI_Chen_2020",
+  "AACC1_PSEAI_Dandage_2018",
+  "AICDA_HUMAN_Gajula_2014_3cycles"
+ ],
+ "n_calibration": 1024,
+ "arms": {
+  "D": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.02395814148170344,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.10007950638754011,
+    "A4GRB6_PSEAI_Chen_2020": 0.6390682211203157,
+    "AACC1_PSEAI_Dandage_2018": 0.2502327406847352,
+    "AICDA_HUMAN_Gajula_2014_3cycles": 0.17723171050894063
+   },
+   "mean_rho": 0.22853080744396564
+  },
+  "A|1.0": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.02395814148170344,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.10007950638754011,
+    "A4GRB6_PSEAI_Chen_2020": 0.6390682211203157,
+    "AACC1_PSEAI_Dandage_2018": 0.2502327406847352,
+    "AICDA_HUMAN_Gajula_2014_3cycles": 0.17723171050894063
+   },
+   "mean_rho": 0.22853080744396564,
+   "budget": 1.0,
+   "kept": {
+    "heads": 600,
+    "neurons": 76800
+   },
+   "mac_ratio": 1.0
+  },
+  "B|1.0": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.024018839928139378,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.10012618420599613,
+    "A4GRB6_PSEAI_Chen_2020": 0.639072939994145,
+    "AACC1_PSEAI_Dandage_2018": 0.2502437511337803,
+    "AICDA_HUMAN_Gajula_2014_3cycles": 0.17623372049831687
+   },
+   "mean_rho": 0.2283315511808198,
+   "budget": 1.0,
+   "kept": {
+    "heads": 600,
+    "neurons": 76800
+   },
+   "mac_ratio": 1.0
+  },
+  "A|0.5": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.11493972339590892,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.0745332044797218,
+    "A4GRB6_PSEAI_Chen_2020": -0.015533520979918272,
+    "AACC1_PSEAI_Dandage_2018": -0.01933002753810366,
+    "AICDA_HUMAN_Gajula_2014_3cycles": -0.07661037094077681
+   },
+   "mean_rho": -0.030376087674997176,
+   "budget": 0.5,
+   "kept": {
+    "heads": 420,
+    "neurons": 30720
+   },
+   "mac_ratio": 0.5
+  },
+  "B|0.5": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.08023879897211715,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.07502848777636673,
+    "A4GRB6_PSEAI_Chen_2020": 0.07426316132334594,
+    "AACC1_PSEAI_Dandage_2018": 0.18618661221125896,
+    "AICDA_HUMAN_Gajula_2014_3cycles": 0.08693828470266374
+   },
+   "mean_rho": 0.06843554940830364,
+   "budget": 0.5,
+   "kept": {
+    "heads": 420,
+    "neurons": 30720
+   },
+   "mac_ratio": 0.5
+  },
+  "A|0.9": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.02190324376738908,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.05963704636597904,
+    "A4GRB6_PSEAI_Chen_2020": 0.08546058665720084,
+    "AACC1_PSEAI_Dandage_2018": 0.10300291412435339,
+    "AICDA_HUMAN_Gajula_2014_3cycles": 0.24159450067992008
+   },
+   "mean_rho": 0.09355836081201285,
+   "budget": 0.9,
+   "kept": {
+    "heads": 584,
+    "neurons": 66304
+   },
+   "mac_ratio": 0.9
+  },
+  "B|0.9": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.033742954580363006,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.09370067921855979,
+    "A4GRB6_PSEAI_Chen_2020": 0.6252435439904551,
+    "AACC1_PSEAI_Dandage_2018": 0.24488366335396314,
+    "AICDA_HUMAN_Gajula_2014_3cycles": 0.19280548606694745
+   },
+   "mean_rho": 0.2245780836099125,
+   "budget": 0.9,
+   "kept": {
+    "heads": 584,
+    "neurons": 66304
+   },
+   "mac_ratio": 0.9
+  },
+  "A|0.8": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.02850629172240911,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.06225137748390931,
+    "A4GRB6_PSEAI_Chen_2020": 0.13748412244059924,
+    "AACC1_PSEAI_Dandage_2018": 0.017825202146413702,
+    "AICDA_HUMAN_Gajula_2014_3cycles": 0.04230175060851587
+   },
+   "mean_rho": 0.0462712321914058,
+   "budget": 0.8,
+   "kept": {
+    "heads": 568,
+    "neurons": 55808
+   },
+   "mac_ratio": 0.8
+  },
+  "B|0.8": {
+   "rho": {
+    "A0A1I9GEU1_NEIME_Kennouche_2019": -0.059685779859025484,
+    "A0A247D711_LISMN_Stadelmann_2021": 0.08945971420129889,
+    "A4GRB6_PSEAI_Chen_2020": 0.5237164928963658,
+    "AACC1_PSEAI_Dandage_2018": 0.2377094374532078,
+    "AICDA_HUMAN_Gajula_2014_3cycles": -0.22239717273001106
+   },
+   "mean_rho": 0.11376053839236719,
+   "budget": 0.8,
+   "kept": {
+    "heads": 568,
+    "neurons": 55808
+   },
+   "mac_ratio": 0.8
+  }
+ },
+ "checks": {
+  "S0": {
+   "max_abs_diff": {
+    "A": 0.0,
+    "B": 0.0
+   },
+   "pass": true
+  },
+  "S1": {
+   "keeps_all": true,
+   "A_vs_D": 0.0,
+   "B_vs_D": 0.000997990010623756,
+   "pass": true
+  },
+  "S2": {
+   "B_minus_B05": {
+    "0.8": 0.04532498898406355,
+    "0.9": 0.15614253420160884
+   },
+   "pass": true
+  }
+ }
+}
