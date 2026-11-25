@@ -229,3 +229,18 @@ over assays, 10,000 resamples, seed 1234. Budget 0.225, selector GRP (primary), 
 - Incomplete (disclosed): the second run was again killed for low system memory during the refit of the last descriptive arm, so `B|magnitude|0.5` is missing, and `scores.json.gz`
   and `run_meta.json` were not written (per-variant scores were not saved). K1 and K2 use only arms present. Per the instruction not to change the design, no further rerun was made.
 - Deviations: E6-A1/A2/A3 above (shard-level calibration sample, shard skipping, memory-only memmap change); sensitivity-weighted GRP as primary; Spearman via ranks (no scipy).
+
+**E6-S | 2026-11-25 | Implementation sanity check of the ESM-2 pilot (owner go 2026-11-25). Written BEFORE any sanity-check number exists.**
+Purpose: check the implementation, not re-test the hypothesis. The E6 verdict (STOP) is final and is not reopened by this check. Trigger: the
+unexplained non-monotonicity in E6-V (B|grp|0.5 = 0.1287 < B|grp|0.225 = 0.1868).
+Design: the code, models, calibration set (all 1,024 sequences, unchanged), refit (drift_correct, ridge_rel 1e-4) and GRP selector of commit
+53c73f70; first 5 assays of the frozen list; budgets 1.0, 0.5, 0.9, 0.8 (in that order); arms A (no repair) and B (repair) at each, and D (dense 150M).
+Script `scripts/esm2_sanity.py`; output `results/esm2_pilot/sanity_<commit>/`. CPU, 8 threads.
+Checks, fixed now:
+- S0 (reproduction): A|0.5 and B|0.5 per-assay rho equal the pilot's values for the same 5 assays (max abs diff <= 1e-3).
+- S1 (identity): at budget 1.0 the selector keeps every unit; A|1.0 equals D (max abs per-assay rho diff <= 1e-4); B|1.0 within 0.01 of D on every assay.
+- S2 (monotonicity of the repaired model): mean rho of B over the 5 assays at 0.8 and 0.9 is >= B|0.5 - 0.02.
+Interpretation, fixed now: S0 fail = nondeterminism, report and stop. S1 fail on A = student construction bug; S1 fail on B = refit damages a
+complete model (bug or target problem in the pre-LN port). Either S1 failure means the E6 numbers may be affected by a bug; that is recorded
+here, and any repair is a NEW pre-registered pilot, never a rescue of E6. S1 and S2 pass = the pipeline behaves as intended near identity and the
+0.5/0.225 non-monotonicity is a property of the method on this protocol, not evidence of a bug. No other analysis is run on these numbers.
