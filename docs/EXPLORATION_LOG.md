@@ -255,3 +255,18 @@ Mean rho over the 5 assays: D 0.2285; A/B at 0.9: 0.0936 / 0.2246; at 0.8: 0.046
 Reading per the pre-specified rule: the pipeline behaves as intended near identity; the E6 non-monotonicity (B|0.5 < B|0.225) is a property of the
 method on this protocol, not evidence of a bug. Descriptive only: without repair ESM-2 150M loses most of its zero-shot signal at a 10% MAC cut
 (0.2285 -> 0.0936); repair recovers it at 0.9 but not at 0.8 (on assay 5, B|0.8 = -0.2224 vs A|0.8 = 0.0423). No further analysis on these numbers.
+
+**E7 | 2026-11-25 | High-compression development kill test (owner: continue the method line). Design adopted unchanged from
+`docs/STRATEGY_AUDIT_2026-11-19.md` section 3.3 (fixed 2026-11-19, before any data at these budgets). Development-only; not confirmatory.**
+- Question: once headroom exists, is there any allocation effect beyond K-prune? Budgets c = 0.3 and 0.2 MACs kept. BERT-base, pinned
+  textattack checkpoints; MRPC, SST-2, STS-B (already development); calibration `train.shuffle(seed)[:2048]`; seeds 7, 42, 77, 123, 2024.
+- Arms: official K-prune and Kwon (unmodified, `scripts/v15_kaggle.sh bl`, new constraint only); GRP-RI (existing `beat_run.py`, own
+  allocation); d2i-RI (K-prune masks + our repair: repair headroom only, never a compression win). Validation accuracy (Pearson for STS-B).
+- Rule (fixed; analysis `scripts/e7_highcomp_analysis.py`, tested on synthetic data, committed before any kernel): PASS at a budget only if
+  teacher - mean K-prune >= 0.03 on all three tasks, mean GRP-RI - mean K-prune >= 0.010 on all three, GRP-RI > K-prune on >= 4 of 5 seeds
+  per task, no task with a loss. PASS if either budget passes. FAIL = stop this allocation family (these budgets, tasks, thresholds only).
+- Integrity gate before any statistic: labels / evaluation size equal across pipelines; teacher metric ours vs official within 2 rows
+  (0.002 Pearson); d2i-RI masks equal K-prune's; MAC ratios <= c + 0.005. A gate failure is a pipeline issue, fixed and rerun, never analysed.
+- Expected outcome stated in advance: FAIL (MRPC already lost at 0.5/0.4). A PASS would still need fresh confirmatory evidence
+  (SQuAD v1.1 + new teacher seeds), pre-registered separately.
+- Kernels: one per task, frozen tag `e7-freeze`; outputs `results/e7_highcomp/<tag commit>/`.

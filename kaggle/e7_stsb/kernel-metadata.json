@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/e7-highcomp-stsb",
+ "title": "e7 highcomp stsb",
+ "code_file": "e7_stsb.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}

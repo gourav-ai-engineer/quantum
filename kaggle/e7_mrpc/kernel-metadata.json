@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/e7-highcomp-mrpc",
+ "title": "e7 highcomp mrpc",
+ "code_file": "e7_mrpc.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}

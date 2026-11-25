@@ -1,0 +1,13 @@
+{
+ "id": "gouravcseai/e7-highcomp-sst2",
+ "title": "e7 highcomp sst2",
+ "code_file": "e7_sst2.ipynb",
+ "language": "python",
+ "kernel_type": "notebook",
+ "is_private": true,
+ "enable_gpu": true,
+ "enable_internet": true,
+ "dataset_sources": [],
+ "competition_sources": [],
+ "kernel_sources": []
+}
